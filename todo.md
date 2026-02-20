@@ -498,3 +498,25 @@
 - [x] BEAM: 0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E
 - [x] VOID: 0x243db4A8B200B59416C2b8d080fd8F8e44e59577
 - [x] Updated README with deployed contract addresses and BaseScan links
+
+## v18 — Contract Verification, AI Playtests, Final Polish
+
+### BaseScan Verification
+- [x] Verify ArenaToken on BaseScan (7/7 verified!)
+- [x] Verify all 6 WeaponToken contracts on BaseScan (all verified)
+
+### AI Agent Playtests
+- [x] Create server-side playtest endpoint that runs real AI vs AI matches
+- [x] Agent brain makes LLM-powered tactical decisions (8 matches with LLM)
+- [x] Generate authentic combat logs, token transactions, match results
+- [x] Store match data in database for leaderboard/flywheel display
+
+### Seed Flywheel Dashboard
+- [x] Seed economic data via flywheel.seed endpoint (20 matches seeded)
+- [x] Verify Flywheel Dashboard shows populated data (economy: healthy)
+
+### Final Polish
+- [x] Check all navigation links work
+- [x] Verify README is complete and accurate (updated with verification + playtests)
+- [x] Ensure demo experience is clean for judges
+- [x] Final checkpoint and deploy

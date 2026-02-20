@@ -866,6 +866,20 @@ export const appRouter = router({
           ecosystemHealth: health,
         };
       }),
+
+    // Run AI agent playtests — full matches with LLM reasoning, combat, and token economics
+    playtest: publicProcedure
+      .input(z.object({
+        matchCount: z.number().int().min(1).max(10).default(3),
+        useLLM: z.boolean().default(true),
+      }).optional())
+      .mutation(async ({ input }) => {
+        const count = input?.matchCount ?? 3;
+        const useLLM = input?.useLLM ?? true;
+        const { runPlaytestSession } = await import("./aiPlaytest");
+        const session = await runPlaytestSession(count, useLLM);
+        return session;
+      }),
   }),
 });
 

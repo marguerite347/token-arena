@@ -1,0 +1,196 @@
+#!/usr/bin/env node
+/**
+ * Verify all 7 Token Arena contracts on BaseScan using Etherscan V2 API
+ * Uses solc's own import resolution to collect ALL transitive dependencies
+ */
+import { createRequire } from "module";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { ethers } from "ethers";
+
+const require = createRequire(import.meta.url);
+const solc = require("solc");
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, "..");
+
+const BASESCAN_API_KEY = process.env.BASESCAN_API_KEY || "SGTK888FIYG1H2483B561MBPJ755YG5G2P";
+const API_URL = "https://api.etherscan.io/v2/api?chainid=84532";
+const DEPLOYER = "0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3";
+
+const deployed = JSON.parse(fs.readFileSync(path.join(ROOT, "shared/deployed-contracts.json"), "utf-8"));
+
+/**
+ * Use solc's import resolution to collect ALL transitive dependencies.
+ * This is the same approach used during compilation, so it matches exactly.
+ */
+function collectAllSources(contractPath, contractSource) {
+  const collected = {};
+
+  function findImports(importPath) {
+    const resolved = path.join(ROOT, "node_modules", importPath);
+    if (fs.existsSync(resolved)) {
+      const content = fs.readFileSync(resolved, "utf-8");
+      collected[importPath] = { content };
+      return { contents: content };
+    }
+    return { error: "File not found: " + importPath };
+  }
+
+  // Run a dummy compile just to trigger import resolution
+  const input = {
+    language: "Solidity",
+    sources: { [contractPath]: { content: contractSource } },
+    settings: { optimizer: { enabled: true, runs: 200 }, outputSelection: { "*": { "*": ["abi"] } } },
+  };
+  solc.compile(JSON.stringify(input), { import: findImports });
+
+  // Build the full sources map
+  const sources = { [contractPath]: { content: contractSource } };
+  Object.assign(sources, collected);
+
+  console.log(`  Resolved ${Object.keys(sources).length} source files`);
+  return sources;
+}
+
+function buildStandardInput(sources) {
+  return {
+    language: "Solidity",
+    sources,
+    settings: {
+      optimizer: { enabled: true, runs: 200 },
+      outputSelection: { "*": { "*": ["abi", "evm.bytecode"] } },
+    },
+  };
+}
+
+function encodeArenaArgs() {
+  return ethers.AbiCoder.defaultAbiCoder().encode(["address"], [DEPLOYER]).slice(2);
+}
+
+function encodeWeaponArgs(name, symbol, weaponType, maxSupply) {
+  return ethers.AbiCoder.defaultAbiCoder().encode(
+    ["string", "string", "string", "uint256", "address"],
+    [name, symbol, weaponType, ethers.parseEther(maxSupply), DEPLOYER]
+  ).slice(2);
+}
+
+async function submitVerification(address, contractName, sourceFile, standardInput, constructorArgs) {
+  console.log(`\nVerifying ${contractName} at ${address}...`);
+
+  const params = new URLSearchParams();
+  params.append("module", "contract");
+  params.append("action", "verifysourcecode");
+  params.append("apikey", BASESCAN_API_KEY);
+  params.append("sourceCode", JSON.stringify(standardInput));
+  params.append("codeformat", "solidity-standard-json-input");
+  params.append("contractaddress", address);
+  params.append("contractname", `${sourceFile}:${contractName}`);
+  params.append("compilerversion", "v0.8.24+commit.e11b9ed9");
+  params.append("optimizationUsed", "1");
+  params.append("runs", "200");
+  params.append("constructorArguements", constructorArgs);
+
+  const resp = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+  const data = await resp.json();
+  console.log(`  Submit: ${data.status} - ${data.message}`);
+
+  if (data.status === "1" && data.result) {
+    console.log(`  GUID: ${data.result}`);
+    return data.result;
+  }
+  console.log(`  Error: ${typeof data.result === 'string' ? data.result.slice(0, 200) : JSON.stringify(data.result)}`);
+  return null;
+}
+
+async function pollStatus(guid) {
+  await new Promise(r => setTimeout(r, 10000)); // initial wait
+  for (let i = 0; i < 8; i++) {
+    const url = `${API_URL}&module=contract&action=checkverifystatus&guid=${guid}&apikey=${BASESCAN_API_KEY}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    const result = data.result || "";
+
+    if (result.includes("Pass - Verified") || result.includes("Already Verified")) {
+      console.log(`  ✅ ${result}`);
+      return true;
+    }
+    if (result.includes("Fail")) {
+      console.log(`  ❌ ${result.slice(0, 200)}`);
+      return false;
+    }
+    console.log(`  ⏳ (${i + 1}/8) Pending...`);
+    await new Promise(r => setTimeout(r, 5000));
+  }
+  console.log(`  ⏳ Still pending`);
+  return false;
+}
+
+async function main() {
+  console.log("═══════════════════════════════════════════════════════");
+  console.log("  TOKEN ARENA — BaseScan Contract Verification");
+  console.log("═══════════════════════════════════════════════════════\n");
+
+  const arenaSource = fs.readFileSync(path.join(ROOT, "contracts/ArenaToken.sol"), "utf-8");
+  const weaponSource = fs.readFileSync(path.join(ROOT, "contracts/WeaponToken.sol"), "utf-8");
+
+  // Collect all sources using solc's resolver
+  console.log("Resolving ArenaToken dependencies...");
+  const arenaSources = collectAllSources("contracts/ArenaToken.sol", arenaSource);
+  const arenaInput = buildStandardInput(arenaSources);
+
+  console.log("\nResolving WeaponToken dependencies...");
+  const weaponSources = collectAllSources("contracts/WeaponToken.sol", weaponSource);
+  const weaponInput = buildStandardInput(weaponSources);
+
+  const results = {};
+
+  // 1. ARENA
+  const arenaGuid = await submitVerification(
+    deployed.contracts.ARENA, "ArenaToken", "contracts/ArenaToken.sol", arenaInput, encodeArenaArgs()
+  );
+  if (arenaGuid) results.ARENA = await pollStatus(arenaGuid);
+  else results.ARENA = false;
+
+  // 2. Weapon tokens
+  const weapons = [
+    { symbol: "PLAS", name: "Plasma Ammo", type: "plasma", maxSupply: "100000000" },
+    { symbol: "RAIL", name: "Railgun Ammo", type: "railgun", maxSupply: "50000000" },
+    { symbol: "SCAT", name: "Scatter Ammo", type: "scatter", maxSupply: "200000000" },
+    { symbol: "RCKT", name: "Rocket Ammo", type: "missile", maxSupply: "25000000" },
+    { symbol: "BEAM", name: "Beam Ammo", type: "beam", maxSupply: "75000000" },
+    { symbol: "VOID", name: "Void Ammo", type: "nova", maxSupply: "10000000" },
+  ];
+
+  for (const w of weapons) {
+    const args = encodeWeaponArgs(w.name, w.symbol, w.type, w.maxSupply);
+    const guid = await submitVerification(
+      deployed.contracts[w.symbol], "WeaponToken", "contracts/WeaponToken.sol", weaponInput, args
+    );
+    if (guid) results[w.symbol] = await pollStatus(guid);
+    else results[w.symbol] = false;
+    await new Promise(r => setTimeout(r, 2000)); // rate limit
+  }
+
+  // Summary
+  console.log("\n═══════════════════════════════════════════════════════");
+  console.log("  VERIFICATION SUMMARY");
+  console.log("═══════════════════════════════════════════════════════");
+  let verified = 0;
+  for (const [sym, ok] of Object.entries(results)) {
+    console.log(`  ${sym.padEnd(8)} ${deployed.contracts[sym]}  ${ok ? "✅ Verified" : "❌ Failed"}`);
+    if (ok) verified++;
+  }
+  console.log(`\n  ${verified}/7 contracts verified on BaseScan`);
+  console.log("═══════════════════════════════════════════════════════");
+}
+
+main().catch(err => {
+  console.error("Fatal:", err.message);
+  process.exit(1);
+});

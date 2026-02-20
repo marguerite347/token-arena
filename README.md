@@ -264,7 +264,7 @@ DEPLOYER_PRIVATE_KEY=0x... node scripts/deploy-base-sepolia.mjs
 
 **Output:** Deployment writes contract addresses and ABIs to `shared/deployed-contracts.json` for integration with the game server.
 
-**Verification:** After deployment, verify contracts on [BaseScan](https://sepolia.basescan.org) using the addresses in `deployed-contracts.json`.
+**Verification:** All 7 contracts are verified on BaseScan — source code is publicly readable. Run `node scripts/verify-basescan.mjs` to re-verify if needed (requires `BASESCAN_API_KEY`).
 
 ---
 
@@ -278,8 +278,9 @@ DEPLOYER_PRIVATE_KEY=0x... node scripts/deploy-base-sepolia.mjs
 | Skybox AI | ✅ Live | Blockade Labs Model 4 (staging API) |
 | Scene Graph | ✅ Live | Vision LLM analysis + JSON graph storage |
 | Flywheel Dashboard | ✅ Live | Economics visualization and seed matches |
-| ERC-20 Contracts | ✅ Deployed | 7 contracts live on Base Sepolia |
-| Base Sepolia Deploy | ✅ Complete | [ARENA](https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610) + 6 weapon tokens |
+| ERC-20 Contracts | ✅ Deployed & Verified | 7/7 contracts verified on BaseScan |
+| Base Sepolia Deploy | ✅ Complete | [ARENA](https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610#code) + 6 weapon tokens |
+| AI Playtests | ✅ Complete | 8 LLM-powered matches + 20 seeded matches |
 
 ---
 

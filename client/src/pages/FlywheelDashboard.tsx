@@ -85,6 +85,7 @@ export default function FlywheelDashboard() {
   const { data: healthData, isLoading: hLoading } = trpc.flywheel.health.useQuery(undefined, { staleTime: 10000 });
   const { data: ecosystemState } = trpc.dao.ecosystem.useQuery(undefined, { staleTime: 10000 });
   const [seedResult, setSeedResult] = useState<string | null>(null);
+  const [playtestResult, setPlaytestResult] = useState<string | null>(null);
 
   const seedMutation = trpc.flywheel.seed.useMutation({
     onSuccess: (data) => {
@@ -92,6 +93,19 @@ export default function FlywheelDashboard() {
       utils.flywheel.all.invalidate();
       utils.flywheel.health.invalidate();
       setTimeout(() => setSeedResult(null), 5000);
+    },
+  });
+
+  const playtestMutation = trpc.flywheel.playtest.useMutation({
+    onSuccess: (data) => {
+      setPlaytestResult(`${data.matchesPlayed} AI battles completed! MVP: ${data.summary.mvp} | ${data.summary.totalKills} total kills | ${data.summary.totalTokensEarned} ARENA earned`);
+      utils.flywheel.all.invalidate();
+      utils.flywheel.health.invalidate();
+      setTimeout(() => setPlaytestResult(null), 10000);
+    },
+    onError: (err) => {
+      setPlaytestResult(`Playtest error: ${err.message}`);
+      setTimeout(() => setPlaytestResult(null), 5000);
     },
   });
 
@@ -122,6 +136,13 @@ export default function FlywheelDashboard() {
           </div>
           <div className="flex items-center gap-3">
             <button
+              onClick={() => playtestMutation.mutate({ matchCount: 3, useLLM: true })}
+              disabled={playtestMutation.isPending}
+              className="clip-brutal-sm px-4 py-1.5 bg-neon-magenta/10 border border-neon-magenta/30 text-neon-magenta font-mono text-xs hover:bg-neon-magenta/20 transition-colors disabled:opacity-50 animate-pulse"
+            >
+              {playtestMutation.isPending ? "AI BATTLING..." : "RUN AI PLAYTEST"}
+            </button>
+            <button
               onClick={() => seedMutation.mutate({ matchCount: 20 })}
               disabled={seedMutation.isPending}
               className="clip-brutal-sm px-4 py-1.5 bg-neon-green/10 border border-neon-green/30 text-neon-green font-mono text-xs hover:bg-neon-green/20 transition-colors disabled:opacity-50"
@@ -141,6 +162,11 @@ export default function FlywheelDashboard() {
         {seedResult && (
           <div className="mx-6 mt-2 px-4 py-2 bg-neon-green/10 border border-neon-green/30 text-neon-green font-mono text-xs">
             ✓ {seedResult}
+          </div>
+        )}
+        {playtestResult && (
+          <div className="mx-6 mt-2 px-4 py-2 bg-neon-magenta/10 border border-neon-magenta/30 text-neon-magenta font-mono text-xs">
+            ⚔ {playtestResult}
           </div>
         )}
 
