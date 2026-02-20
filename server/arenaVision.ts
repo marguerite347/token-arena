@@ -15,6 +15,8 @@
  */
 
 import { invokeLLM } from "./_core/llm";
+import type { SceneGraph, SceneNode, SceneEdge, NodeType, EdgeRelation } from "@shared/sceneGraph";
+export type { SceneGraph };
 
 export interface SceneAnalysis {
   spatialLayout: {
@@ -305,6 +307,198 @@ ${spawns}`;
 /**
  * Generate prediction market context from scene analysis
  */
+// ─── SCENE GRAPH GENERATION ─────────────────────────────────────────────────
+
+/**
+ * Generate a structured scene graph from a skybox image using vision LLM.
+ * Returns nodes (spatial elements with tactical properties) and edges
+ * (spatial relationships) for agent pathfinding and game master item placement.
+ */
+export async function generateSceneGraph(imageUrl: string, arenaName?: string): Promise<SceneGraph> {
+  const prompt = `You are analyzing a 360° panoramic skybox image of a combat arena called "${arenaName || "Unknown Arena"}".
+This is a multiplayer AI agent battle arena. Your task is to produce a STRUCTURED SCENE GRAPH — a JSON representation of the arena's spatial layout as nodes and edges.
+
+NODES represent distinct spatial elements:
+- platform: Elevated surface, sniper advantage
+- corridor: Narrow passage, ambush risk
+- open_area: Wide space, exposed but mobile
+- cover_point: Defensive position with partial protection
+- chokepoint: Narrow bottleneck between areas
+- spawn_zone: Good location for agent/item spawns
+- hazard: Environmental danger
+- vantage_point: High ground with wide sightlines
+- junction: Intersection of multiple paths
+- dead_end: Single-entry area
+
+Each node needs:
+- id: unique string like "platform-north-1"
+- label: human-readable name like "North Elevated Platform"
+- type: one of the node types above
+- tactical: { coverValue(0-10), exposure(0-10), elevation(0-10), sightlines(0-10), escapability(0-10), idealWeapons(string[]), features(string[]), itemSpawnAffinity("none"|"low"|"medium"|"high") }
+- position: { x(-1 to 1), z(-1 to 1), y(0 to 1) } approximate normalized position
+- size: "small" | "medium" | "large"
+- description: brief visual description
+
+EDGES represent spatial relationships between nodes:
+- from/to: node IDs
+- relation: "connected_to" | "overlooks" | "adjacent_to" | "above" | "below" | "leads_to" | "blocks_view_of"
+- traversalCost(0-10), traversable(bool), hasLineOfSight(bool), description
+
+Generate 8-15 nodes and 12-25 edges that capture the arena's tactical structure.
+Also provide globalProperties: { layoutType, avgCoverDensity(0-10), combatZoneCount, theme, strategicSummary }
+
+Respond with EXACTLY this JSON structure:
+{
+  "version": 1,
+  "arenaName": "string",
+  "nodes": [...],
+  "edges": [...],
+  "globalProperties": { "layoutType": "open|enclosed|mixed|vertical|labyrinthine", "avgCoverDensity": 0-10, "combatZoneCount": number, "theme": "string", "strategicSummary": "string" },
+  "generatedAt": ${Date.now()},
+  "nodeCount": number,
+  "edgeCount": number
+}`;
+
+  try {
+    const result = await invokeLLM({
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert game level designer who analyzes 360° panoramic arena images and produces structured scene graphs as JSON. Respond only with valid JSON."
+        },
+        {
+          role: "user",
+          content: [
+            { type: "image_url", image_url: { url: imageUrl, detail: "high" } },
+            { type: "text", text: prompt },
+          ],
+        },
+      ],
+    });
+
+    const content = result.choices[0]?.message?.content;
+    if (typeof content === "string") {
+      // Extract JSON from response (may be wrapped in markdown code blocks)
+      const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      const parsed = JSON.parse(jsonStr) as SceneGraph;
+      // Ensure counts match
+      parsed.nodeCount = parsed.nodes.length;
+      parsed.edgeCount = parsed.edges.length;
+      parsed.generatedAt = Date.now();
+      console.log(`[ArenaVision] Scene graph generated for "${arenaName}": ${parsed.nodeCount} nodes, ${parsed.edgeCount} edges`);
+      return parsed;
+    }
+  } catch (e: any) {
+    console.error("[ArenaVision] Scene graph generation failed:", e.message);
+  }
+
+  // Fallback: generate a default scene graph
+  return getDefaultSceneGraph(arenaName);
+}
+
+/**
+ * Generate a default scene graph when vision LLM is unavailable
+ */
+function getDefaultSceneGraph(arenaName?: string): SceneGraph {
+  const name = (arenaName || "").toLowerCase();
+  const isCyberpunk = name.includes("neon") || name.includes("cyber") || name.includes("circuit");
+
+  const nodes: SceneNode[] = [
+    {
+      id: "center-arena", label: "Central Arena", type: "open_area",
+      tactical: { coverValue: 2, exposure: 9, elevation: 0, sightlines: 8, escapability: 7, idealWeapons: ["railgun", "beam"], features: ["open ground", "grid floor"], itemSpawnAffinity: "high" },
+      position: { x: 0, z: 0, y: 0 }, size: "large",
+      description: "The main open combat zone at the center of the arena"
+    },
+    {
+      id: "north-platform", label: "North Elevated Platform", type: "platform",
+      tactical: { coverValue: 5, exposure: 6, elevation: 7, sightlines: 9, escapability: 4, idealWeapons: ["railgun", "beam", "missile"], features: isCyberpunk ? ["neon railing", "circuit panels"] : ["metal railing"], itemSpawnAffinity: "medium" },
+      position: { x: 0, z: -0.7, y: 0.6 }, size: "medium",
+      description: "An elevated platform on the north side with excellent sightlines"
+    },
+    {
+      id: "south-corridor", label: "South Corridor", type: "corridor",
+      tactical: { coverValue: 7, exposure: 3, elevation: 0, sightlines: 3, escapability: 4, idealWeapons: ["scatter", "plasma"], features: isCyberpunk ? ["pipes", "steam vents"] : ["walls"], itemSpawnAffinity: "medium" },
+      position: { x: 0, z: 0.7, y: 0 }, size: "medium",
+      description: "A narrow corridor on the south side, good for ambushes"
+    },
+    {
+      id: "east-cover", label: "East Cover Cluster", type: "cover_point",
+      tactical: { coverValue: 8, exposure: 3, elevation: 1, sightlines: 4, escapability: 6, idealWeapons: ["plasma", "scatter"], features: isCyberpunk ? ["concrete pillars", "holographic displays"] : ["pillars"], itemSpawnAffinity: "low" },
+      position: { x: 0.6, z: 0, y: 0.1 }, size: "medium",
+      description: "A cluster of cover objects on the east side"
+    },
+    {
+      id: "west-chokepoint", label: "West Chokepoint", type: "chokepoint",
+      tactical: { coverValue: 4, exposure: 5, elevation: 0, sightlines: 2, escapability: 3, idealWeapons: ["nova", "scatter", "plasma"], features: isCyberpunk ? ["narrow gap", "neon archway"] : ["narrow gap"], itemSpawnAffinity: "high" },
+      position: { x: -0.6, z: 0, y: 0 }, size: "small",
+      description: "A narrow chokepoint on the west side — dangerous to cross"
+    },
+    {
+      id: "ne-vantage", label: "Northeast Vantage", type: "vantage_point",
+      tactical: { coverValue: 3, exposure: 7, elevation: 8, sightlines: 10, escapability: 3, idealWeapons: ["railgun", "beam"], features: ["high ground", "exposed"], itemSpawnAffinity: "low" },
+      position: { x: 0.5, z: -0.5, y: 0.7 }, size: "small",
+      description: "The highest point in the northeast — excellent for sniping but very exposed"
+    },
+    {
+      id: "sw-dead-end", label: "Southwest Dead End", type: "dead_end",
+      tactical: { coverValue: 9, exposure: 1, elevation: 0, sightlines: 1, escapability: 1, idealWeapons: ["scatter", "nova"], features: isCyberpunk ? ["pipe junction", "steam"] : ["wall"], itemSpawnAffinity: "high" },
+      position: { x: -0.5, z: 0.5, y: 0 }, size: "small",
+      description: "A dead-end alcove — defensible but easy to trap"
+    },
+    {
+      id: "nw-junction", label: "Northwest Junction", type: "junction",
+      tactical: { coverValue: 4, exposure: 6, elevation: 2, sightlines: 5, escapability: 8, idealWeapons: ["plasma", "beam"], features: ["intersection", "multiple exits"], itemSpawnAffinity: "medium" },
+      position: { x: -0.5, z: -0.5, y: 0.2 }, size: "medium",
+      description: "A junction where three paths meet — high traffic area"
+    },
+    {
+      id: "se-spawn", label: "Southeast Spawn Zone", type: "spawn_zone",
+      tactical: { coverValue: 5, exposure: 5, elevation: 0, sightlines: 4, escapability: 7, idealWeapons: ["plasma"], features: ["spawn pad", "energy field"], itemSpawnAffinity: "high" },
+      position: { x: 0.5, z: 0.5, y: 0 }, size: "medium",
+      description: "A spawn zone in the southeast with moderate protection"
+    },
+  ];
+
+  const edges: SceneEdge[] = [
+    { from: "center-arena", to: "north-platform", relation: "connected_to", traversalCost: 3, traversable: true, hasLineOfSight: true, description: "Ramp from center to north platform" },
+    { from: "center-arena", to: "south-corridor", relation: "connected_to", traversalCost: 2, traversable: true, hasLineOfSight: true, description: "Open path to south corridor entrance" },
+    { from: "center-arena", to: "east-cover", relation: "connected_to", traversalCost: 2, traversable: true, hasLineOfSight: true, description: "Direct path to east cover cluster" },
+    { from: "center-arena", to: "west-chokepoint", relation: "connected_to", traversalCost: 2, traversable: true, hasLineOfSight: true, description: "Path to west chokepoint" },
+    { from: "north-platform", to: "center-arena", relation: "overlooks", traversalCost: 0, traversable: false, hasLineOfSight: true, description: "Platform overlooks the central arena" },
+    { from: "north-platform", to: "ne-vantage", relation: "connected_to", traversalCost: 4, traversable: true, hasLineOfSight: true, description: "Ledge path to northeast vantage" },
+    { from: "ne-vantage", to: "center-arena", relation: "overlooks", traversalCost: 0, traversable: false, hasLineOfSight: true, description: "Vantage overlooks entire center" },
+    { from: "ne-vantage", to: "east-cover", relation: "overlooks", traversalCost: 0, traversable: false, hasLineOfSight: true, description: "Vantage overlooks east cover" },
+    { from: "south-corridor", to: "sw-dead-end", relation: "leads_to", traversalCost: 2, traversable: true, hasLineOfSight: false, description: "Corridor leads to dead-end alcove" },
+    { from: "south-corridor", to: "se-spawn", relation: "connected_to", traversalCost: 3, traversable: true, hasLineOfSight: true, description: "Path from corridor to spawn zone" },
+    { from: "west-chokepoint", to: "nw-junction", relation: "connected_to", traversalCost: 3, traversable: true, hasLineOfSight: false, description: "Narrow path through chokepoint to junction" },
+    { from: "west-chokepoint", to: "sw-dead-end", relation: "adjacent_to", traversalCost: 4, traversable: true, hasLineOfSight: false, description: "Side path to dead end" },
+    { from: "nw-junction", to: "north-platform", relation: "connected_to", traversalCost: 3, traversable: true, hasLineOfSight: true, description: "Path from junction up to platform" },
+    { from: "nw-junction", to: "center-arena", relation: "connected_to", traversalCost: 2, traversable: true, hasLineOfSight: true, description: "Direct path from junction to center" },
+    { from: "east-cover", to: "se-spawn", relation: "connected_to", traversalCost: 2, traversable: true, hasLineOfSight: true, description: "Path from cover to spawn zone" },
+    { from: "north-platform", to: "south-corridor", relation: "blocks_view_of", traversalCost: 0, traversable: false, hasLineOfSight: false, description: "Platform structure blocks view of south corridor" },
+  ];
+
+  return {
+    version: 1,
+    arenaName: arenaName || "Unknown Arena",
+    nodes,
+    edges,
+    globalProperties: {
+      layoutType: isCyberpunk ? "mixed" : "open",
+      avgCoverDensity: Math.round(nodes.reduce((s, n) => s + n.tactical.coverValue, 0) / nodes.length),
+      combatZoneCount: nodes.filter(n => ["open_area", "corridor", "chokepoint"].includes(n.type)).length,
+      theme: isCyberpunk ? "cyberpunk brutalist" : "futuristic",
+      strategicSummary: isCyberpunk
+        ? "Mixed layout favors versatile loadouts. Use corridors for ambushes, platforms for sniping, and the central arena for decisive engagements."
+        : "Open layout with elevated positions. Long-range weapons dominate the center, close-range weapons excel in corridors and chokepoints.",
+    },
+    generatedAt: Date.now(),
+    nodeCount: nodes.length,
+    edgeCount: edges.length,
+  };
+}
+
 export function getPredictionContext(analysis: SceneAnalysis): string {
   const layout = analysis.spatialLayout;
   const strat = analysis.strategicImplications;

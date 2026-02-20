@@ -134,7 +134,7 @@ export async function getSkyboxByPrompt(prompt: string) {
   return results.length > 0 ? results[0] : null;
 }
 
-export async function updateSkyboxCache(id: number, data: { skyboxId?: number; fileUrl?: string; thumbUrl?: string; depthMapUrl?: string; status: string; sceneAnalysis?: unknown }) {
+export async function updateSkyboxCache(id: number, data: { skyboxId?: number; fileUrl?: string; thumbUrl?: string; depthMapUrl?: string; status?: string; sceneAnalysis?: unknown; sceneGraph?: unknown }) {
   const db = await getDb();
   if (!db) return;
   await db.update(skyboxCache).set(data).where(eq(skyboxCache.id, id));

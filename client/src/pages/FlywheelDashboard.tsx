@@ -80,9 +80,20 @@ export default function FlywheelDashboard() {
   const [, navigate] = useLocation();
   const [selectedAgent, setSelectedAgent] = useState<number | null>(null);
 
+  const utils = trpc.useUtils();
   const { data: flywheelData, isLoading: fwLoading } = trpc.flywheel.all.useQuery(undefined, { staleTime: 10000 });
   const { data: healthData, isLoading: hLoading } = trpc.flywheel.health.useQuery(undefined, { staleTime: 10000 });
   const { data: ecosystemState } = trpc.dao.ecosystem.useQuery(undefined, { staleTime: 10000 });
+  const [seedResult, setSeedResult] = useState<string | null>(null);
+
+  const seedMutation = trpc.flywheel.seed.useMutation({
+    onSuccess: (data) => {
+      setSeedResult(data.message);
+      utils.flywheel.all.invalidate();
+      utils.flywheel.health.invalidate();
+      setTimeout(() => setSeedResult(null), 5000);
+    },
+  });
 
   const maxEarnings = Math.max(1, ...(flywheelData || []).map(a => a.earnings));
   const maxSpending = Math.max(1, ...(flywheelData || []).map(a => a.spending));
@@ -110,6 +121,13 @@ export default function FlywheelDashboard() {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => seedMutation.mutate({ matchCount: 20 })}
+              disabled={seedMutation.isPending}
+              className="clip-brutal-sm px-4 py-1.5 bg-neon-green/10 border border-neon-green/30 text-neon-green font-mono text-xs hover:bg-neon-green/20 transition-colors disabled:opacity-50"
+            >
+              {seedMutation.isPending ? "SEEDING..." : "SEED 20 MATCHES"}
+            </button>
             <button onClick={() => navigate("/arena")} className="clip-brutal-sm px-4 py-1.5 bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-mono text-xs hover:bg-neon-cyan/20 transition-colors">
               ENTER ARENA
             </button>
@@ -118,6 +136,13 @@ export default function FlywheelDashboard() {
             </button>
           </div>
         </header>
+
+        {/* Seed result notification */}
+        {seedResult && (
+          <div className="mx-6 mt-2 px-4 py-2 bg-neon-green/10 border border-neon-green/30 text-neon-green font-mono text-xs">
+            ✓ {seedResult}
+          </div>
+        )}
 
         {/* Flywheel Diagram */}
         <FlywheelDiagram />

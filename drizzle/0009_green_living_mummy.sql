@@ -1,0 +1,1 @@
+ALTER TABLE `skybox_cache` ADD `sceneGraph` json;

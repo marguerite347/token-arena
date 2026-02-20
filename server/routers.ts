@@ -33,11 +33,14 @@ import {
   isGovernanceCooldownActive, getOpenMarkets, getMarketWithBets, getResolvedMarkets,
   takeEcosystemSnapshot, getEcosystemSnapshots,
 } from "./predictionMarket";
-import { analyzeArenaScene, getAgentSceneBriefing, getGameMasterSpawnContext, getPredictionContext } from "./arenaVision";
-import type { SceneAnalysis } from "./arenaVision";
+import { analyzeArenaScene, getAgentSceneBriefing, getGameMasterSpawnContext, getPredictionContext, generateSceneGraph } from "./arenaVision";
+import type { SceneAnalysis, SceneGraph } from "./arenaVision";
+import { getSceneGraphBriefing, getSceneGraphItemContext, sceneGraphToLearningData } from "@shared/sceneGraph";
 import { getAllFlywheelData, getAgentEconomics, getEcosystemHealth } from "./agentLifecycle";
 
-const SKYBOX_API_BASE = "https://backend.blockadelabs.com/api/v1";
+// Blockade Labs Staging API — Model 4 styles (IDs 172-188)
+const SKYBOX_API_BASE = "https://backend-staging.blockadelabs.com/api/v1/skybox";
+const SKYBOX_IMAGINE_BASE = "https://backend-staging.blockadelabs.com/api/v1/imagine";
 const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "";
 
 export const appRouter = router({
@@ -55,7 +58,7 @@ export const appRouter = router({
   skybox: router({
     getStyles: publicProcedure.query(async () => {
       try {
-        const res = await axios.get(`${SKYBOX_API_BASE}/skybox/styles`, {
+        const res = await axios.get(`${SKYBOX_API_BASE}/styles`, {
           headers: { "x-api-key": SKYBOX_API_KEY },
         });
         return res.data as Array<{ id: number; name: string; model: string }>;
@@ -73,7 +76,7 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         try {
           console.log(`[Skybox Generate] prompt="${input.prompt.slice(0, 60)}..." styleId=${input.styleId}`);
-          const res = await axios.post(`${SKYBOX_API_BASE}/skybox`, {
+          const res = await axios.post(`${SKYBOX_API_BASE}`, {
             prompt: input.prompt,
             skybox_style_id: input.styleId,
             enhance_prompt: input.enhancePrompt,
@@ -100,7 +103,7 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         try {
-          const res = await axios.get(`${SKYBOX_API_BASE}/imagine/requests/${input.id}`, {
+          const res = await axios.get(`${SKYBOX_IMAGINE_BASE}/requests/${input.id}`, {
             headers: { "x-api-key": SKYBOX_API_KEY },
             timeout: 15000,
           });
@@ -158,6 +161,68 @@ export const appRouter = router({
         };
       }),
 
+    // Generate a structured scene graph from a skybox image
+    generateSceneGraph: publicProcedure
+      .input(z.object({
+        imageUrl: z.string().min(1).max(2048),
+        arenaName: z.string().max(128).optional(),
+        cacheId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        console.log(`[SceneGraph] Generating for "${input.arenaName || "Unknown"}" url=${input.imageUrl.slice(0, 60)}...`);
+        const graph = await generateSceneGraph(input.imageUrl, input.arenaName);
+
+        // Store in cache if cacheId provided
+        if (input.cacheId) {
+          await updateSkyboxCache(input.cacheId, { sceneGraph: graph });
+          console.log(`[SceneGraph] Stored in cache ID=${input.cacheId}: ${graph.nodeCount} nodes, ${graph.edgeCount} edges`);
+        }
+
+        return {
+          graph,
+          agentBriefing: getSceneGraphBriefing(graph),
+          itemContext: getSceneGraphItemContext(graph),
+        };
+      }),
+
+    // Get cached scene graph for a skybox by style ID
+    getSceneGraph: publicProcedure
+      .input(z.object({ styleId: z.number() }))
+      .query(async ({ input }) => {
+        const cached = await getCachedSkyboxByStyleId(input.styleId);
+        if (!cached?.sceneGraph) return null;
+        const graph = cached.sceneGraph as SceneGraph;
+        return {
+          graph,
+          agentBriefing: getSceneGraphBriefing(graph),
+          itemContext: getSceneGraphItemContext(graph),
+        };
+      }),
+
+    // Generate scene graph as post-match learning data for an agent
+    sceneGraphToLearning: publicProcedure
+      .input(z.object({
+        styleId: z.number(),
+        weaponUsed: z.string(),
+        outcome: z.enum(["win", "loss"]),
+        kills: z.number().int().min(0),
+        deaths: z.number().int().min(0),
+        nodeVisited: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        const cached = await getCachedSkyboxByStyleId(input.styleId);
+        if (!cached?.sceneGraph) return { learningData: null };
+        const graph = cached.sceneGraph as SceneGraph;
+        const learningData = sceneGraphToLearningData(graph, {
+          weaponUsed: input.weaponUsed,
+          outcome: input.outcome,
+          kills: input.kills,
+          deaths: input.deaths,
+          nodeVisited: input.nodeVisited,
+        });
+        return { learningData };
+      }),
+
     warmCache: protectedProcedure.mutation(async () => {
       // Pre-generate all 5 preset skyboxes in background
       const { ARENA_PROMPTS } = await import("@shared/arenaPrompts");
@@ -169,7 +234,7 @@ export const appRouter = router({
       // Fire off generation for uncached presets (don't await — run in background)
       for (const arena of toGenerate) {
         try {
-          const res = await axios.post(`${SKYBOX_API_BASE}/skybox`, {
+          const res = await axios.post(`${SKYBOX_API_BASE}`, {
             prompt: arena.prompt,
             skybox_style_id: arena.styleId,
             enhance_prompt: true,
@@ -186,7 +251,7 @@ export const appRouter = router({
             for (let i = 0; i < 40; i++) {
               await new Promise(r => setTimeout(r, 3000));
               try {
-                const pollRes = await axios.get(`${SKYBOX_API_BASE}/imagine/requests/${data.id}`, {
+                const pollRes = await axios.get(`${SKYBOX_IMAGINE_BASE}/requests/${data.id}`, {
                   headers: { "x-api-key": SKYBOX_API_KEY },
                   timeout: 15000,
                 });
@@ -711,6 +776,82 @@ export const appRouter = router({
     health: publicProcedure.query(async () => {
       return getEcosystemHealth();
     }),
+
+    // Seed agent token balances by simulating AI vs AI matches
+    // This populates real economic data for the Flywheel Dashboard
+    seed: publicProcedure
+      .input(z.object({
+        matchCount: z.number().int().min(1).max(50).default(10),
+      }).optional())
+      .mutation(async ({ input }) => {
+        const count = input?.matchCount ?? 10;
+        const agents = await getAgentIdentities();
+        if (agents.length === 0) {
+          return { seeded: 0, message: "No agents found — run agent.list first to initialize agents" };
+        }
+
+        const WEAPONS = ["plasma", "railgun", "scatter", "missile", "beam", "nova", "void"];
+        const ARENAS = ["Neon Brutalism", "Neon Colosseum", "Crypto Wasteland", "Digital Void", "Mech Hangar"];
+        let matchesSeeded = 0;
+
+        for (let i = 0; i < count; i++) {
+          // Pick two random agents
+          const shuffled = [...agents].sort(() => Math.random() - 0.5);
+          const agent1 = shuffled[0];
+          const agent2 = shuffled[1] || shuffled[0];
+          const arena = ARENAS[Math.floor(Math.random() * ARENAS.length)];
+
+          // Simulate match outcome — winner earns more
+          const agent1Kills = Math.floor(Math.random() * 8) + 1;
+          const agent2Kills = Math.floor(Math.random() * 8) + 1;
+          const agent1Wins = agent1Kills > agent2Kills;
+
+          // Token economics: winner earns 50-200 tokens, loser earns 10-50
+          const winnerEarnings = Math.floor(Math.random() * 150) + 50;
+          const loserEarnings = Math.floor(Math.random() * 40) + 10;
+          const computeCost = Math.floor(Math.random() * 20) + 5; // LLM + memory costs
+          const ammoCost = Math.floor(Math.random() * 15) + 3;    // Weapon token costs
+
+          const agent1Earned = agent1Wins ? winnerEarnings : loserEarnings;
+          const agent2Earned = agent1Wins ? loserEarnings : winnerEarnings;
+          const agent1Spent = computeCost + ammoCost;
+          const agent2Spent = Math.floor(computeCost * 0.8) + Math.floor(ammoCost * 0.9);
+
+          // Update agent stats
+          await updateAgentStats(agent1.agentId, {
+            kills: agent1Kills, deaths: agent2Kills,
+            tokensEarned: agent1Earned, tokensSpent: agent1Spent,
+          });
+          await updateAgentStats(agent2.agentId, {
+            kills: agent2Kills, deaths: agent1Kills,
+            tokensEarned: agent2Earned, tokensSpent: agent2Spent,
+          });
+
+          // Log x402 transactions for the match
+          const txId = `seed-${Date.now()}-${i}`;
+          await logX402Transaction({
+            paymentId: `${txId}-a1`, txHash: `0x${txId.replace(/-/g, "")}a1`,
+            action: "match_earnings", tokenSymbol: "ARENA", amount: agent1Earned,
+            fromAddress: "0xArena", toAddress: agent1.owner || "0xAgent1",
+            matchId: null, agentId: agent1.agentId, feeAmount: 0, success: 1,
+          });
+          await logX402Transaction({
+            paymentId: `${txId}-a2`, txHash: `0x${txId.replace(/-/g, "")}a2`,
+            action: "match_earnings", tokenSymbol: "ARENA", amount: agent2Earned,
+            fromAddress: "0xArena", toAddress: agent2.owner || "0xAgent2",
+            matchId: null, agentId: agent2.agentId, feeAmount: 0, success: 1,
+          });
+
+          matchesSeeded++;
+        }
+
+        const health = await getEcosystemHealth();
+        return {
+          seeded: matchesSeeded,
+          message: `Seeded ${matchesSeeded} simulated matches across ${agents.length} agents`,
+          ecosystemHealth: health,
+        };
+      }),
   }),
 });
 

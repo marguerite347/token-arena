@@ -79,6 +79,7 @@ export const skyboxCache = mysqlTable("skybox_cache", {
   depthMapUrl: text("depthMapUrl"),
   status: varchar("status", { length: 16 }).notNull().default("pending"),
   sceneAnalysis: json("sceneAnalysis"),
+  sceneGraph: json("sceneGraph"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

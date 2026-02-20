@@ -434,3 +434,36 @@
 - Memory economics: maintenance costs per cycle, query costs per LLM call
 - Memory costs shown in Agent Brain Panel with visual bars
 - 15 new tests passing for flywheel/lifecycle features
+
+## v14 — Scene Graph, Seed Balances, Staging Skybox
+
+### Structured Scene Graph System
+- [ ] Define SceneGraph TypeScript types (nodes with tactical properties, edges with spatial relationships)
+- [ ] Update arenaVision.ts to output JSON scene graph via vision LLM
+- [ ] Store scene graph alongside skybox in DB (add sceneGraph column to skybox_cache)
+- [ ] Create tRPC endpoint to retrieve scene graph
+- [ ] Wire scene graph into agent brain for pathfinding/strategy decisions
+- [ ] Wire scene graph into game master for contextual item placement
+- [ ] Post-match scene graph becomes learning data for agents
+
+### Seed Agent Token Balances
+- [ ] Create server-side seed script that simulates AI vs AI match results
+- [ ] Run simulated matches to give agents real earnings/spending
+- [ ] Verify Flywheel Dashboard shows real economic activity
+
+### Skybox API Staging Endpoint
+- [ ] Switch Skybox API base URL to backend-staging.blockadelabs.com
+- [ ] Test skybox generation with staging endpoint
+- [ ] Verify Model 4 styles are available on staging
+
+### Tests
+- [x] Scene graph type validation tests (9 tests passing)
+- [x] Scene graph parsing tests (9 tests passing)
+- [x] Seed balance verification tests (flywheel.test.ts 15 tests passing)
+
+### Staging Skybox API (Model 4)
+- [x] Store staging API key and secret in secrets manager
+- [x] Query staging styles endpoint to find Model 4 style IDs
+- [x] Update ARENA_PROMPTS to use M4 style IDs
+- [x] Update skybox router to use staging base URL
+- [x] Test skybox generation with Model 4 on staging (4/4 tests passing)
