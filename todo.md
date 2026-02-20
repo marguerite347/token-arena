@@ -173,3 +173,38 @@
 - [x] Prediction ticker odds calculation tests
 - [x] Skybox cache endpoint logic tests
 - [x] All 44 tests passing across 8 files
+
+## v10 — Replay System, Tournament Brackets, Agent Customization
+
+### Replay System
+- [x] Record match events (agent positions, projectiles, kills, crafting, token transfers)
+- [x] Build replay playback engine with timeline scrubbing
+- [x] Add slow-mo on key eliminations (auto-detected highlights)
+- [x] Replay viewer UI with play/pause/speed controls
+- [x] Save replays to localStorage with match metadata
+- [x] Make replays shareable as clips (generate share URLs)
+- [x] Replay list page showing recent matches
+
+### Tournament Brackets
+- [x] Tournament creation with configurable rounds and agent count (4/8/16)
+- [x] Multi-round elimination bracket system
+- [x] Auto-advance winners through bracket rounds
+- [x] Cumulative prediction markets across tournament rounds
+- [x] Tournament bracket visualization UI with connector lines
+- [x] Tournament results and champion display
+- [x] Tournament page with setup, bracket, and match views
+
+### Agent Customization UI
+- [x] Personality weight sliders (aggression, caution, greed, creativity)
+- [x] Visual preview of how weights affect agent behavior (radar chart)
+- [x] Save custom agent builds locally
+- [x] Apply custom personality to AI agents before matches
+- [x] Preset personality templates (berserker, sniper, merchant, chaos, turtle, balanced)
+- [x] Agent build comparison and archetype display
+
+### Integration
+- [x] Replay recording wired into game engine (frame + kill recording)
+- [x] Tournament, Replay, and Customizer buttons in Arena menu
+- [x] Watch Replay button in results screen
+- [x] Tournament page route (/tournament)
+- [x] All 62 tests passing across 9 files

@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import * as THREE from "three";
 import { useGame, type Agent, type Projectile, WEAPONS, type WeaponType } from "@/contexts/GameContext";
 import { updateAgentAI, notifyAgentDamaged, resetAgentStates } from "@/lib/aiCombat";
+import { getActiveRecorder } from "@/lib/replayEngine";
 
 interface GameEngineOptions {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -428,7 +429,11 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
             }
             if (hp <= 0) {
               d({ type: "AGENT_KILLED", killerId: p.ownerId, victimId: agent.id });
-              d({ type: "ADD_LOG", log: { id: `k-${now}-${Math.random()}`, timestamp: now, message: `${p.ownerId === s.player.id ? "PLAYER" : s.agents.find((a) => a.id === p.ownerId)?.name || "?"} eliminated ${agent.name}`, type: "kill" } });
+              const killerName = p.ownerId === s.player.id ? "PLAYER" : s.agents.find((a) => a.id === p.ownerId)?.name || "?";
+              d({ type: "ADD_LOG", log: { id: `k-${now}-${Math.random()}`, timestamp: now, message: `${killerName} eliminated ${agent.name}`, type: "kill" } });
+              // Record kill in replay
+              const replayRec = getActiveRecorder();
+              if (replayRec) replayRec.recordKill(p.ownerId, killerName, agent.id, agent.name, s.matchTime);
               if (p.ownerId === s.player.id) d({ type: "EARN_TOKENS", amount: 25 });
             }
             break;
@@ -446,7 +451,11 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
             d({ type: "EARN_TOKENS", amount: p.tokenValue });
             if (hp <= 0) {
               d({ type: "AGENT_KILLED", killerId: p.ownerId, victimId: s.player.id });
-              d({ type: "ADD_LOG", log: { id: `d-${now}`, timestamp: now, message: `PLAYER eliminated by ${s.agents.find((a) => a.id === p.ownerId)?.name || "?"}`, type: "kill" } });
+              const pKillerName = s.agents.find((a) => a.id === p.ownerId)?.name || "?";
+              d({ type: "ADD_LOG", log: { id: `d-${now}`, timestamp: now, message: `PLAYER eliminated by ${pKillerName}`, type: "kill" } });
+              // Record kill in replay
+              const replayRec2 = getActiveRecorder();
+              if (replayRec2) replayRec2.recordKill(p.ownerId, pKillerName, s.player.id, "PLAYER", s.matchTime);
             }
           }
         }
@@ -518,6 +527,14 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
       // Rotate projectile for visual effect
       pv.mesh.rotation.x += dt * 5;
       pv.mesh.rotation.z += dt * 3;
+    }
+
+    // Record replay frame
+    if (s.phase === "combat") {
+      const recorder = getActiveRecorder();
+      if (recorder) {
+        recorder.recordFrame(s.agents, s.projectiles, s.player, s.matchTime);
+      }
     }
 
     renderer.render(scene, camera);

@@ -22,6 +22,10 @@ import DAOPanel from "@/components/DAOPanel";
 import PredictionPanel from "@/components/PredictionPanel";
 import PredictionTicker from "@/components/PredictionTicker";
 import PreGameLobby from "@/components/PreGameLobby";
+import ReplayViewer from "@/components/ReplayViewer";
+import ReplayList from "@/components/ReplayList";
+import AgentCustomizer, { type PersonalityWeights } from "@/components/AgentCustomizer";
+import { startRecording, stopRecording, saveReplay, type ReplayData } from "@/lib/replayEngine";
 
 export default function Arena() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,6 +47,12 @@ export default function Arena() {
   const [showLobby, setShowLobby] = useState(false);
   const [lobbyArenaName, setLobbyArenaName] = useState("");
   const [lobbyMatchMode, setLobbyMatchMode] = useState<"pvai" | "aivai">("pvai");
+  const [showReplayViewer, setShowReplayViewer] = useState(false);
+  const [showReplayList, setShowReplayList] = useState(false);
+  const [activeReplay, setActiveReplay] = useState<ReplayData | null>(null);
+  const [showCustomizer, setShowCustomizer] = useState(false);
+  const [agentWeights, setAgentWeights] = useState<PersonalityWeights | null>(null);
+  const [agentBuildName, setAgentBuildName] = useState("");
   const prevHealthRef = useRef(state.player.health);
   const prevPhaseRef = useRef(state.phase);
   const matchSavedRef = useRef(false);
@@ -338,9 +348,38 @@ export default function Arena() {
     return () => clearInterval(interval);
   }, [state.phase, dispatch]);
 
-  // Show results screen
+  // Replay recording: start when countdown begins
+  useEffect(() => {
+    if (state.phase === "countdown") {
+      startRecording(state.mode);
+    }
+  }, [state.phase, state.mode]);
+
+  // Record frames during combat (the game engine tick calls getActiveRecorder().recordFrame)
+  useEffect(() => {
+    if (state.phase !== "combat") return;
+    // Frame recording is handled by useGameEngine via getActiveRecorder()
+  }, [state.phase]);
+
+  // Stop recording and save replay when match ends
   useEffect(() => {
     if (state.phase === "victory" || state.phase === "defeat") {
+      const recorder = stopRecording();
+      if (recorder) {
+        try {
+          const replay = recorder.finalize(
+            state.agents,
+            state.player,
+            state.phase,
+            state.skybox.imageUrl,
+            state.skybox.prompt,
+          );
+          saveReplay(replay);
+          setActiveReplay(replay);
+        } catch (err) {
+          console.warn("[Replay] Failed to finalize:", err);
+        }
+      }
       setShowResults(true);
     }
   }, [state.phase]);
@@ -668,6 +707,24 @@ export default function Arena() {
                   className="px-3 py-2 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-['Orbitron'] text-xs hover:bg-yellow-500/20 transition">
                   🎰 PREDICTIONS
                 </button>
+                <button
+                  onClick={() => navigate("/tournament")}
+                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-pink-400 hover:bg-pink-400/10 transition-colors pointer-events-auto text-center"
+                >
+                  🏆 TOURNAMENT
+                </button>
+                <button
+                  onClick={() => setShowReplayList(true)}
+                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-blue-400 hover:bg-blue-400/10 transition-colors pointer-events-auto text-center"
+                >
+                  📹 REPLAYS
+                </button>
+                <button
+                  onClick={() => setShowCustomizer(true)}
+                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-emerald-400 hover:bg-emerald-400/10 transition-colors pointer-events-auto text-center"
+                >
+                  🎛️ CUSTOMIZE AI
+                </button>
               </div>
 
               {/* Navigation */}
@@ -765,15 +822,28 @@ export default function Arena() {
                   <div className="text-[9px] font-mono text-neon-green/70 mb-3">Match saved to leaderboard</div>
                 )}
 
+                {/* Watch Replay button */}
+                {activeReplay && (
+                  <div className="mb-4">
+                    <button
+                      onClick={() => {
+                        setShowResults(false);
+                        setShowReplayViewer(true);
+                      }}
+                      className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-xs text-blue-400 hover:bg-blue-400/10 transition-colors pointer-events-auto w-full"
+                    >
+                      📹 WATCH REPLAY ({activeReplay.highlights.length} highlights)
+                    </button>
+                  </div>
+                )}
+
                 <div className="flex gap-3 justify-center">
                   <button
                     onClick={() => {
                       setShowResults(false);
                       dispatch({ type: "RESET_MATCH" });
-                      // Go through lobby flow for next match
                       setLobbyMatchMode(state.mode as "pvai" | "aivai");
                       setShowLobby(true);
-                      // Generate new skybox for next match
                       const randomArena = ARENA_PROMPTS[Math.floor(Math.random() * ARENA_PROMPTS.length)];
                       setLobbyArenaName(randomArena.name);
                       handleGenerateSkybox(randomArena.prompt, randomArena.styleId);
@@ -821,6 +891,59 @@ export default function Arena() {
 
       {/* Prediction Market Panel */}
       <PredictionPanel isOpen={showPrediction} onClose={() => setShowPrediction(false)} />
+
+      {/* Replay Viewer */}
+      {showReplayViewer && activeReplay && (
+        <ReplayViewer
+          replay={activeReplay}
+          onClose={() => { setShowReplayViewer(false); setActiveReplay(null); }}
+        />
+      )}
+
+      {/* Replay List */}
+      <AnimatePresence>
+        {showReplayList && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/90"
+          >
+            <div className="max-w-lg w-full mx-4 bg-black/80 border border-cyan-500/20 rounded-xl p-6">
+              <ReplayList
+                onSelectReplay={(replay) => {
+                  setActiveReplay(replay);
+                  setShowReplayList(false);
+                  setShowReplayViewer(true);
+                }}
+                onClose={() => setShowReplayList(false)}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Agent Customizer */}
+      <AnimatePresence>
+        {showCustomizer && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/90"
+          >
+            <AgentCustomizer
+              onApply={(weights, name) => {
+                setAgentWeights(weights);
+                setAgentBuildName(name);
+                setShowCustomizer(false);
+              }}
+              onClose={() => setShowCustomizer(false)}
+              initialWeights={agentWeights || undefined}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Pre-Game Lobby (during skybox generation) */}
       {showLobby && (
