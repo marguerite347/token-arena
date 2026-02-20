@@ -15,9 +15,32 @@ function createPublicContext(): TrpcContext {
   };
 }
 
+function createAuthContext(): TrpcContext {
+  return {
+    user: {
+      id: 1,
+      openId: "test-match-user",
+      email: "match@test.com",
+      name: "Match Tester",
+      loginMethod: "manus",
+      role: "user",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastSignedIn: new Date(),
+    },
+    req: {
+      protocol: "https",
+      headers: {},
+    } as TrpcContext["req"],
+    res: {
+      clearCookie: () => {},
+    } as TrpcContext["res"],
+  };
+}
+
 describe("match.save", () => {
   it("should save a match and return an id", async () => {
-    const ctx = createPublicContext();
+    const ctx = createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.match.save({

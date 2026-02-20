@@ -214,3 +214,36 @@
 - [x] Complete code review against checklist
 - [x] Fix identified bugs (4 bugs fixed)
 - [x] Produce markdown report (CODE_REVIEW_REPORT.md)
+
+## v11 — Security Hardening, Endpoint Protection, Arena Decomposition
+
+### Smart Contract Security (Austin Griffith Checklist)
+- [x] Audit ERC-20 token definitions for decimal handling, minting controls, supply caps
+- [x] Audit wallet integration for approve pattern, tx.origin usage, spending limits
+- [x] Audit DAO governance for flash loan prevention, voting safeguards, treasury controls
+- [x] Audit prediction market for oracle manipulation, front-running, race conditions, resolution edge cases
+- [x] Audit fee/treasury management for fee caps, reentrancy, access control
+- [x] Add input validation and safety checks to all financial operations
+- [x] Add server-side rate limiting for expensive operations (LLM, Skybox API) — context length capped
+
+### Endpoint Protection
+- [x] Convert prediction.resolve to protectedProcedure
+- [x] Convert dao.deliberate to protectedProcedure
+- [x] Convert dao.killAgent to protectedProcedure
+- [x] Convert dao.spawnAgent to protectedProcedure
+- [x] Convert dao.recordFee to protectedProcedure
+- [x] Convert match.save to protectedProcedure
+- [x] Convert skybox.warmCache to protectedProcedure
+- [x] Audit all other endpoints for appropriate access control
+
+### Replay Route
+- [x] Add /replay/:id route to App.tsx
+- [x] Create ReplayPage component that loads replay by ID from localStorage
+
+### Arena.tsx Decomposition
+- [x] Extract ArenaMenu sub-component
+- [x] Extract ArenaResults sub-component
+- [x] Extract ArenaCombatOverlays sub-component (HUD + combat UI)
+- [x] Extract ArenaOverlayPanels sub-component (panels, modals)
+- [x] Reduce Arena.tsx from ~980 lines to ~340 lines
+- [x] Update tests for auth context changes (62 tests passing)

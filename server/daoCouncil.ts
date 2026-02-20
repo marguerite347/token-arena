@@ -265,6 +265,11 @@ export async function spawnAgent(
   const db = await getDb();
   if (!db) return null;
 
+  // Sanitize agent name and description to prevent injection
+  const sanitizedName = name.replace(/[<>"'&]/g, '').trim().slice(0, 50);
+  const sanitizedDesc = description.replace(/[<>"'&]/g, '').trim().slice(0, 500);
+  if (!sanitizedName) return null;
+
   // Spawn costs come from treasury
   const spawnCost = 100; // ARENA tokens from treasury
   const initialCompute = 500;
@@ -282,8 +287,8 @@ export async function spawnAgent(
   // Create agent
   await db.insert(agentIdentities).values({
     agentId: newAgentId,
-    name,
-    description,
+    name: sanitizedName,
+    description: sanitizedDesc,
     owner: "0xDAO_TREASURY",
     agentRegistry: "0xERC8004_REGISTRY",
     computeBudget: initialCompute,
@@ -296,7 +301,7 @@ export async function spawnAgent(
     txType: "spawn_cost",
     amount: spawnCost,
     direction: "outflow",
-    description: `Spawned agent ${name} (gen ${generation})`,
+    description: `Spawned agent ${sanitizedName} (gen ${generation})`,
     relatedAgentId: newAgentId,
     relatedProposalId: proposalId ?? null,
   });
@@ -318,7 +323,7 @@ export async function spawnAgent(
 // ─── Council Deliberation ───────────────────────────────────
 export async function councilDeliberate(
   proposalType: string,
-  context: string,
+  rawContext: string,
 ): Promise<{
   proposal: { title: string; description: string; parameters: Record<string, unknown> };
   votes: Array<{ member: string; philosophy: string; vote: string; reasoning: string }>;
@@ -326,6 +331,11 @@ export async function councilDeliberate(
   proposalId: number;
 }> {
   const db = await getDb();
+
+  // Sanitize user-provided context to mitigate prompt injection
+  const context = rawContext
+    .replace(/[<>]/g, '')
+    .slice(0, 1000); // Cap context length
 
   // Get treasury state
   const treasury = await getTreasuryBalance();

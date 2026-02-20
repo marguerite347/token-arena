@@ -1,62 +1,62 @@
 /*
- * Arena Page — Main game screen with Three.js canvas, HUD, and Web3 wallet integration
- * Uses tRPC for Skybox API proxy, saves match results + x402 transactions to DB
+ * Arena Page — Main game screen orchestrator
+ * Delegates UI to sub-components: ArenaMenu, ArenaResults, ArenaCombatOverlays, ArenaOverlayPanels
+ * Keeps game lifecycle hooks, wallet wiring, and skybox generation logic
  */
 import { useRef, useEffect, useState, useCallback } from "react";
-import { useLocation } from "wouter";
 import { useGame } from "@/contexts/GameContext";
 import { useWallet } from "@/contexts/WalletContext";
 import { useGameEngine } from "@/hooks/useGameEngine";
-import GameHUD from "@/components/GameHUD";
-import AgentIdentityCard from "@/components/AgentIdentityCard";
-import WalletButton from "@/components/WalletButton";
 import { ARENA_PROMPTS } from "@/lib/skyboxApi";
 import { soundEngine } from "@/lib/soundEngine";
 import { trpc } from "@/lib/trpc";
-import { DEFAULT_AI_AGENTS, WEAPON_TOKENS } from "@shared/web3";
-import { motion, AnimatePresence } from "framer-motion";
-import CraftingPanel from "@/components/CraftingPanel";
-import AgentBrainPanel from "@/components/AgentBrainPanel";
-import GameMasterPanel from "@/components/GameMasterPanel";
-import DAOPanel from "@/components/DAOPanel";
-import PredictionPanel from "@/components/PredictionPanel";
-import PredictionTicker from "@/components/PredictionTicker";
-import PreGameLobby from "@/components/PreGameLobby";
-import ReplayViewer from "@/components/ReplayViewer";
-import ReplayList from "@/components/ReplayList";
-import AgentCustomizer, { type PersonalityWeights } from "@/components/AgentCustomizer";
+import { AnimatePresence } from "framer-motion";
 import { startRecording, stopRecording, saveReplay, type ReplayData } from "@/lib/replayEngine";
+import type { PersonalityWeights } from "@/components/AgentCustomizer";
+import { ArenaMenu, ArenaResults, ArenaCombatOverlays, ArenaOverlayPanels, type PanelState } from "@/components/arena";
+import PreGameLobby from "@/components/PreGameLobby";
 
 export default function Arena() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { state, dispatch, startMatch } = useGame();
   const wallet = useWallet();
-  const [, navigate] = useLocation();
+
+  // UI state
   const [skyboxLoading, setSkyboxLoading] = useState(false);
   const [skyboxProgress, setSkyboxProgress] = useState("");
   const [countdown, setCountdown] = useState(3);
   const [showResults, setShowResults] = useState(false);
   const [hitFlash, setHitFlash] = useState(false);
   const [screenShake, setScreenShake] = useState(false);
-  const [showAgentPanel, setShowAgentPanel] = useState(false);
-  const [showCrafting, setShowCrafting] = useState(false);
-  const [showBrain, setShowBrain] = useState(false);
-  const [showGameMaster, setShowGameMaster] = useState(false);
-  const [showDAO, setShowDAO] = useState(false);
-  const [showPrediction, setShowPrediction] = useState(false);
   const [showLobby, setShowLobby] = useState(false);
   const [lobbyArenaName, setLobbyArenaName] = useState("");
   const [lobbyMatchMode, setLobbyMatchMode] = useState<"pvai" | "aivai">("pvai");
-  const [showReplayViewer, setShowReplayViewer] = useState(false);
-  const [showReplayList, setShowReplayList] = useState(false);
   const [activeReplay, setActiveReplay] = useState<ReplayData | null>(null);
-  const [showCustomizer, setShowCustomizer] = useState(false);
   const [agentWeights, setAgentWeights] = useState<PersonalityWeights | null>(null);
   const [agentBuildName, setAgentBuildName] = useState("");
+
+  // Panel visibility state
+  const [panels, setPanels] = useState<PanelState>({
+    crafting: false,
+    brain: false,
+    gameMaster: false,
+    dao: false,
+    prediction: false,
+    replayViewer: false,
+    replayList: false,
+    customizer: false,
+  });
+
+  // Refs for tracking state changes
   const prevHealthRef = useRef(state.player.health);
   const prevPhaseRef = useRef(state.phase);
   const matchSavedRef = useRef(false);
+  const prevProjCountRef = useRef(0);
+  const prevKillsRef = useRef(state.player.kills);
+  const craftingSeeded = useRef(false);
+  const cacheWarmed = useRef(false);
 
+  // Initialize game engine
   useGameEngine({ canvasRef });
 
   // tRPC mutations
@@ -65,9 +65,11 @@ export default function Arena() {
   const logX402Mut = trpc.x402.log.useMutation();
   const craftingInitMut = trpc.crafting.init.useMutation();
   const rollDropsMut = trpc.crafting.rollDrops.useMutation();
+  const warmCacheMut = trpc.skybox.warmCache.useMutation();
+
+  // ─── Initialization Effects ──────────────────────────────────────────────────
 
   // Seed crafting materials/recipes on first load
-  const craftingSeeded = useRef(false);
   useEffect(() => {
     if (!craftingSeeded.current) {
       craftingSeeded.current = true;
@@ -75,9 +77,7 @@ export default function Arena() {
     }
   }, []);
 
-  // Warm skybox cache on first load (pre-generate all 5 presets)
-  const warmCacheMut = trpc.skybox.warmCache.useMutation();
-  const cacheWarmed = useRef(false);
+  // Warm skybox cache on first load
   useEffect(() => {
     if (!cacheWarmed.current) {
       cacheWarmed.current = true;
@@ -104,6 +104,19 @@ export default function Arena() {
     };
   }, []);
 
+  // Load skybox styles from server
+  const { data: stylesData } = trpc.skybox.getStyles.useQuery(undefined, { staleTime: 60000 });
+  useEffect(() => {
+    if (stylesData && stylesData.length > 0) {
+      dispatch({
+        type: "SET_SKYBOX_STYLES",
+        styles: stylesData.map((s) => ({ id: s.id, name: s.name })),
+      });
+    }
+  }, [stylesData, dispatch]);
+
+  // ─── Wallet & Token Wiring ───────────────────────────────────────────────────
+
   // Initialize wallet balances when match starts
   useEffect(() => {
     if (state.phase === "countdown") {
@@ -112,14 +125,12 @@ export default function Arena() {
   }, [state.phase]);
 
   // Wire wallet to shooting — spend tokens on fire
-  const prevProjCountRef = useRef(0);
   useEffect(() => {
     if (state.projectiles.length > prevProjCountRef.current && state.phase === "combat") {
       const newProjs = state.projectiles.slice(prevProjCountRef.current);
       const playerProj = newProjs.find(p => p.ownerId === state.player.id);
       if (playerProj) {
         soundEngine.playWeaponFire(playerProj.type);
-        // x402 payment: spend tokens for shooting
         const result = wallet.spendTokens(playerProj.type, playerProj.tokenValue);
         if (result.success) {
           logX402Mut.mutate({
@@ -138,11 +149,9 @@ export default function Arena() {
   }, [state.projectiles.length, state.phase, state.player.id]);
 
   // Roll material drops on kills
-  const prevKillsRef = useRef(state.player.kills);
   useEffect(() => {
     if (state.player.kills > prevKillsRef.current && state.phase === "combat") {
-      const streak = state.player.kills;
-      rollDropsMut.mutate({ weaponUsed: state.player.weapon.type, killStreak: streak, agentId: 1 });
+      rollDropsMut.mutate({ weaponUsed: state.player.weapon.type, killStreak: state.player.kills, agentId: 1 });
     }
     prevKillsRef.current = state.player.kills;
   }, [state.player.kills, state.phase]);
@@ -156,7 +165,6 @@ export default function Arena() {
       setTimeout(() => setHitFlash(false), 150);
       setTimeout(() => setScreenShake(false), 200);
 
-      // x402 payment: receive tokens from incoming fire
       const dmg = prevHealthRef.current - state.player.health;
       const tokenValue = Math.max(1, Math.floor(dmg / 5));
       const result = wallet.receiveTokens("plasma", tokenValue, "0x0000000000000000000000000000000000000001");
@@ -174,6 +182,8 @@ export default function Arena() {
     }
     prevHealthRef.current = state.player.health;
   }, [state.player.health, state.phase]);
+
+  // ─── Phase Lifecycle ─────────────────────────────────────────────────────────
 
   // Sound effects for phase changes
   useEffect(() => {
@@ -195,7 +205,7 @@ export default function Arena() {
     prevPhaseRef.current = state.phase;
   }, [state.phase]);
 
-  // Save match results to database with wallet address
+  // Save match results to database
   useEffect(() => {
     if ((state.phase === "victory" || state.phase === "defeat") && !matchSavedRef.current) {
       matchSavedRef.current = true;
@@ -224,7 +234,58 @@ export default function Arena() {
     }
   }, [state.phase]);
 
-  // Generate skybox via server proxy
+  // Countdown timer
+  useEffect(() => {
+    if (state.phase !== "countdown") return;
+    setCountdown(3);
+    matchSavedRef.current = false;
+    let count = 3;
+    const interval = setInterval(() => {
+      count--;
+      soundEngine.playCountdown();
+      if (count <= 0) {
+        clearInterval(interval);
+        setCountdown(0);
+        setTimeout(() => dispatch({ type: "SET_PHASE", phase: "combat" }), 100);
+      } else {
+        setCountdown(count);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [state.phase, dispatch]);
+
+  // ─── Replay Recording ────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (state.phase === "countdown") {
+      startRecording(state.mode);
+    }
+  }, [state.phase, state.mode]);
+
+  useEffect(() => {
+    if (state.phase === "victory" || state.phase === "defeat") {
+      const recorder = stopRecording();
+      if (recorder) {
+        try {
+          const replay = recorder.finalize(
+            state.agents,
+            state.player,
+            state.phase,
+            state.skybox.imageUrl,
+            state.skybox.prompt,
+          );
+          saveReplay(replay);
+          setActiveReplay(replay);
+        } catch (err) {
+          console.warn("[Replay] Failed to finalize:", err);
+        }
+      }
+      setShowResults(true);
+    }
+  }, [state.phase]);
+
+  // ─── Skybox Generation ───────────────────────────────────────────────────────
+
   const handleGenerateSkybox = useCallback(
     async (prompt?: string, styleId?: number) => {
       setSkyboxLoading(true);
@@ -247,7 +308,6 @@ export default function Arena() {
 
         setSkyboxProgress(`Skybox queued (ID: ${result.id}). Rendering 360° environment...`);
 
-        // Poll with progress indicator — typical generation takes 20-40 seconds
         const pollForCompletion = async (skyboxId: number, attempts = 0): Promise<void> => {
           if (attempts > 40) throw new Error("Skybox generation timed out after 2 minutes");
           await new Promise(r => setTimeout(r, 3000));
@@ -256,18 +316,16 @@ export default function Arena() {
           const progressMessages = [
             "Generating 360° panorama...",
             "AI is painting your arena...",
-            "Rendering environment details...",
+            "Rendering volumetric lighting...",
             "Applying lighting and atmosphere...",
             "Finalizing equirectangular projection...",
           ];
           const msgIdx = Math.min(Math.floor(elapsed / 8), progressMessages.length - 1);
 
           try {
-            // tRPC with superjson requires input wrapped in { json: { ... } }
             const inputPayload = { json: { id: skyboxId } };
             const res = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify(inputPayload))}`);
             const json = await res.json();
-            // tRPC+superjson wraps the result in { result: { data: { json: { ... } } } }
             const data = json.result?.data?.json || json.result?.data;
 
             if (!data || !data.status) {
@@ -294,11 +352,9 @@ export default function Arena() {
 
             if (data.status === "error") throw new Error("Skybox generation failed on server");
 
-            // Still processing
             setSkyboxProgress(`${progressMessages[msgIdx]} (${elapsed}s)`);
             return pollForCompletion(skyboxId, attempts + 1);
           } catch (fetchErr: any) {
-            // Network error during poll — retry
             console.warn(`[Skybox Poll] Fetch error attempt ${attempts}:`, fetchErr.message);
             setSkyboxProgress(`Reconnecting... (${elapsed}s)`);
             return pollForCompletion(skyboxId, attempts + 1);
@@ -317,78 +373,11 @@ export default function Arena() {
     [dispatch, state.skyboxPrompt, state.selectedSkyboxStyle, generateSkyboxMut]
   );
 
-  // Load skybox styles from server
-  const { data: stylesData } = trpc.skybox.getStyles.useQuery(undefined, { staleTime: 60000 });
-  useEffect(() => {
-    if (stylesData && stylesData.length > 0) {
-      dispatch({
-        type: "SET_SKYBOX_STYLES",
-        styles: stylesData.map((s) => ({ id: s.id, name: s.name })),
-      });
-    }
-  }, [stylesData, dispatch]);
+  // ─── Match Start Handlers ────────────────────────────────────────────────────
 
-  // Countdown timer
-  useEffect(() => {
-    if (state.phase !== "countdown") return;
-    setCountdown(3);
-    matchSavedRef.current = false;
-    let count = 3;
-    const interval = setInterval(() => {
-      count--;
-      soundEngine.playCountdown();
-      if (count <= 0) {
-        clearInterval(interval);
-        setCountdown(0);
-        setTimeout(() => dispatch({ type: "SET_PHASE", phase: "combat" }), 100);
-      } else {
-        setCountdown(count);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [state.phase, dispatch]);
-
-  // Replay recording: start when countdown begins
-  useEffect(() => {
-    if (state.phase === "countdown") {
-      startRecording(state.mode);
-    }
-  }, [state.phase, state.mode]);
-
-  // Record frames during combat (the game engine tick calls getActiveRecorder().recordFrame)
-  useEffect(() => {
-    if (state.phase !== "combat") return;
-    // Frame recording is handled by useGameEngine via getActiveRecorder()
-  }, [state.phase]);
-
-  // Stop recording and save replay when match ends
-  useEffect(() => {
-    if (state.phase === "victory" || state.phase === "defeat") {
-      const recorder = stopRecording();
-      if (recorder) {
-        try {
-          const replay = recorder.finalize(
-            state.agents,
-            state.player,
-            state.phase,
-            state.skybox.imageUrl,
-            state.skybox.prompt,
-          );
-          saveReplay(replay);
-          setActiveReplay(replay);
-        } catch (err) {
-          console.warn("[Replay] Failed to finalize:", err);
-        }
-      }
-      setShowResults(true);
-    }
-  }, [state.phase]);
-
-  // Start match with lobby flow
   const handleStartPvAI = () => {
     setLobbyMatchMode("pvai");
     setShowLobby(true);
-    // If no skybox is ready, generate one
     if (state.skybox.status !== "ready") {
       const randomArena = ARENA_PROMPTS[Math.floor(Math.random() * ARENA_PROMPTS.length)];
       setLobbyArenaName(randomArena.name);
@@ -397,6 +386,7 @@ export default function Arena() {
       setLobbyArenaName(state.skybox.styleName || "Custom Arena");
     }
   };
+
   const handleStartAIvAI = () => {
     setLobbyMatchMode("aivai");
     setShowLobby(true);
@@ -408,542 +398,100 @@ export default function Arena() {
       setLobbyArenaName(state.skybox.styleName || "Custom Arena");
     }
   };
+
   const handleQuickArena = (idx: number) => {
     const arena = ARENA_PROMPTS[idx];
     setLobbyArenaName(arena.name);
     handleGenerateSkybox(arena.prompt, arena.styleId);
   };
+
   const handleLobbyStartMatch = useCallback((mode: "pvai" | "aivai") => {
     setShowLobby(false);
     startMatch(mode, mode === "pvai" ? 4 : 6);
   }, [startMatch]);
+
+  // ─── Panel Management ────────────────────────────────────────────────────────
+
+  const handleShowPanel = (panel: string) => {
+    setPanels(prev => ({ ...prev, [panel]: true }));
+  };
+
+  const handleClosePanel = (panel: keyof PanelState) => {
+    setPanels(prev => ({ ...prev, [panel]: false }));
+    if (panel === "replayViewer") setActiveReplay(null);
+  };
+
+  const handleSelectReplay = (replay: ReplayData) => {
+    setActiveReplay(replay);
+    setPanels(prev => ({ ...prev, replayList: false, replayViewer: true }));
+  };
+
+  const handleApplyCustomizer = (weights: PersonalityWeights, name: string) => {
+    setAgentWeights(weights);
+    setAgentBuildName(name);
+    setPanels(prev => ({ ...prev, customizer: false }));
+  };
+
+  const handleNextMatch = () => {
+    setShowResults(false);
+    dispatch({ type: "RESET_MATCH" });
+    setLobbyMatchMode(state.mode as "pvai" | "aivai");
+    setShowLobby(true);
+    const randomArena = ARENA_PROMPTS[Math.floor(Math.random() * ARENA_PROMPTS.length)];
+    setLobbyArenaName(randomArena.name);
+    handleGenerateSkybox(randomArena.prompt, randomArena.styleId);
+  };
+
+  const handleWatchReplay = () => {
+    setShowResults(false);
+    setPanels(prev => ({ ...prev, replayViewer: true }));
+  };
+
+  // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <div className={`relative w-screen h-screen overflow-hidden bg-background ${screenShake ? "animate-shake" : ""}`}>
       {/* Three.js Canvas */}
       <canvas ref={canvasRef} id="game-canvas" className="absolute inset-0" />
 
-      {/* Hit flash overlay */}
-      <AnimatePresence>
-        {hitFlash && (
-          <motion.div
-            className="fixed inset-0 z-30 pointer-events-none bg-neon-magenta/20"
-            initial={{ opacity: 0.6 }}
-            animate={{ opacity: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Combat phase overlays: hit flash, crosshair, HUD, countdown, pause */}
+      <ArenaCombatOverlays hitFlash={hitFlash} countdown={countdown} />
 
-      {/* Crosshair (PvAI combat only) */}
-      {state.phase === "combat" && state.mode === "pvai" && state.player.isAlive && (
-        <div className="fixed inset-0 z-20 pointer-events-none flex items-center justify-center">
-          <div className="relative w-8 h-8">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-2.5 bg-neon-cyan/80" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0.5 h-2.5 bg-neon-cyan/80" />
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-0.5 bg-neon-cyan/80" />
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-0.5 bg-neon-cyan/80" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-neon-cyan/60" />
-          </div>
-        </div>
-      )}
-
-      {/* HUD Overlay (only during combat) */}
-      {(state.phase === "combat" || state.phase === "countdown") && <GameHUD />}
-
-      {/* Bloomberg-style Prediction Ticker during combat */}
-      <PredictionTicker />
-
-      {/* Countdown Overlay */}
-      <AnimatePresence>
-        {state.phase === "countdown" && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              key={countdown}
-              initial={{ scale: 2, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="font-display text-[120px] font-black text-neon-cyan text-glow-cyan"
-            >
-              {countdown > 0 ? countdown : "FIGHT"}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Pre-match Setup */}
+      {/* Pre-match Menu */}
       {state.phase === "menu" && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center overflow-y-auto py-8">
-          <div className="absolute inset-0 bg-background/90" />
-          <div className="relative z-10 max-w-2xl w-full mx-4">
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-              {/* Title + Wallet */}
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h1 className="font-display text-4xl md:text-5xl font-black text-neon-cyan text-glow-cyan tracking-wider">
-                    TOKEN ARENA
-                  </h1>
-                  <p className="font-mono text-sm text-muted-foreground">
-                    AI Agent Battle Arena — On-Chain Token Combat
-                  </p>
-                </div>
-                <WalletButton />
-              </div>
-
-              {/* Skybox Generation */}
-              <div className="hud-panel clip-brutal p-4 mb-4">
-                <div className="text-[10px] font-sans uppercase tracking-[0.2em] text-neon-cyan/70 mb-3">
-                  Environment — Powered by Skybox AI (Blockade Labs)
-                </div>
-
-                <div className="grid grid-cols-5 gap-2 mb-3">
-                  {ARENA_PROMPTS.map((arena, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleQuickArena(i)}
-                      disabled={skyboxLoading}
-                      className="hud-panel clip-brutal-sm px-2 py-2 text-[9px] font-mono text-foreground/70 hover:text-neon-cyan hover:border-neon-cyan/50 transition-colors pointer-events-auto text-center disabled:opacity-50"
-                    >
-                      {arena.name}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={state.skyboxPrompt}
-                    onChange={(e) => dispatch({ type: "SET_SKYBOX_PROMPT", prompt: e.target.value })}
-                    placeholder="Describe your arena environment..."
-                    className="flex-1 bg-background/50 border border-border/50 clip-brutal-sm px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground/50 focus:border-neon-cyan/50 focus:outline-none pointer-events-auto"
-                  />
-                  <button
-                    onClick={() => handleGenerateSkybox()}
-                    disabled={skyboxLoading}
-                    className="hud-panel clip-brutal-sm px-4 py-2 font-mono text-xs text-neon-cyan hover:bg-neon-cyan/10 transition-colors pointer-events-auto disabled:opacity-50"
-                  >
-                    {skyboxLoading ? "GENERATING..." : "GENERATE"}
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[9px] font-mono text-muted-foreground">Style:</span>
-                  <select
-                    value={state.selectedSkyboxStyle}
-                    onChange={(e) => dispatch({ type: "SET_SKYBOX_STYLE", styleId: Number(e.target.value) })}
-                    className="bg-background/50 border border-border/50 px-2 py-1 text-[10px] font-mono text-foreground pointer-events-auto"
-                  >
-                    {state.skyboxStyles.length > 0
-                      ? state.skyboxStyles.map((s) => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
-                        ))
-                      : ARENA_PROMPTS.map((a, i) => (
-                          <option key={i} value={a.styleId}>{a.name}</option>
-                        ))}
-                  </select>
-                </div>
-
-                {skyboxLoading && (
-                  <div className="mt-2 space-y-2">
-                    <div className="h-1.5 bg-background/50 rounded-full overflow-hidden border border-border/30">
-                      <div className="h-full bg-neon-cyan/70 rounded-full animate-pulse" style={{ width: '100%', animation: 'pulse 1.5s ease-in-out infinite' }} />
-                    </div>
-                    <div className="text-[10px] font-mono text-neon-cyan/70 animate-pulse">{skyboxProgress}</div>
-                  </div>
-                )}
-                {!skyboxLoading && skyboxProgress && (
-                  <div className={`text-[10px] font-mono mt-1 ${skyboxProgress.startsWith('✓') ? 'text-neon-green' : skyboxProgress.includes('failed') ? 'text-red-400' : 'text-neon-cyan/70'}`}>
-                    {skyboxProgress}
-                  </div>
-                )}
-                {state.skybox.status === "ready" && state.skybox.thumbUrl && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <img src={state.skybox.thumbUrl} alt="Skybox preview" className="w-12 h-8 rounded border border-neon-cyan/30 object-cover" />
-                    <div className="text-[10px] font-mono text-neon-green">
-                      ✓ Environment loaded: {state.skybox.styleName}
-                    </div>
-                  </div>
-                )}
-                {state.skybox.status === "ready" && !state.skybox.thumbUrl && (
-                  <div className="text-[10px] font-mono text-neon-green mt-1">
-                    ✓ Environment loaded: {state.skybox.styleName}
-                  </div>
-                )}
-              </div>
-
-              {/* Game Mode Selection */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <button
-                  onClick={handleStartPvAI}
-                  className="hud-panel clip-brutal p-4 text-left hover:border-neon-cyan/50 hover:neon-glow-cyan transition-all pointer-events-auto group"
-                >
-                  <div className="font-display text-lg text-neon-cyan text-glow-cyan mb-1 group-hover:animate-glitch">
-                    PLAYER vs AI
-                  </div>
-                  <div className="text-[10px] font-mono text-muted-foreground leading-relaxed">
-                    Battle 4 AI agents. Spend tokens to fire, collect tokens from hits. x402 payments on every shot.
-                  </div>
-                  <div className="mt-2 text-[9px] font-mono text-neon-green">WASD + Mouse · Click to fire · 1-6 weapons</div>
-                </button>
-
-                <button
-                  onClick={handleStartAIvAI}
-                  className="hud-panel clip-brutal p-4 text-left hover:border-neon-magenta/50 hover:neon-glow-magenta transition-all pointer-events-auto group"
-                >
-                  <div className="font-display text-lg text-neon-magenta text-glow-magenta mb-1 group-hover:animate-glitch">
-                    AI vs AI
-                  </div>
-                  <div className="text-[10px] font-mono text-muted-foreground leading-relaxed">
-                    Spectate 6 autonomous ERC-8004 agents battling for token supremacy. Watch emergent strategies.
-                  </div>
-                  <div className="mt-2 text-[9px] font-mono text-neon-amber">Spectator mode · Auto-camera</div>
-                </button>
-              </div>
-
-              {/* Agent Identity Panel Toggle */}
-              <div className="mb-4">
-                <button
-                  onClick={() => setShowAgentPanel(!showAgentPanel)}
-                  className="hud-panel clip-brutal-sm px-4 py-2 font-mono text-xs text-neon-cyan/70 hover:text-neon-cyan transition-colors pointer-events-auto w-full text-left"
-                >
-                  {showAgentPanel ? "▼" : "▶"} ERC-8004 AI AGENT IDENTITIES ({DEFAULT_AI_AGENTS.length} registered)
-                </button>
-                <AnimatePresence>
-                  {showAgentPanel && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        {DEFAULT_AI_AGENTS.map((agent) => (
-                          <AgentIdentityCard
-                            key={agent.agentId}
-                            agent={{
-                              ...agent,
-                              stats: {
-                                totalKills: Math.floor(Math.random() * 50),
-                                totalDeaths: Math.floor(Math.random() * 30),
-                                totalMatches: Math.floor(Math.random() * 20) + 5,
-                                totalTokensEarned: Math.floor(Math.random() * 2000),
-                                totalTokensSpent: Math.floor(Math.random() * 1500),
-                                winRate: 0.3 + Math.random() * 0.5,
-                                favoriteWeapon: agent.loadout.primaryWeapon,
-                              },
-                            }}
-                            compact
-                          />
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Token Economy Info */}
-              <div className="hud-panel clip-brutal-sm p-3 mb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-display text-lg text-neon-green text-glow-green">{wallet.arenaBalance}</div>
-                    <div className="text-[9px] font-mono text-muted-foreground">ARENA BALANCE</div>
-                  </div>
-                  <div>
-                    <div className="font-display text-lg text-neon-cyan">{state.player.weapon.name.split(" ")[0]}</div>
-                    <div className="text-[9px] font-mono text-muted-foreground">EQUIPPED WEAPON</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono text-[8px] px-1.5 py-0.5 bg-neon-green/10 text-neon-green border border-neon-green/20">x402</span>
-                      <span className="font-mono text-[8px] px-1.5 py-0.5 bg-neon-cyan/10 text-neon-cyan/70 border border-neon-cyan/10">Base L2</span>
-                    </div>
-                  </div>
-                  <div>
-                    <button
-                      onClick={() => navigate("/shop")}
-                      className="font-display text-lg text-neon-amber hover:text-glow-green transition-all pointer-events-auto"
-                    >
-                      ARMORY →
-                    </button>
-                    <div className="text-[9px] font-mono text-muted-foreground">SHOP & UPGRADES</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Advanced Panels */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                <button
-                  onClick={() => setShowCrafting(true)}
-                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-neon-green hover:bg-neon-green/10 transition-colors pointer-events-auto text-center"
-                >
-                  ⚒ CRAFTING LAB
-                </button>
-                <button
-                  onClick={() => setShowBrain(true)}
-                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-purple-400 hover:bg-purple-400/10 transition-colors pointer-events-auto text-center"
-                >
-                  🧠 AGENT BRAIN
-                </button>
-                <button
-                  onClick={() => setShowGameMaster(true)}
-                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-neon-amber hover:bg-neon-amber/10 transition-colors pointer-events-auto text-center"
-                >
-                  🎲 GAME MASTER
-                </button>
-                <button
-                  onClick={() => setShowDAO(true)}
-                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-cyan-400 hover:bg-cyan-400/10 transition-colors pointer-events-auto text-center"
-                >
-                  🏛️ DAO COUNCIL
-                </button>
-                <button onClick={() => setShowPrediction(true)}
-                  className="px-3 py-2 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-['Orbitron'] text-xs hover:bg-yellow-500/20 transition">
-                  🎰 PREDICTIONS
-                </button>
-                <button
-                  onClick={() => navigate("/tournament")}
-                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-pink-400 hover:bg-pink-400/10 transition-colors pointer-events-auto text-center"
-                >
-                  🏆 TOURNAMENT
-                </button>
-                <button
-                  onClick={() => setShowReplayList(true)}
-                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-blue-400 hover:bg-blue-400/10 transition-colors pointer-events-auto text-center"
-                >
-                  📹 REPLAYS
-                </button>
-                <button
-                  onClick={() => setShowCustomizer(true)}
-                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-emerald-400 hover:bg-emerald-400/10 transition-colors pointer-events-auto text-center"
-                >
-                  🎛️ CUSTOMIZE AI
-                </button>
-              </div>
-
-              {/* Navigation */}
-              <div className="flex items-center justify-center gap-6">
-                <button
-                  onClick={() => navigate("/")}
-                  className="text-[10px] font-mono text-muted-foreground hover:text-neon-cyan transition-colors pointer-events-auto"
-                >
-                  ← LOBBY
-                </button>
-                <button
-                  onClick={() => navigate("/leaderboard")}
-                  className="text-[10px] font-mono text-muted-foreground hover:text-neon-amber transition-colors pointer-events-auto"
-                >
-                  LEADERBOARD →
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        </div>
+        <ArenaMenu
+          skyboxLoading={skyboxLoading}
+          skyboxProgress={skyboxProgress}
+          onGenerateSkybox={handleGenerateSkybox}
+          onStartPvAI={handleStartPvAI}
+          onStartAIvAI={handleStartAIvAI}
+          onQuickArena={handleQuickArena}
+          onShowPanel={handleShowPanel}
+        />
       )}
 
       {/* Results Screen */}
       <AnimatePresence>
         {showResults && (state.phase === "victory" || state.phase === "defeat") && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/90"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="max-w-lg w-full mx-4"
-            >
-              <div className="hud-panel clip-brutal p-6 text-center">
-                <div
-                  className={`font-display text-5xl font-black mb-4 ${
-                    state.phase === "victory" ? "text-neon-green text-glow-green" : "text-neon-magenta text-glow-magenta"
-                  }`}
-                >
-                  {state.phase === "victory" ? "VICTORY" : "DEFEATED"}
-                </div>
-
-                <div className="grid grid-cols-4 gap-3 mb-6">
-                  <div>
-                    <div className="font-display text-2xl text-neon-cyan">{state.player.kills}</div>
-                    <div className="text-[9px] font-mono text-muted-foreground">ELIMINATIONS</div>
-                  </div>
-                  <div>
-                    <div className="font-display text-2xl text-neon-green">+{state.tokensEarned}</div>
-                    <div className="text-[9px] font-mono text-muted-foreground">EARNED</div>
-                  </div>
-                  <div>
-                    <div className="font-display text-2xl text-neon-amber">-{state.tokensSpent}</div>
-                    <div className="text-[9px] font-mono text-muted-foreground">SPENT</div>
-                  </div>
-                  <div>
-                    <div className={`font-display text-2xl ${state.tokensEarned - state.tokensSpent >= 0 ? "text-neon-green" : "text-neon-magenta"}`}>
-                      {state.tokensEarned - state.tokensSpent >= 0 ? "+" : ""}{state.tokensEarned - state.tokensSpent}
-                    </div>
-                    <div className="text-[9px] font-mono text-muted-foreground">NET</div>
-                  </div>
-                </div>
-
-                {/* On-chain receipt with real wallet info */}
-                <div className="bg-background/50 clip-brutal-sm p-3 mb-4 text-left">
-                  <div className="text-[9px] font-mono text-neon-cyan/70 mb-1">ON-CHAIN SETTLEMENT (Base Sepolia L2)</div>
-                  <div className="text-[9px] font-mono text-muted-foreground space-y-0.5">
-                    <div>wallet: {wallet.address ? `${wallet.address.slice(0, 10)}...${wallet.address.slice(-6)}` : "simulated (no wallet connected)"}</div>
-                    <div>tokens_in: {state.tokensEarned} TKN · tokens_out: {state.tokensSpent} TKN</div>
-                    <div>net: {state.tokensEarned - state.tokensSpent > 0 ? "+" : ""}{state.tokensEarned - state.tokensSpent} TKN</div>
-                    <div>x402_txns: {wallet.completedPayments.length} · protocol: x402 · chain: base-sepolia</div>
-                    <div>agent_id: {state.player.erc8004Id} (ERC-8004)</div>
-                  </div>
-                </div>
-
-                {/* Wallet token summary */}
-                <div className="bg-background/50 clip-brutal-sm p-3 mb-4">
-                  <div className="text-[9px] font-mono text-neon-green/70 mb-1">TOKEN BALANCES AFTER MATCH</div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {wallet.tokenBalances.filter(t => t.symbol !== "ARENA").map((t) => (
-                      <div key={t.symbol} className="flex items-center gap-1">
-                        <div className="w-2 h-2" style={{ backgroundColor: t.color }} />
-                        <span className="font-mono text-[10px]" style={{ color: t.color }}>{t.balance}</span>
-                        <span className="font-mono text-[8px] text-muted-foreground/50">{t.symbol}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {saveMatchMut.isSuccess && (
-                  <div className="text-[9px] font-mono text-neon-green/70 mb-3">Match saved to leaderboard</div>
-                )}
-
-                {/* Watch Replay button */}
-                {activeReplay && (
-                  <div className="mb-4">
-                    <button
-                      onClick={() => {
-                        setShowResults(false);
-                        setShowReplayViewer(true);
-                      }}
-                      className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-xs text-blue-400 hover:bg-blue-400/10 transition-colors pointer-events-auto w-full"
-                    >
-                      📹 WATCH REPLAY ({activeReplay.highlights.length} highlights)
-                    </button>
-                  </div>
-                )}
-
-                <div className="flex gap-3 justify-center">
-                  <button
-                    onClick={() => {
-                      setShowResults(false);
-                      dispatch({ type: "RESET_MATCH" });
-                      setLobbyMatchMode(state.mode as "pvai" | "aivai");
-                      setShowLobby(true);
-                      const randomArena = ARENA_PROMPTS[Math.floor(Math.random() * ARENA_PROMPTS.length)];
-                      setLobbyArenaName(randomArena.name);
-                      handleGenerateSkybox(randomArena.prompt, randomArena.styleId);
-                    }}
-                    className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-neon-cyan hover:bg-neon-cyan/10 transition-colors pointer-events-auto"
-                  >
-                    NEXT MATCH
-                  </button>
-                  <button
-                    onClick={() => { setShowResults(false); dispatch({ type: "RESET_MATCH" }); navigate("/shop"); }}
-                    className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-neon-green hover:bg-neon-green/10 transition-colors pointer-events-auto"
-                  >
-                    ARMORY
-                  </button>
-                  <button
-                    onClick={() => { setShowResults(false); dispatch({ type: "RESET_MATCH" }); navigate("/leaderboard"); }}
-                    className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-neon-amber hover:bg-neon-amber/10 transition-colors pointer-events-auto"
-                  >
-                    RANKINGS
-                  </button>
-                  <button
-                    onClick={() => { setShowResults(false); dispatch({ type: "RESET_MATCH" }); navigate("/"); }}
-                    className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-muted-foreground hover:text-foreground transition-colors pointer-events-auto"
-                  >
-                    LOBBY
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+          <ArenaResults
+            activeReplay={activeReplay}
+            saveMatchSuccess={saveMatchMut.isSuccess}
+            onClose={() => setShowResults(false)}
+            onWatchReplay={handleWatchReplay}
+            onNextMatch={handleNextMatch}
+          />
         )}
       </AnimatePresence>
 
-      {/* Crafting Panel */}
-      <CraftingPanel agentId={1} isOpen={showCrafting} onClose={() => setShowCrafting(false)} />
-
-      {/* Agent Brain Panel */}
-      <AgentBrainPanel isOpen={showBrain} onClose={() => setShowBrain(false)} />
-
-      {/* Game Master Panel */}
-      <GameMasterPanel isOpen={showGameMaster} onClose={() => setShowGameMaster(false)} />
-
-      {/* DAO Governance Panel */}
-      <DAOPanel isOpen={showDAO} onClose={() => setShowDAO(false)} />
-
-      {/* Prediction Market Panel */}
-      <PredictionPanel isOpen={showPrediction} onClose={() => setShowPrediction(false)} />
-
-      {/* Replay Viewer */}
-      {showReplayViewer && activeReplay && (
-        <ReplayViewer
-          replay={activeReplay}
-          onClose={() => { setShowReplayViewer(false); setActiveReplay(null); }}
-        />
-      )}
-
-      {/* Replay List */}
-      <AnimatePresence>
-        {showReplayList && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/90"
-          >
-            <div className="max-w-lg w-full mx-4 bg-black/80 border border-cyan-500/20 rounded-xl p-6">
-              <ReplayList
-                onSelectReplay={(replay) => {
-                  setActiveReplay(replay);
-                  setShowReplayList(false);
-                  setShowReplayViewer(true);
-                }}
-                onClose={() => setShowReplayList(false)}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Agent Customizer */}
-      <AnimatePresence>
-        {showCustomizer && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/90"
-          >
-            <AgentCustomizer
-              onApply={(weights, name) => {
-                setAgentWeights(weights);
-                setAgentBuildName(name);
-                setShowCustomizer(false);
-              }}
-              onClose={() => setShowCustomizer(false)}
-              initialWeights={agentWeights || undefined}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* All overlay panels */}
+      <ArenaOverlayPanels
+        panels={panels}
+        activeReplay={activeReplay}
+        agentWeights={agentWeights}
+        onClosePanel={handleClosePanel}
+        onSelectReplay={handleSelectReplay}
+        onApplyCustomizer={handleApplyCustomizer}
+      />
 
       {/* Pre-Game Lobby (during skybox generation) */}
       {showLobby && (
@@ -956,22 +504,6 @@ export default function Arena() {
           matchMode={lobbyMatchMode}
           arenaName={lobbyArenaName}
         />
-      )}
-
-      {/* Pause overlay */}
-      {state.isPaused && state.phase === "combat" && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-background/80">
-          <div className="hud-panel clip-brutal p-8 text-center">
-            <div className="font-display text-3xl text-neon-amber text-glow-green mb-4">PAUSED</div>
-            <div className="text-xs font-mono text-muted-foreground mb-4">Press ESC to resume</div>
-            <button
-              onClick={() => dispatch({ type: "SET_PAUSED", paused: false })}
-              className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-neon-cyan hover:bg-neon-cyan/10 transition-colors pointer-events-auto"
-            >
-              RESUME
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );

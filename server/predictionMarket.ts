@@ -88,6 +88,16 @@ export async function placeBet(params: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  // Validate bet amount — must be positive integer, bounded to prevent abuse
+  if (!Number.isFinite(params.amount) || params.amount <= 0) {
+    throw new Error("Bet amount must be a positive number");
+  }
+  if (params.amount > 100_000) {
+    throw new Error("Bet amount exceeds maximum allowed (100,000)");
+  }
+  // Sanitize bettor name to prevent XSS
+  const sanitizedName = params.bettorName.replace(/[<>"'&]/g, '').slice(0, 50);
+
   // Check market is open
   const market = await db.select().from(predictionMarkets)
     .where(eq(predictionMarkets.id, params.marketId)).limit(1);
@@ -100,13 +110,18 @@ export async function placeBet(params: {
   const selectedOption = options.find(o => o.id === params.optionId);
   if (!selectedOption) throw new Error("Invalid option");
 
+  // Validate odds are reasonable (prevent manipulation)
+  if (selectedOption.odds < 1.01 || selectedOption.odds > 100) {
+    throw new Error("Option odds are out of valid range");
+  }
+
   const potentialPayout = Math.floor(params.amount * selectedOption.odds);
 
   const result = await db.insert(predictionBets).values({
     marketId: params.marketId,
     bettorType: params.bettorType,
     bettorId: params.bettorId,
-    bettorName: params.bettorName,
+    bettorName: sanitizedName,
     optionId: params.optionId,
     amount: params.amount,
     potentialPayout,
@@ -134,6 +149,11 @@ export async function resolveMarket(params: {
   const market = await db.select().from(predictionMarkets)
     .where(eq(predictionMarkets.id, params.marketId)).limit(1);
   if (!market.length) throw new Error("Market not found");
+
+  // Prevent double-resolution
+  if (market[0].status === "resolved") {
+    throw new Error("Market has already been resolved");
+  }
 
   // Get all bets for this market
   const bets = await db.select().from(predictionBets)

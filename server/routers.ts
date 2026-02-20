@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import axios from "axios";
 import {
@@ -35,7 +35,7 @@ import {
 } from "./predictionMarket";
 
 const SKYBOX_API_BASE = "https://backend.blockadelabs.com/api/v1";
-const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "IRmVFdJZMYrjtVBUgb2kq4Xp8YAKCQ4Hq4j8aGZCXYJVixoUFaWh8cwNezQU";
+const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "";
 
 export const appRouter = router({
   system: systemRouter,
@@ -115,7 +115,7 @@ export const appRouter = router({
       .input(z.object({ styleId: z.number() }))
       .query(async ({ input }) => getCachedSkyboxByStyleId(input.styleId)),
     getAllCached: publicProcedure.query(async () => getAllCachedSkyboxes()),
-    warmCache: publicProcedure.mutation(async () => {
+    warmCache: protectedProcedure.mutation(async () => {
       // Pre-generate all 5 preset skyboxes in background
       const { ARENA_PROMPTS } = await import("@shared/arenaPrompts");
       const cached = await getAllCachedSkyboxes();
@@ -182,14 +182,14 @@ export const appRouter = router({
 
   // ─── Match History ──────────────────────────────────────────────────────────
   match: router({
-    save: publicProcedure
+    save: protectedProcedure
       .input(z.object({
-        mode: z.string(), duration: z.number(),
-        skyboxPrompt: z.string().optional(), skyboxUrl: z.string().optional(),
-        playerName: z.string(), playerKills: z.number(), playerDeaths: z.number(),
-        tokensEarned: z.number(), tokensSpent: z.number(), tokenNet: z.number(),
-        result: z.string(), weaponUsed: z.string().optional(),
-        agentData: z.any().optional(), walletAddress: z.string().optional(),
+        mode: z.string().min(1).max(32), duration: z.number().nonnegative().max(600),
+        skyboxPrompt: z.string().max(600).optional(), skyboxUrl: z.string().max(2048).optional(),
+        playerName: z.string().min(1).max(64), playerKills: z.number().int().nonnegative(), playerDeaths: z.number().int().nonnegative(),
+        tokensEarned: z.number().nonnegative(), tokensSpent: z.number().nonnegative(), tokenNet: z.number(),
+        result: z.string().min(1).max(32), weaponUsed: z.string().max(64).optional(),
+        agentData: z.any().optional(), walletAddress: z.string().max(128).optional(),
       }))
       .mutation(async ({ input }) => {
         // Calculate and record match entry fee
@@ -499,10 +499,10 @@ export const appRouter = router({
     }),
 
     // Council deliberation — all 5 members vote on a proposal
-    deliberate: publicProcedure
+    deliberate: protectedProcedure
       .input(z.object({
-        proposalType: z.string(),
-        context: z.string(),
+        proposalType: z.string().min(1).max(64),
+        context: z.string().min(1).max(1000),
       }))
       .mutation(async ({ input }) => {
         return councilDeliberate(input.proposalType, input.context);
@@ -522,10 +522,10 @@ export const appRouter = router({
       }),
 
     // Spawn a new agent (requires DAO vote or treasury funds)
-    spawnAgent: publicProcedure
+    spawnAgent: protectedProcedure
       .input(z.object({
-        name: z.string(),
-        description: z.string(),
+        name: z.string().min(1).max(64),
+        description: z.string().min(1).max(500),
         proposalId: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -533,23 +533,23 @@ export const appRouter = router({
       }),
 
     // Kill a bankrupt agent
-    killAgent: publicProcedure
+    killAgent: protectedProcedure
       .input(z.object({
-        agentId: z.number(),
-        reason: z.string(),
+        agentId: z.number().int().positive(),
+        reason: z.string().min(1).max(256),
       }))
       .mutation(async ({ input }) => {
         return killAgent(input.agentId, input.reason);
       }),
 
     // Record a fee to the treasury
-    recordFee: publicProcedure
+    recordFee: protectedProcedure
       .input(z.object({
-        txType: z.string(),
-        amount: z.number(),
-        description: z.string(),
-        relatedAgentId: z.number().optional(),
-        relatedMatchId: z.number().optional(),
+        txType: z.string().min(1).max(64),
+        amount: z.number().positive().max(1_000_000),
+        description: z.string().min(1).max(256),
+        relatedAgentId: z.number().int().positive().optional(),
+        relatedMatchId: z.number().int().positive().optional(),
       }))
       .mutation(async ({ input }) => {
         await recordFee(input.txType, input.amount, input.description, input.relatedAgentId, input.relatedMatchId);
@@ -615,10 +615,10 @@ export const appRouter = router({
       }),
 
     // Resolve a market
-    resolve: publicProcedure
+    resolve: protectedProcedure
       .input(z.object({
-        marketId: z.number(),
-        winningOptionId: z.number(),
+        marketId: z.number().int().positive(),
+        winningOptionId: z.number().int().nonnegative(),
       }))
       .mutation(async ({ input }) => {
         return resolveMarket(input);

@@ -134,11 +134,17 @@ function WalletInner({ children }: { children: ReactNode }) {
     };
   }, [isConnected, address, signMessageAsync]);
 
-  // Spend tokens (shooting)
+  // Spend tokens (shooting) — validates amount > 0 and sufficient balance
   const spendTokens = useCallback((weaponType: string, amount: number): X402PaymentResponse => {
     const token = WEAPON_TOKENS[weaponType];
-    if (!token) {
+    if (!token || amount <= 0 || !Number.isFinite(amount)) {
       return { success: false, txHash: "", settlement: { amount: 0, token: "", from: "0x0", to: "0x0", blockNumber: 0, timestamp: 0 } } as X402PaymentResponse;
+    }
+
+    // Check sufficient balance before spending
+    const currentBalance = tokenBalances.find(t => t.symbol === token.symbol)?.balance ?? 0;
+    if (currentBalance < amount) {
+      return { success: false, txHash: "", settlement: { amount: 0, token: token.symbol, from: "0x0", to: "0x0", blockNumber: 0, timestamp: 0 } } as X402PaymentResponse;
     }
 
     setTokenBalances(prev => prev.map(t => {
@@ -165,16 +171,17 @@ function WalletInner({ children }: { children: ReactNode }) {
     return response;
   }, [address]);
 
-  // Receive tokens (getting hit)
+  // Receive tokens (getting hit) — validates amount > 0, caps max balance to prevent overflow
   const receiveTokens = useCallback((weaponType: string, amount: number, from: `0x${string}`): X402PaymentResponse => {
     const token = WEAPON_TOKENS[weaponType];
-    if (!token) {
+    if (!token || amount <= 0 || !Number.isFinite(amount)) {
       return { success: false, txHash: "", settlement: { amount: 0, token: "", from: "0x0", to: "0x0", blockNumber: 0, timestamp: 0 } } as X402PaymentResponse;
     }
 
+    const MAX_BALANCE = 1_000_000; // Prevent overflow
     setTokenBalances(prev => prev.map(t => {
       if (t.symbol === token.symbol) {
-        return { ...t, balance: t.balance + amount };
+        return { ...t, balance: Math.min(MAX_BALANCE, t.balance + amount) };
       }
       return t;
     }));
@@ -203,8 +210,9 @@ function WalletInner({ children }: { children: ReactNode }) {
     return tokenBalances.find(t => t.symbol === token.symbol)?.balance ?? 0;
   }, [tokenBalances]);
 
-  // Purchase from shop
+  // Purchase from shop — validates cost > 0 and sufficient balance
   const purchaseItem = useCallback((cost: number): X402PaymentResponse | null => {
+    if (cost <= 0 || !Number.isFinite(cost)) return null;
     const arenaToken = tokenBalances.find(t => t.symbol === "ARENA");
     if (!arenaToken || arenaToken.balance < cost) return null;
 

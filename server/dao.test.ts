@@ -63,7 +63,7 @@ describe("DAO Governance", () => {
   });
 
   it("records a fee to the treasury", async () => {
-    const caller = appRouter.createCaller(createPublicContext());
+    const caller = appRouter.createCaller(createAuthContext());
     const result = await caller.dao.recordFee({
       txType: "test_fee",
       amount: 50,
@@ -81,7 +81,7 @@ describe("DAO Governance", () => {
   });
 
   it("runs council deliberation with LLM-powered voting", async () => {
-    const caller = appRouter.createCaller(createPublicContext());
+    const caller = appRouter.createCaller(createAuthContext());
     const result = await caller.dao.deliberate({
       proposalType: "economy_intervention",
       context: "Token inflation is rising. The economy needs rebalancing.",
