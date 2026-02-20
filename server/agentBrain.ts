@@ -30,6 +30,7 @@ export interface AgentPerformance {
   currentLoadout: { primary: string; secondary: string; armor: number };
   inventory: Array<{ name: string; type: string; quantity: number }>;
   memories: Array<{ type: string; content: string; confidence: number; successRate: number }>;
+  arenaContext?: string; // Scene analysis briefing from Arena Vision
 }
 
 export interface AgentDecisionResult {
@@ -68,10 +69,14 @@ export async function agentReason(perf: AgentPerformance): Promise<AgentDecision
     `Match ${i + 1}: ${m.won ? "WIN" : "LOSS"} | K:${m.kills} D:${m.deaths} | Earned:${m.tokensEarned} Spent:${m.tokensSpent} | Weapon:${m.weaponUsed}`
   ).join("\n");
 
+  const arenaSection = perf.arenaContext
+    ? `\n${perf.arenaContext}\n\nIMPORTANT: Adapt your weapon and strategy choices to the arena environment above. If the arena favors close combat, prioritize scatter/plasma. If it favors sniping, prioritize railgun/beam. If it has many ambush spots, consider void/stealth.\n`
+    : "";
+
   const prompt = `You are ${perf.agentName}, an autonomous AI combat agent in Token Arena.
 You have an ERC-4337 smart wallet on Base L2 and make your own financial decisions.
 Your goal is to be SELF-SUSTAINING: earn more tokens than you spend over time.
-
+${arenaSection}
 CURRENT STATE:
 - Token Balance: ${perf.totalTokenBalance} ARENA
 - Loadout: Primary=${perf.currentLoadout.primary}, Secondary=${perf.currentLoadout.secondary}, Armor=${perf.currentLoadout.armor}

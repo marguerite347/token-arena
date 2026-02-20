@@ -33,6 +33,7 @@ export interface MetaAnalysis {
     winRate: number;
     tokenBalance: number;
   }>;
+  arenaContext?: string; // Scene analysis context from Arena Vision
 }
 
 export interface GameMasterDecision {
@@ -82,6 +83,7 @@ ${agentOverview || "No agent data yet"}
 
 CURRENT SHOP: ${meta.currentShopItems.join(", ") || "Default items only"}
 EXISTING RECIPES: ${meta.currentRecipes.join(", ") || "Default recipes only"}
+${meta.arenaContext ? `\nARENA ENVIRONMENT:\n${meta.arenaContext}\n\nWhen suggesting items/traps, consider the arena layout. Spawn items in locations that make contextual sense (e.g., tech items near circuit walls, traps at chokepoints, sniper gear on elevated platforms).` : ""}
 
 YOUR GOALS:
 1. No single weapon should have >60% win rate

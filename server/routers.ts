@@ -33,6 +33,8 @@ import {
   isGovernanceCooldownActive, getOpenMarkets, getMarketWithBets, getResolvedMarkets,
   takeEcosystemSnapshot, getEcosystemSnapshots,
 } from "./predictionMarket";
+import { analyzeArenaScene, getAgentSceneBriefing, getGameMasterSpawnContext, getPredictionContext } from "./arenaVision";
+import type { SceneAnalysis } from "./arenaVision";
 
 const SKYBOX_API_BASE = "https://backend.blockadelabs.com/api/v1";
 const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "";
@@ -115,6 +117,46 @@ export const appRouter = router({
       .input(z.object({ styleId: z.number() }))
       .query(async ({ input }) => getCachedSkyboxByStyleId(input.styleId)),
     getAllCached: publicProcedure.query(async () => getAllCachedSkyboxes()),
+    // Analyze a skybox image with vision LLM
+    analyzeScene: publicProcedure
+      .input(z.object({
+        imageUrl: z.string().min(1).max(2048),
+        arenaName: z.string().max(128).optional(),
+        cacheId: z.number().optional(), // if provided, stores analysis in skybox cache
+      }))
+      .mutation(async ({ input }) => {
+        console.log(`[ArenaVision] Analyzing scene: ${input.arenaName || "Unknown"} url=${input.imageUrl.slice(0, 60)}...`);
+        const analysis = await analyzeArenaScene(input.imageUrl, input.arenaName);
+        
+        // Store in cache if cacheId provided
+        if (input.cacheId) {
+          await updateSkyboxCache(input.cacheId, { status: "complete", sceneAnalysis: analysis });
+          console.log(`[ArenaVision] Stored analysis in cache ID=${input.cacheId}`);
+        }
+        
+        return {
+          analysis,
+          agentBriefing: getAgentSceneBriefing(analysis),
+          gameMasterContext: getGameMasterSpawnContext(analysis),
+          predictionContext: getPredictionContext(analysis),
+        };
+      }),
+
+    // Get cached scene analysis for a skybox
+    getSceneAnalysis: publicProcedure
+      .input(z.object({ styleId: z.number() }))
+      .query(async ({ input }) => {
+        const cached = await getCachedSkyboxByStyleId(input.styleId);
+        if (!cached?.sceneAnalysis) return null;
+        const analysis = cached.sceneAnalysis as SceneAnalysis;
+        return {
+          analysis,
+          agentBriefing: getAgentSceneBriefing(analysis),
+          gameMasterContext: getGameMasterSpawnContext(analysis),
+          predictionContext: getPredictionContext(analysis),
+        };
+      }),
+
     warmCache: protectedProcedure.mutation(async () => {
       // Pre-generate all 5 preset skyboxes in background
       const { ARENA_PROMPTS } = await import("@shared/arenaPrompts");
