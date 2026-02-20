@@ -140,15 +140,26 @@ export default function GameHUD() {
         </div>
       </div>
 
-      {/* Bottom center — Crosshair */}
+      {/* Weapon switch hint */}
       {mode === "pvai" && state.phase === "combat" && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative w-8 h-8">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-2 bg-neon-cyan/80" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[2px] h-2 bg-neon-cyan/80" />
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] w-2 bg-neon-cyan/80" />
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[2px] w-2 bg-neon-cyan/80" />
-            <div className="absolute inset-[12px] border border-neon-cyan/40" />
+        <div className="absolute bottom-16 left-4">
+          <div className="flex gap-1">
+            {["1", "2", "3", "4", "5", "6"].map((key, i) => {
+              const weaponTypes = ["plasma", "railgun", "scatter", "missile", "beam", "nova"];
+              const isActive = player.weapon.type === weaponTypes[i];
+              return (
+                <div
+                  key={key}
+                  className={`w-6 h-6 flex items-center justify-center text-[9px] font-mono border ${
+                    isActive
+                      ? "border-neon-cyan/80 text-neon-cyan bg-neon-cyan/10"
+                      : "border-border/30 text-muted-foreground/40"
+                  }`}
+                >
+                  {key}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -43,6 +43,9 @@ export default function Home() {
             <button onClick={() => navigate("/shop")} className="text-xs font-mono text-muted-foreground hover:text-neon-green transition-colors">
               ARMORY
             </button>
+            <button onClick={() => navigate("/leaderboard")} className="text-xs font-mono text-muted-foreground hover:text-neon-amber transition-colors">
+              RANKINGS
+            </button>
             <div className="hud-panel clip-brutal-sm px-3 py-1">
               <span className="font-display text-sm text-neon-green text-glow-green">{state.player.tokens}</span>
               <span className="text-[9px] font-mono text-neon-green/60 ml-1">TKN</span>
