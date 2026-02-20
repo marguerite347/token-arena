@@ -393,3 +393,44 @@
 - Security hardened
 - Ready for Base Sepolia contract deployment
 - Ready for production launch
+
+## v13 — Final Deadline Sprint
+
+### Contract Deployment
+- [ ] Deploy ERC-20 contracts to Base Sepolia (ethers.js script)
+- [ ] Update deployed-contracts.json with real addresses
+- [ ] Verify contracts on BaseScan
+
+### Agent Spawn/Death in Game Flow
+- [x] Wire bankruptcy check into game tick loop
+- [x] Agent dies when token balance hits zero mid-match
+- [x] DAO spawns replacement agents between matches
+- [x] Show death/spawn events in combat log
+
+### Flywheel Dashboard
+- [x] Create /flywheel page with ecosystem health metrics
+- [x] Show per-agent token earnings vs compute spending
+- [x] Visualize the earn → compute → smarter → earn loop
+- [x] Show ecosystem health (healthy/struggling/critical)
+- [x] Add route to App.tsx
+
+### Memory Economics
+- [x] Add memory size tracking to agent identities
+- [x] Memory maintenance costs deducted per cycle
+- [x] Memory query costs deducted per LLM call
+- [x] Show memory usage in agent brain panel
+- [x] Agents prune low-value memories when budget is tight
+
+### Tests
+- [x] Flywheel economics unit tests (15 tests passing)
+- [x] Memory cost calculation tests
+- [x] Bankruptcy detection tests
+- [x] Compute budget allocation tests
+- [x] All new tests passing
+
+### Status: v13 FEATURES COMPLETE
+- Agent lifecycle wired into game flow (bankruptcy → death with combat log)
+- Flywheel Dashboard at /flywheel with per-agent economics, charts, ecosystem health
+- Memory economics: maintenance costs per cycle, query costs per LLM call
+- Memory costs shown in Agent Brain Panel with visual bars
+- 15 new tests passing for flywheel/lifecycle features

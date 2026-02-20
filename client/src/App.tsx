@@ -13,6 +13,7 @@ import Demo from "./pages/Demo";
 import Dashboard from "./pages/Dashboard";
 import Tournament from "./pages/Tournament";
 import Replay from "./pages/Replay";
+import FlywheelDashboard from "./pages/FlywheelDashboard";
 import { GameProvider } from "./contexts/GameContext";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/demo" component={Demo} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/tournament" component={Tournament} />
+      <Route path="/flywheel" component={FlywheelDashboard} />
       <Route path="/replay/:id" component={Replay} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

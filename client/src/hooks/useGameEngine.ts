@@ -465,6 +465,43 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
 
       d({ type: "UPDATE_PROJECTILES", projectiles: updatedProjs });
 
+      // ─── BANKRUPTCY CHECK ─────────────────────────────────────────────
+      // Agents whose token balance hits zero mid-match go bankrupt and die
+      for (const agent of s.agents) {
+        if (!agent.isAlive) continue;
+        if (agent.tokens <= 0 && !agent.isBankrupt) {
+          d({ type: "AGENT_BANKRUPT", agentId: agent.id });
+          d({
+            type: "ADD_LOG",
+            log: {
+              id: `bankrupt-${Date.now()}-${agent.id}`,
+              timestamp: Date.now(),
+              message: `⚠ ${agent.name} BANKRUPT — zero tokens, eliminated from arena`,
+              type: "system",
+            },
+          });
+          // Record in replay
+          const replayRecB = getActiveRecorder();
+          if (replayRecB) replayRecB.recordKill("ECONOMY", "BANKRUPTCY", agent.id, agent.name, s.matchTime);
+        }
+      }
+
+      // ─── MEMORY MAINTENANCE COST (every 10 seconds of match time) ─────
+      // Agents pay compute tokens to maintain their memory each cycle
+      const memoryCycleInterval = 10; // seconds
+      const prevCycle = Math.floor((s.matchTime - dt) / memoryCycleInterval);
+      const currCycle = Math.floor(s.matchTime / memoryCycleInterval);
+      if (currCycle > prevCycle) {
+        for (const agent of s.agents) {
+          if (!agent.isAlive || agent.memorySize <= 0) continue;
+          // Cost = 1 token per 100KB of memory per cycle
+          const maintenanceCost = Math.max(1, Math.ceil(agent.memorySize / 100));
+          if (agent.computeTokens >= maintenanceCost) {
+            d({ type: "COMPUTE_SPEND", agentId: agent.id, amount: maintenanceCost, reason: "memory_maintenance" });
+          }
+        }
+      }
+
       // Win/lose
       const alive = s.agents.filter((a) => a.isAlive);
       if (s.mode === "pvai") {

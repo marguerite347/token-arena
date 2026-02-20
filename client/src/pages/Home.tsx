@@ -52,6 +52,9 @@ export default function Home() {
             <button onClick={() => navigate("/dashboard")} className="text-xs font-mono text-muted-foreground hover:text-neon-magenta transition-colors">
               ECOSYSTEM
             </button>
+            <button onClick={() => navigate("/flywheel")} className="text-xs font-mono text-muted-foreground hover:text-neon-cyan transition-colors">
+              FLYWHEEL
+            </button>
             <button onClick={() => navigate("/demo")} className="text-xs font-mono text-muted-foreground hover:text-neon-green transition-colors">
               BOUNTIES
             </button>

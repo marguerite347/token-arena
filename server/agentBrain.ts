@@ -14,6 +14,7 @@ import {
   getAgentById, getAgentMemories, saveAgentMemory, saveAgentDecision,
   getAgentDecisionHistory, getAgentInventoryItems, getAvailableRecipes,
 } from "./db";
+import { recordComputeSpending, calculateMemoryCost, calculateMemoryQueryCost } from "./agentLifecycle";
 
 export interface AgentPerformance {
   agentId: number;
@@ -202,14 +203,29 @@ export async function executeAgentDecision(agentId: number, decision: AgentDecis
     matchId,
   });
 
-  // Save new memory if the agent learned something
+  // Save new memory if the agent learned something — costs compute tokens
   if (decision.newMemory) {
+    const memorySizeKb = Math.ceil(decision.newMemory.length / 100);
+    const storageCost = Math.max(1, calculateMemoryCost(memorySizeKb));
+
+    // Deduct memory storage cost
+    await recordComputeSpending({
+      agentId,
+      type: "memory_maintenance",
+      tokensSpent: storageCost,
+      timestamp: Date.now(),
+      description: `Store new memory: ${decision.newMemory.slice(0, 40)}...`,
+    });
+
     await saveAgentMemory({
       agentId,
       memoryType: decision.action === "change_loadout" ? "strategy" : decision.action === "craft" ? "craft" : "economy",
       content: decision.newMemory,
       confidence: decision.confidence,
+      computeCost: storageCost,
     });
+
+    console.log(`[AgentBrain] Agent ${agentId} stored memory (cost: ${storageCost} TKN)`);
   }
 
   return decision;
@@ -223,6 +239,21 @@ export async function buildAgentPerformance(agentId: number): Promise<AgentPerfo
   if (!agent) return null;
 
   const memories = await getAgentMemories(agentId, 10);
+
+  // Deduct memory query cost — agents pay to access their memories
+  if (memories.length > 0) {
+    const totalMemorySize = memories.reduce((sum, m) => sum + (m.computeCost ?? 1), 0);
+    const queryCost = calculateMemoryQueryCost(totalMemorySize);
+    await recordComputeSpending({
+      agentId,
+      type: "memory_query",
+      tokensSpent: queryCost,
+      timestamp: Date.now(),
+      description: `Query ${memories.length} memories (${totalMemorySize} compute units)`,
+    });
+    console.log(`[AgentBrain] Agent ${agentId} queried ${memories.length} memories (cost: ${queryCost} TKN)`);
+  }
+
   const decisions = await getAgentDecisionHistory(agentId, 10);
   const inventory = await getAgentInventoryItems(agentId);
 

@@ -105,6 +105,8 @@ export const agentIdentities = mysqlTable("agent_identities", {
   totalTokensSpent: bigint("totalTokensSpent", { mode: "number" }).notNull().default(0),
   computeBudget: bigint("computeBudget", { mode: "number" }).notNull().default(1000),
   computeSpent: bigint("computeSpent", { mode: "number" }).notNull().default(0),
+  memorySize: int("memorySize").notNull().default(0),
+  memoryCostPerCycle: int("memoryCostPerCycle").notNull().default(0),
   generation: int("generation").notNull().default(1),
   alive: int("alive").notNull().default(1),
   deathReason: varchar("deathReason", { length: 64 }),

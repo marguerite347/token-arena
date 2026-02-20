@@ -57,6 +57,13 @@
       "when": 1771618536831,
       "tag": "0007_lush_sersi",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1771619875641,
+      "tag": "0008_lazy_gamora",
+      "breakpoints": true
     }
   ]
 }

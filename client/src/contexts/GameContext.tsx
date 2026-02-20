@@ -48,6 +48,12 @@ export interface Agent {
   kills: number;
   color: string;
   erc8004Id?: string;
+  computeTokens: number;
+  memorySize: number;
+  memoryCapacity: number;
+  totalEarned: number;
+  totalSpent: number;
+  isBankrupt: boolean;
 }
 
 export interface Projectile {
@@ -101,6 +107,9 @@ export interface GameState {
   skyboxStyles: Array<{ id: number; name: string }>;
   selectedSkyboxStyle: number;
   skyboxPrompt: string;
+  ecosystemDeaths: number;
+  ecosystemSpawns: number;
+  sceneAnalysis: string | null;
 }
 
 // ─── Weapons Database ────────────────────────────────────────────────────────
@@ -210,6 +219,12 @@ const createAgent = (id: string, name: string, isPlayer: boolean, color: string)
   kills: 0,
   color,
   erc8004Id: `0x${Math.random().toString(16).slice(2, 10)}`,
+  computeTokens: isPlayer ? 500 : 100 + Math.floor(Math.random() * 200),
+  memorySize: 0,
+  memoryCapacity: isPlayer ? 1024 : 256 + Math.floor(Math.random() * 256),
+  totalEarned: 0,
+  totalSpent: 0,
+  isBankrupt: false,
 });
 
 const AI_NAMES = [
@@ -245,6 +260,9 @@ const initialState: GameState = {
   skyboxStyles: [],
   selectedSkyboxStyle: 89,
   skyboxPrompt: "Futuristic cyberpunk battle arena with neon lights, floating platforms, and holographic displays",
+  ecosystemDeaths: 0,
+  ecosystemSpawns: 0,
+  sceneAnalysis: null,
 };
 
 // ─── Actions ─────────────────────────────────────────────────────────────────
@@ -269,6 +287,11 @@ type GameAction =
   | { type: "SET_SKYBOX_STYLE"; styleId: number }
   | { type: "SET_SKYBOX_PROMPT"; prompt: string }
   | { type: "AGENT_KILLED"; killerId: string; victimId: string }
+  | { type: "AGENT_BANKRUPT"; agentId: string }
+  | { type: "SPAWN_AGENT"; agent: Agent }
+  | { type: "COMPUTE_SPEND"; agentId: string; amount: number; reason: string }
+  | { type: "MEMORY_UPDATE"; agentId: string; memorySize: number }
+  | { type: "SET_SCENE_ANALYSIS"; analysis: string }
   | { type: "RESET_MATCH" };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -347,6 +370,69 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
       return newState;
     }
+    case "AGENT_BANKRUPT": {
+      return {
+        ...state,
+        agents: state.agents.map((a) =>
+          a.id === action.agentId ? { ...a, isAlive: false, isBankrupt: true, tokens: 0, computeTokens: 0 } : a
+        ),
+        ecosystemDeaths: state.ecosystemDeaths + 1,
+        combatLog: [
+          ...state.combatLog.slice(-50),
+          {
+            id: `bankrupt-${Date.now()}`,
+            timestamp: Date.now(),
+            message: `${state.agents.find((a) => a.id === action.agentId)?.name || "AGENT"} went BANKRUPT — insufficient compute tokens`,
+            type: "system" as const,
+          },
+        ],
+      };
+    }
+    case "SPAWN_AGENT":
+      return {
+        ...state,
+        agents: [...state.agents, action.agent],
+        ecosystemSpawns: state.ecosystemSpawns + 1,
+        combatLog: [
+          ...state.combatLog.slice(-50),
+          {
+            id: `spawn-${Date.now()}`,
+            timestamp: Date.now(),
+            message: `DAO spawned new agent: ${action.agent.name}`,
+            type: "system" as const,
+          },
+        ],
+      };
+    case "COMPUTE_SPEND": {
+      const isPlayer = action.agentId === state.player.id;
+      if (isPlayer) {
+        return {
+          ...state,
+          player: {
+            ...state.player,
+            computeTokens: Math.max(0, state.player.computeTokens - action.amount),
+            totalSpent: state.player.totalSpent + action.amount,
+          },
+        };
+      }
+      return {
+        ...state,
+        agents: state.agents.map((a) =>
+          a.id === action.agentId
+            ? { ...a, computeTokens: Math.max(0, a.computeTokens - action.amount), totalSpent: a.totalSpent + action.amount }
+            : a
+        ),
+      };
+    }
+    case "MEMORY_UPDATE":
+      return {
+        ...state,
+        agents: state.agents.map((a) =>
+          a.id === action.agentId ? { ...a, memorySize: action.memorySize } : a
+        ),
+      };
+    case "SET_SCENE_ANALYSIS":
+      return { ...state, sceneAnalysis: action.analysis };
     case "RESET_MATCH":
       return {
         ...state,

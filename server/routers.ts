@@ -35,6 +35,7 @@ import {
 } from "./predictionMarket";
 import { analyzeArenaScene, getAgentSceneBriefing, getGameMasterSpawnContext, getPredictionContext } from "./arenaVision";
 import type { SceneAnalysis } from "./arenaVision";
+import { getAllFlywheelData, getAgentEconomics, getEcosystemHealth } from "./agentLifecycle";
 
 const SKYBOX_API_BASE = "https://backend.blockadelabs.com/api/v1";
 const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "";
@@ -689,6 +690,27 @@ export const appRouter = router({
     history: publicProcedure
       .input(z.object({ limit: z.number().default(50) }).optional())
       .query(async ({ input }) => getEcosystemSnapshots(input?.limit ?? 50)),
+  }),
+
+  // ─── Flywheel Dashboard ─────────────────────────────────────────────────
+  flywheel: router({
+    // Get all agents' flywheel data (earnings → compute → smarter → earn loop)
+    all: publicProcedure.query(async () => {
+      const data = await getAllFlywheelData();
+      return data;
+    }),
+
+    // Get single agent economics
+    agent: publicProcedure
+      .input(z.object({ agentId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        return getAgentEconomics(input.agentId);
+      }),
+
+    // Get ecosystem health metrics
+    health: publicProcedure.query(async () => {
+      return getEcosystemHealth();
+    }),
   }),
 });
 
