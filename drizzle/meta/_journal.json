@@ -15,6 +15,13 @@
       "when": 1771573642973,
       "tag": "0001_naive_ma_gnuci",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1771586545933,
+      "tag": "0002_pink_lady_deathstrike",
+      "breakpoints": true
     }
   ]
 }

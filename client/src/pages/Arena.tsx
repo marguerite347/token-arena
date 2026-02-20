@@ -1,20 +1,25 @@
 /*
- * Arena Page — Main game screen with Three.js canvas and HUD overlay
- * Now uses tRPC for Skybox API proxy and saves match results to DB
+ * Arena Page — Main game screen with Three.js canvas, HUD, and Web3 wallet integration
+ * Uses tRPC for Skybox API proxy, saves match results + x402 transactions to DB
  */
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useGame } from "@/contexts/GameContext";
+import { useWallet } from "@/contexts/WalletContext";
 import { useGameEngine } from "@/hooks/useGameEngine";
 import GameHUD from "@/components/GameHUD";
+import AgentIdentityCard from "@/components/AgentIdentityCard";
+import WalletButton from "@/components/WalletButton";
 import { ARENA_PROMPTS } from "@/lib/skyboxApi";
 import { soundEngine } from "@/lib/soundEngine";
 import { trpc } from "@/lib/trpc";
+import { DEFAULT_AI_AGENTS, WEAPON_TOKENS } from "@shared/web3";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Arena() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { state, dispatch, startMatch } = useGame();
+  const wallet = useWallet();
   const [, navigate] = useLocation();
   const [skyboxLoading, setSkyboxLoading] = useState(false);
   const [skyboxProgress, setSkyboxProgress] = useState("");
@@ -22,6 +27,7 @@ export default function Arena() {
   const [showResults, setShowResults] = useState(false);
   const [hitFlash, setHitFlash] = useState(false);
   const [screenShake, setScreenShake] = useState(false);
+  const [showAgentPanel, setShowAgentPanel] = useState(false);
   const prevHealthRef = useRef(state.player.health);
   const prevPhaseRef = useRef(state.phase);
   const matchSavedRef = useRef(false);
@@ -31,6 +37,7 @@ export default function Arena() {
   // tRPC mutations
   const generateSkyboxMut = trpc.skybox.generate.useMutation();
   const saveMatchMut = trpc.match.save.useMutation();
+  const logX402Mut = trpc.x402.log.useMutation();
 
   // Initialize sound engine on first interaction
   useEffect(() => {
@@ -47,7 +54,40 @@ export default function Arena() {
     };
   }, []);
 
-  // Hit feedback — detect health drops
+  // Initialize wallet balances when match starts
+  useEffect(() => {
+    if (state.phase === "countdown") {
+      wallet.initMatchBalances(200);
+    }
+  }, [state.phase]);
+
+  // Wire wallet to shooting — spend tokens on fire
+  const prevProjCountRef = useRef(0);
+  useEffect(() => {
+    if (state.projectiles.length > prevProjCountRef.current && state.phase === "combat") {
+      const newProjs = state.projectiles.slice(prevProjCountRef.current);
+      const playerProj = newProjs.find(p => p.ownerId === state.player.id);
+      if (playerProj) {
+        soundEngine.playWeaponFire(playerProj.type);
+        // x402 payment: spend tokens for shooting
+        const result = wallet.spendTokens(playerProj.type, playerProj.tokenValue);
+        if (result.success) {
+          logX402Mut.mutate({
+            paymentId: `fire-${Date.now()}`,
+            txHash: result.txHash,
+            action: "fire",
+            tokenSymbol: result.settlement.token,
+            amount: result.settlement.amount,
+            fromAddress: result.settlement.from,
+            toAddress: result.settlement.to,
+          });
+        }
+      }
+    }
+    prevProjCountRef.current = state.projectiles.length;
+  }, [state.projectiles.length, state.phase, state.player.id]);
+
+  // Wire wallet to getting hit — receive tokens
   useEffect(() => {
     if (state.player.health < prevHealthRef.current && state.phase === "combat") {
       soundEngine.playDamage();
@@ -55,6 +95,22 @@ export default function Arena() {
       setScreenShake(true);
       setTimeout(() => setHitFlash(false), 150);
       setTimeout(() => setScreenShake(false), 200);
+
+      // x402 payment: receive tokens from incoming fire
+      const dmg = prevHealthRef.current - state.player.health;
+      const tokenValue = Math.max(1, Math.floor(dmg / 5));
+      const result = wallet.receiveTokens("plasma", tokenValue, "0x0000000000000000000000000000000000000001");
+      if (result.success) {
+        logX402Mut.mutate({
+          paymentId: `hit-${Date.now()}`,
+          txHash: result.txHash,
+          action: "hit_receive",
+          tokenSymbol: result.settlement.token,
+          amount: result.settlement.amount,
+          fromAddress: result.settlement.from,
+          toAddress: result.settlement.to,
+        });
+      }
     }
     prevHealthRef.current = state.player.health;
   }, [state.player.health, state.phase]);
@@ -79,20 +135,7 @@ export default function Arena() {
     prevPhaseRef.current = state.phase;
   }, [state.phase]);
 
-  // Sound for projectile firing (detect new projectiles from player)
-  const prevProjCountRef = useRef(0);
-  useEffect(() => {
-    if (state.projectiles.length > prevProjCountRef.current && state.phase === "combat") {
-      const newProjs = state.projectiles.slice(prevProjCountRef.current);
-      const playerProj = newProjs.find(p => p.ownerId === state.player.id);
-      if (playerProj) {
-        soundEngine.playWeaponFire(playerProj.type);
-      }
-    }
-    prevProjCountRef.current = state.projectiles.length;
-  }, [state.projectiles.length, state.phase, state.player.id]);
-
-  // Save match results to database
+  // Save match results to database with wallet address
   useEffect(() => {
     if ((state.phase === "victory" || state.phase === "defeat") && !matchSavedRef.current) {
       matchSavedRef.current = true;
@@ -109,6 +152,7 @@ export default function Arena() {
         tokenNet: state.tokensEarned - state.tokensSpent,
         result: state.phase,
         weaponUsed: state.player.weapon.type,
+        walletAddress: wallet.address ?? undefined,
         agentData: state.agents.map(a => ({
           name: a.name,
           kills: a.kills,
@@ -139,11 +183,8 @@ export default function Arena() {
 
         setSkyboxProgress(`Skybox created (ID: ${result.id}). Waiting for render...`);
 
-        // Poll for completion
         const pollForCompletion = async (skyboxId: number, attempts = 0): Promise<void> => {
-          if (attempts > 60) {
-            throw new Error("Skybox generation timed out");
-          }
+          if (attempts > 60) throw new Error("Skybox generation timed out");
           await new Promise(r => setTimeout(r, 3000));
 
           const res = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ id: skyboxId }))}`);
@@ -174,10 +215,7 @@ export default function Arena() {
             return;
           }
 
-          if (data.status === "error") {
-            throw new Error("Skybox generation failed");
-          }
-
+          if (data.status === "error") throw new Error("Skybox generation failed");
           return pollForCompletion(skyboxId, attempts + 1);
         };
 
@@ -194,9 +232,7 @@ export default function Arena() {
   );
 
   // Load skybox styles from server
-  const { data: stylesData } = trpc.skybox.getStyles.useQuery(undefined, {
-    staleTime: 60000,
-  });
+  const { data: stylesData } = trpc.skybox.getStyles.useQuery(undefined, { staleTime: 60000 });
   useEffect(() => {
     if (stylesData && stylesData.length > 0) {
       dispatch({
@@ -233,14 +269,8 @@ export default function Arena() {
     }
   }, [state.phase]);
 
-  const handleStartPvAI = () => {
-    startMatch("pvai", 4);
-  };
-
-  const handleStartAIvAI = () => {
-    startMatch("aivai", 6);
-  };
-
+  const handleStartPvAI = () => startMatch("pvai", 4);
+  const handleStartAIvAI = () => startMatch("aivai", 6);
   const handleQuickArena = (idx: number) => {
     const arena = ARENA_PROMPTS[idx];
     handleGenerateSkybox(arena.prompt, arena.styleId);
@@ -305,18 +335,21 @@ export default function Arena() {
 
       {/* Pre-match Setup */}
       {state.phase === "menu" && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center">
+        <div className="fixed inset-0 z-20 flex items-center justify-center overflow-y-auto py-8">
           <div className="absolute inset-0 bg-background/90" />
           <div className="relative z-10 max-w-2xl w-full mx-4">
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-              {/* Title */}
-              <div className="text-center mb-8">
-                <h1 className="font-display text-4xl md:text-5xl font-black text-neon-cyan text-glow-cyan tracking-wider mb-2">
-                  TOKEN ARENA
-                </h1>
-                <p className="font-mono text-sm text-muted-foreground">
-                  AI Agent Battle Arena — On-Chain Token Combat
-                </p>
+              {/* Title + Wallet */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h1 className="font-display text-4xl md:text-5xl font-black text-neon-cyan text-glow-cyan tracking-wider">
+                    TOKEN ARENA
+                  </h1>
+                  <p className="font-mono text-sm text-muted-foreground">
+                    AI Agent Battle Arena — On-Chain Token Combat
+                  </p>
+                </div>
+                <WalletButton />
               </div>
 
               {/* Skybox Generation */}
@@ -325,7 +358,6 @@ export default function Arena() {
                   Environment — Powered by Skybox AI (Blockade Labs)
                 </div>
 
-                {/* Quick arena presets */}
                 <div className="grid grid-cols-5 gap-2 mb-3">
                   {ARENA_PROMPTS.map((arena, i) => (
                     <button
@@ -339,7 +371,6 @@ export default function Arena() {
                   ))}
                 </div>
 
-                {/* Custom prompt */}
                 <div className="flex gap-2 mb-2">
                   <input
                     type="text"
@@ -357,7 +388,6 @@ export default function Arena() {
                   </button>
                 </div>
 
-                {/* Style selector */}
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[9px] font-mono text-muted-foreground">Style:</span>
                   <select
@@ -367,19 +397,14 @@ export default function Arena() {
                   >
                     {state.skyboxStyles.length > 0
                       ? state.skyboxStyles.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name}
-                          </option>
+                          <option key={s.id} value={s.id}>{s.name}</option>
                         ))
                       : ARENA_PROMPTS.map((a, i) => (
-                          <option key={i} value={a.styleId}>
-                            {a.name}
-                          </option>
+                          <option key={i} value={a.styleId}>{a.name}</option>
                         ))}
                   </select>
                 </div>
 
-                {/* Progress */}
                 {skyboxProgress && (
                   <div className="text-[10px] font-mono text-neon-cyan/70 animate-pulse-neon">{skyboxProgress}</div>
                 )}
@@ -400,7 +425,7 @@ export default function Arena() {
                     PLAYER vs AI
                   </div>
                   <div className="text-[10px] font-mono text-muted-foreground leading-relaxed">
-                    Battle 4 AI agents in first-person combat. Spend tokens to fire, collect tokens from hits.
+                    Battle 4 AI agents. Spend tokens to fire, collect tokens from hits. x402 payments on every shot.
                   </div>
                   <div className="mt-2 text-[9px] font-mono text-neon-green">WASD + Mouse · Click to fire · 1-6 weapons</div>
                 </button>
@@ -413,22 +438,69 @@ export default function Arena() {
                     AI vs AI
                   </div>
                   <div className="text-[10px] font-mono text-muted-foreground leading-relaxed">
-                    Spectate 6 autonomous AI agents battling for token supremacy. Watch emergent strategies.
+                    Spectate 6 autonomous ERC-8004 agents battling for token supremacy. Watch emergent strategies.
                   </div>
                   <div className="mt-2 text-[9px] font-mono text-neon-amber">Spectator mode · Auto-camera</div>
                 </button>
               </div>
 
+              {/* Agent Identity Panel Toggle */}
+              <div className="mb-4">
+                <button
+                  onClick={() => setShowAgentPanel(!showAgentPanel)}
+                  className="hud-panel clip-brutal-sm px-4 py-2 font-mono text-xs text-neon-cyan/70 hover:text-neon-cyan transition-colors pointer-events-auto w-full text-left"
+                >
+                  {showAgentPanel ? "▼" : "▶"} ERC-8004 AI AGENT IDENTITIES ({DEFAULT_AI_AGENTS.length} registered)
+                </button>
+                <AnimatePresence>
+                  {showAgentPanel && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        {DEFAULT_AI_AGENTS.map((agent) => (
+                          <AgentIdentityCard
+                            key={agent.agentId}
+                            agent={{
+                              ...agent,
+                              stats: {
+                                totalKills: Math.floor(Math.random() * 50),
+                                totalDeaths: Math.floor(Math.random() * 30),
+                                totalMatches: Math.floor(Math.random() * 20) + 5,
+                                totalTokensEarned: Math.floor(Math.random() * 2000),
+                                totalTokensSpent: Math.floor(Math.random() * 1500),
+                                winRate: 0.3 + Math.random() * 0.5,
+                                favoriteWeapon: agent.loadout.primaryWeapon,
+                              },
+                            }}
+                            compact
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               {/* Token Economy Info */}
-              <div className="hud-panel clip-brutal-sm p-3">
+              <div className="hud-panel clip-brutal-sm p-3 mb-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-display text-lg text-neon-green text-glow-green">{state.player.tokens}</div>
-                    <div className="text-[9px] font-mono text-muted-foreground">TOKEN BALANCE</div>
+                    <div className="font-display text-lg text-neon-green text-glow-green">{wallet.arenaBalance}</div>
+                    <div className="text-[9px] font-mono text-muted-foreground">ARENA BALANCE</div>
                   </div>
                   <div>
                     <div className="font-display text-lg text-neon-cyan">{state.player.weapon.name.split(" ")[0]}</div>
                     <div className="text-[9px] font-mono text-muted-foreground">EQUIPPED WEAPON</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono text-[8px] px-1.5 py-0.5 bg-neon-green/10 text-neon-green border border-neon-green/20">x402</span>
+                      <span className="font-mono text-[8px] px-1.5 py-0.5 bg-neon-cyan/10 text-neon-cyan/70 border border-neon-cyan/10">Base L2</span>
+                    </div>
                   </div>
                   <div>
                     <button
@@ -443,7 +515,7 @@ export default function Arena() {
               </div>
 
               {/* Navigation */}
-              <div className="flex items-center justify-center gap-6 mt-4">
+              <div className="flex items-center justify-center gap-6">
                 <button
                   onClick={() => navigate("/")}
                   className="text-[10px] font-mono text-muted-foreground hover:text-neon-cyan transition-colors pointer-events-auto"
@@ -507,14 +579,29 @@ export default function Arena() {
                   </div>
                 </div>
 
-                {/* On-chain receipt */}
+                {/* On-chain receipt with real wallet info */}
                 <div className="bg-background/50 clip-brutal-sm p-3 mb-4 text-left">
-                  <div className="text-[9px] font-mono text-neon-cyan/70 mb-1">ON-CHAIN SETTLEMENT (Base L2)</div>
+                  <div className="text-[9px] font-mono text-neon-cyan/70 mb-1">ON-CHAIN SETTLEMENT (Base Sepolia L2)</div>
                   <div className="text-[9px] font-mono text-muted-foreground space-y-0.5">
-                    <div>tx: 0x{Math.random().toString(16).slice(2, 18)}...{Math.random().toString(16).slice(2, 6)}</div>
+                    <div>wallet: {wallet.address ? `${wallet.address.slice(0, 10)}...${wallet.address.slice(-6)}` : "simulated (no wallet connected)"}</div>
                     <div>tokens_in: {state.tokensEarned} TKN · tokens_out: {state.tokensSpent} TKN</div>
                     <div>net: {state.tokensEarned - state.tokensSpent > 0 ? "+" : ""}{state.tokensEarned - state.tokensSpent} TKN</div>
-                    <div>agent_id: {state.player.erc8004Id} (ERC-8004) · x402_payment: verified</div>
+                    <div>x402_txns: {wallet.completedPayments.length} · protocol: x402 · chain: base-sepolia</div>
+                    <div>agent_id: {state.player.erc8004Id} (ERC-8004)</div>
+                  </div>
+                </div>
+
+                {/* Wallet token summary */}
+                <div className="bg-background/50 clip-brutal-sm p-3 mb-4">
+                  <div className="text-[9px] font-mono text-neon-green/70 mb-1">TOKEN BALANCES AFTER MATCH</div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {wallet.tokenBalances.filter(t => t.symbol !== "ARENA").map((t) => (
+                      <div key={t.symbol} className="flex items-center gap-1">
+                        <div className="w-2 h-2" style={{ backgroundColor: t.color }} />
+                        <span className="font-mono text-[10px]" style={{ color: t.color }}>{t.balance}</span>
+                        <span className="font-mono text-[8px] text-muted-foreground/50">{t.symbol}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -527,37 +614,26 @@ export default function Arena() {
                     onClick={() => {
                       setShowResults(false);
                       dispatch({ type: "RESET_MATCH" });
+                      startMatch(state.mode, state.mode === "pvai" ? 4 : 6);
                     }}
                     className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-neon-cyan hover:bg-neon-cyan/10 transition-colors pointer-events-auto"
                   >
                     PLAY AGAIN
                   </button>
                   <button
-                    onClick={() => {
-                      setShowResults(false);
-                      dispatch({ type: "RESET_MATCH" });
-                      navigate("/shop");
-                    }}
+                    onClick={() => { setShowResults(false); dispatch({ type: "RESET_MATCH" }); navigate("/shop"); }}
                     className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-neon-green hover:bg-neon-green/10 transition-colors pointer-events-auto"
                   >
                     ARMORY
                   </button>
                   <button
-                    onClick={() => {
-                      setShowResults(false);
-                      dispatch({ type: "RESET_MATCH" });
-                      navigate("/leaderboard");
-                    }}
+                    onClick={() => { setShowResults(false); dispatch({ type: "RESET_MATCH" }); navigate("/leaderboard"); }}
                     className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-neon-amber hover:bg-neon-amber/10 transition-colors pointer-events-auto"
                   >
                     RANKINGS
                   </button>
                   <button
-                    onClick={() => {
-                      setShowResults(false);
-                      dispatch({ type: "RESET_MATCH" });
-                      navigate("/");
-                    }}
+                    onClick={() => { setShowResults(false); dispatch({ type: "RESET_MATCH" }); navigate("/"); }}
                     className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-muted-foreground hover:text-foreground transition-colors pointer-events-auto"
                   >
                     LOBBY

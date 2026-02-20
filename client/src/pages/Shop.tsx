@@ -1,11 +1,14 @@
 /*
- * Shop Page — Armory & Upgrades between matches
- * Design: Neon Brutalism — angular panels, neon accents, cyberpunk armory aesthetic
- * Background uses the shop-armory generated image
+ * Shop Page — Armory & Upgrades with Web3 wallet integration
+ * Uses wallet context for real token balances and x402 purchase flow
  */
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useGame, SHOP_ITEMS, WEAPONS, type ShopItem, type WeaponType } from "@/contexts/GameContext";
+import { useWallet } from "@/contexts/WalletContext";
+import WalletButton from "@/components/WalletButton";
+import { trpc } from "@/lib/trpc";
+import { WEAPON_TOKENS } from "@shared/web3";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
@@ -20,9 +23,12 @@ const SHOP_BG = "https://private-us-east-1.manuscdn.com/sessionFile/7BCFtZ5fWXyj
 
 export default function Shop() {
   const { state, buyItem, equipWeapon } = useGame();
+  const wallet = useWallet();
   const [, navigate] = useLocation();
   const [activeCategory, setActiveCategory] = useState<string>("weapon");
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
+
+  const logX402Mut = trpc.x402.log.useMutation();
 
   const filteredItems = SHOP_ITEMS.filter((item) => item.category === activeCategory);
 
@@ -33,12 +39,30 @@ export default function Shop() {
       });
       return;
     }
+
+    // x402 purchase flow
+    const result = wallet.purchaseItem(item.price);
+    if (!result || !result.success) {
+      toast.error("Purchase failed", { description: "x402 payment could not be processed" });
+      return;
+    }
+
+    // Log the x402 transaction
+    logX402Mut.mutate({
+      paymentId: `shop-${item.id}-${Date.now()}`,
+      txHash: result.txHash,
+      action: "shop_purchase",
+      tokenSymbol: result.settlement.token,
+      amount: result.settlement.amount,
+      fromAddress: result.settlement.from,
+      toAddress: result.settlement.to,
+    });
+
     const success = buyItem(item);
     if (success) {
       toast.success(`Acquired: ${item.name}`, {
-        description: `${item.price} TKN deducted from balance`,
+        description: `${item.price} TKN deducted · x402 tx: ${result.txHash.slice(0, 10)}...`,
       });
-      // Auto-equip weapons
       if (item.weapon) {
         equipWeapon(item.weapon);
         toast.info(`${item.weapon.name} equipped`);
@@ -51,10 +75,7 @@ export default function Shop() {
   return (
     <div className="min-h-screen relative">
       {/* Background */}
-      <div
-        className="fixed inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${SHOP_BG})` }}
-      >
+      <div className="fixed inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${SHOP_BG})` }}>
         <div className="absolute inset-0 bg-background/85" />
         <div className="absolute inset-0 scanline-overlay opacity-20" />
       </div>
@@ -75,11 +96,21 @@ export default function Shop() {
               ARMORY
             </h1>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            {/* Wallet token balances */}
+            <div className="flex items-center gap-2">
+              {wallet.tokenBalances.filter(t => t.symbol !== "ARENA").slice(0, 4).map((t) => (
+                <div key={t.symbol} className="flex items-center gap-0.5 px-1.5 py-0.5 bg-background/30 border border-border/20">
+                  <div className="w-1.5 h-1.5" style={{ backgroundColor: t.color }} />
+                  <span className="font-mono text-[9px]" style={{ color: t.color }}>{t.balance}</span>
+                  <span className="font-mono text-[7px] text-muted-foreground/50">{t.symbol}</span>
+                </div>
+              ))}
+            </div>
             <div className="hud-panel clip-brutal-sm px-4 py-1.5">
               <span className="text-[9px] font-mono text-muted-foreground mr-2">BALANCE</span>
-              <span className="font-display text-lg text-neon-green text-glow-green">{state.player.tokens}</span>
-              <span className="text-[10px] font-mono text-neon-green/70 ml-1">TKN</span>
+              <span className="font-display text-lg text-neon-green text-glow-green">{wallet.arenaBalance}</span>
+              <span className="text-[10px] font-mono text-neon-green/70 ml-1">ARENA</span>
             </div>
             <div className="hud-panel clip-brutal-sm px-4 py-1.5">
               <span className="text-[9px] font-mono text-muted-foreground mr-2">WEAPON</span>
@@ -87,6 +118,7 @@ export default function Shop() {
                 {state.player.weapon.name}
               </span>
             </div>
+            <WalletButton compact />
           </div>
         </header>
 
@@ -97,10 +129,7 @@ export default function Shop() {
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => {
-                  setActiveCategory(cat.id);
-                  setSelectedItem(null);
-                }}
+                onClick={() => { setActiveCategory(cat.id); setSelectedItem(null); }}
                 className={`w-full text-left clip-brutal-sm px-3 py-2.5 font-mono text-xs uppercase tracking-wider transition-all ${
                   activeCategory === cat.id
                     ? "bg-white/5 border border-white/20"
@@ -117,6 +146,7 @@ export default function Shop() {
               <div className="text-[9px] font-mono text-muted-foreground mb-2 uppercase tracking-wider">Quick Equip</div>
               {(Object.keys(WEAPONS) as WeaponType[]).map((key) => {
                 const w = WEAPONS[key];
+                const token = WEAPON_TOKENS[key];
                 const owned = key === "plasma" || state.inventory.some((i) => i.weapon?.type === key);
                 return (
                   <button
@@ -134,10 +164,30 @@ export default function Shop() {
                   >
                     {state.player.weapon.type === key ? "▸ " : "  "}
                     {w.name}
+                    {token && <span className="text-[8px] ml-1 text-muted-foreground/40">{token.symbol}</span>}
                     {!owned && " 🔒"}
                   </button>
                 );
               })}
+            </div>
+
+            {/* x402 / Base L2 info */}
+            <div className="pt-4 border-t border-border/30">
+              <div className="text-[9px] font-mono text-muted-foreground mb-2 uppercase tracking-wider">Protocol</div>
+              <div className="space-y-1 text-[8px] font-mono text-muted-foreground/50">
+                <div className="flex items-center gap-1">
+                  <span className="px-1 py-0.5 bg-neon-green/10 text-neon-green border border-neon-green/20">x402</span>
+                  <span>payments</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="px-1 py-0.5 bg-neon-cyan/10 text-neon-cyan/70 border border-neon-cyan/10">Base</span>
+                  <span>Sepolia L2</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="px-1 py-0.5 bg-neon-magenta/10 text-neon-magenta/70 border border-neon-magenta/10">8004</span>
+                  <span>agent identity</span>
+                </div>
+              </div>
             </div>
           </nav>
 
@@ -179,16 +229,12 @@ export default function Shop() {
                           {item.description}
                         </div>
                         <div className="flex items-center justify-between">
-                          <span
-                            className="font-display text-lg"
-                            style={{ color: canAfford ? catColor : "#FF3333" }}
-                          >
+                          <span className="font-display text-lg" style={{ color: canAfford ? catColor : "#FF3333" }}>
                             {item.price}
                           </span>
                           <span className="text-[9px] font-mono text-muted-foreground">TKN</span>
                         </div>
 
-                        {/* Weapon stats */}
                         {item.weapon && (
                           <div className="mt-2 pt-2 border-t border-border/20 grid grid-cols-2 gap-1 text-[9px] font-mono text-muted-foreground">
                             <div>DMG: <span style={{ color: catColor }}>{item.weapon.damage}</span></div>
@@ -198,7 +244,6 @@ export default function Shop() {
                           </div>
                         )}
 
-                        {/* Armor stats */}
                         {item.armorValue && (
                           <div className="mt-2 pt-2 border-t border-border/20 text-[9px] font-mono text-muted-foreground">
                             Damage Reduction: <span style={{ color: catColor }}>{item.armorValue}%</span>
@@ -244,10 +289,7 @@ export default function Shop() {
                               <span>{stat.label === "Fire Rate" ? `${selectedItem.weapon!.fireRate}ms` : stat.value}</span>
                             </div>
                             <div className="h-1 bg-background/50 clip-brutal-sm">
-                              <div
-                                className="h-full bg-neon-cyan"
-                                style={{ width: `${(stat.value / stat.max) * 100}%` }}
-                              />
+                              <div className="h-full bg-neon-cyan" style={{ width: `${(stat.value / stat.max) * 100}%` }} />
                             </div>
                           </div>
                         ))}
@@ -261,7 +303,7 @@ export default function Shop() {
                       <div className="text-[9px] font-mono text-muted-foreground">TKN</div>
                     </div>
                     <div className="text-right text-[9px] font-mono text-muted-foreground">
-                      Balance: {state.player.tokens} TKN
+                      Balance: {wallet.arenaBalance} ARENA
                     </div>
                   </div>
 
@@ -275,17 +317,18 @@ export default function Shop() {
                       disabled={state.player.tokens < selectedItem.price}
                       className="w-full clip-brutal-sm px-4 py-2 text-center text-xs font-mono text-background bg-neon-cyan hover:bg-neon-cyan/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      {state.player.tokens >= selectedItem.price ? "PURCHASE" : "INSUFFICIENT TOKENS"}
+                      {state.player.tokens >= selectedItem.price ? "PURCHASE (x402)" : "INSUFFICIENT TOKENS"}
                     </button>
                   )}
 
                   {/* On-chain info */}
                   <div className="mt-4 pt-3 border-t border-border/20">
                     <div className="text-[8px] font-mono text-muted-foreground/50 space-y-0.5">
-                      <div>chain: Base L2 (EIP-8453)</div>
+                      <div>chain: Base Sepolia L2</div>
                       <div>payment: x402 protocol</div>
                       <div>identity: ERC-8004</div>
-                      <div>contract: 0x{Math.random().toString(16).slice(2, 10)}...</div>
+                      <div>wallet: {wallet.address ? `${wallet.address.slice(0, 8)}...` : "not connected"}</div>
+                      <div>status: {wallet.isConnected ? "● on-chain" : "○ simulated"}</div>
                     </div>
                   </div>
                 </div>

@@ -80,3 +80,52 @@ export const skyboxCache = mysqlTable("skybox_cache", {
 });
 
 export type SkyboxCacheEntry = typeof skyboxCache.$inferSelect;
+
+/**
+ * ERC-8004 Agent Identities — on-chain agent personas
+ */
+export const agentIdentities = mysqlTable("agent_identities", {
+  id: int("id").autoincrement().primaryKey(),
+  agentId: int("agentId").notNull().unique(),
+  name: varchar("name", { length: 64 }).notNull(),
+  description: text("description"),
+  owner: varchar("owner", { length: 64 }).notNull(), // wallet address
+  agentRegistry: varchar("agentRegistry", { length: 128 }).notNull(),
+  reputation: int("reputation").notNull().default(300), // stored as x100 (3.00 = 300)
+  primaryWeapon: varchar("primaryWeapon", { length: 32 }).notNull().default("plasma"),
+  secondaryWeapon: varchar("secondaryWeapon", { length: 32 }).notNull().default("beam"),
+  armor: int("armor").notNull().default(60),
+  totalKills: int("totalKills").notNull().default(0),
+  totalDeaths: int("totalDeaths").notNull().default(0),
+  totalMatches: int("totalMatches").notNull().default(0),
+  totalTokensEarned: bigint("totalTokensEarned", { mode: "number" }).notNull().default(0),
+  totalTokensSpent: bigint("totalTokensSpent", { mode: "number" }).notNull().default(0),
+  metadata: json("metadata"),
+  active: int("active").notNull().default(1), // boolean as int
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AgentIdentityRow = typeof agentIdentities.$inferSelect;
+export type InsertAgentIdentity = typeof agentIdentities.$inferInsert;
+
+/**
+ * x402 Transaction Log — records all x402 payment transactions
+ */
+export const x402Transactions = mysqlTable("x402_transactions", {
+  id: int("id").autoincrement().primaryKey(),
+  paymentId: varchar("paymentId", { length: 128 }).notNull(),
+  txHash: varchar("txHash", { length: 128 }).notNull(),
+  action: varchar("action", { length: 32 }).notNull(), // shoot, hit, purchase, collect
+  tokenSymbol: varchar("tokenSymbol", { length: 16 }).notNull(),
+  amount: int("amount").notNull(),
+  fromAddress: varchar("fromAddress", { length: 64 }).notNull(),
+  toAddress: varchar("toAddress", { length: 64 }).notNull(),
+  matchId: int("matchId"),
+  agentId: int("agentId"),
+  success: int("success").notNull().default(1),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type X402TransactionRow = typeof x402Transactions.$inferSelect;
+export type InsertX402Transaction = typeof x402Transactions.$inferInsert;

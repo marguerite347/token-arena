@@ -4,7 +4,13 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import axios from "axios";
-import { saveMatch, getRecentMatches, upsertLeaderboardEntry, getLeaderboard, cacheSkybox, updateSkyboxCache, getRandomCachedSkybox } from "./db";
+import {
+  saveMatch, getRecentMatches, upsertLeaderboardEntry, getLeaderboard,
+  cacheSkybox, updateSkyboxCache, getRandomCachedSkybox,
+  getAgentIdentities, getAgentById, upsertAgentIdentity, updateAgentStats,
+  logX402Transaction, getRecentX402Transactions, getX402TransactionsByMatch,
+} from "./db";
+import { DEFAULT_AI_AGENTS } from "@shared/web3";
 
 const SKYBOX_API_BASE = "https://backend.blockadelabs.com/api/v1";
 const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "IRmVFdJZMYrjtVBUgb2kq4Xp8YAKCQ4Hq4j8aGZCXYJVixoUFaWh8cwNezQU";
@@ -54,7 +60,6 @@ export const appRouter = router({
           });
 
           const data = res.data;
-          // Cache the generation
           await cacheSkybox({
             prompt: input.prompt,
             styleId: input.styleId,
@@ -125,7 +130,6 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         const id = await saveMatch(input);
-        // Update leaderboard
         await upsertLeaderboardEntry({
           playerName: input.playerName,
           kills: input.playerKills,
@@ -152,6 +156,89 @@ export const appRouter = router({
       .input(z.object({ limit: z.number().default(50) }).optional())
       .query(async ({ input }) => {
         return getLeaderboard(input?.limit ?? 50);
+      }),
+  }),
+
+  // ─── Agent Identity (ERC-8004) ──────────────────────────────────────────────
+  agent: router({
+    list: publicProcedure.query(async () => {
+      const agents = await getAgentIdentities();
+      if (agents.length === 0) {
+        // Seed default agents on first call
+        for (const agent of DEFAULT_AI_AGENTS) {
+          await upsertAgentIdentity({
+            agentId: agent.agentId,
+            name: agent.name,
+            description: agent.description,
+            owner: agent.owner,
+            agentRegistry: agent.agentRegistry,
+            reputation: Math.round(agent.reputation * 100),
+            primaryWeapon: agent.loadout.primaryWeapon,
+            secondaryWeapon: agent.loadout.secondaryWeapon,
+            armor: agent.loadout.armor,
+            metadata: agent.metadata,
+          });
+        }
+        return getAgentIdentities();
+      }
+      return agents;
+    }),
+
+    get: publicProcedure
+      .input(z.object({ agentId: z.number() }))
+      .query(async ({ input }) => {
+        return getAgentById(input.agentId);
+      }),
+
+    updateStats: publicProcedure
+      .input(z.object({
+        agentId: z.number(),
+        kills: z.number().default(0),
+        deaths: z.number().default(0),
+        tokensEarned: z.number().default(0),
+        tokensSpent: z.number().default(0),
+      }))
+      .mutation(async ({ input }) => {
+        await updateAgentStats(input.agentId, {
+          kills: input.kills,
+          deaths: input.deaths,
+          tokensEarned: input.tokensEarned,
+          tokensSpent: input.tokensSpent,
+        });
+        return { success: true };
+      }),
+  }),
+
+  // ─── x402 Transactions ──────────────────────────────────────────────────────
+  x402: router({
+    log: publicProcedure
+      .input(z.object({
+        paymentId: z.string(),
+        txHash: z.string(),
+        action: z.string(),
+        tokenSymbol: z.string(),
+        amount: z.number(),
+        fromAddress: z.string(),
+        toAddress: z.string(),
+        matchId: z.number().optional(),
+        agentId: z.number().optional(),
+        success: z.number().default(1),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await logX402Transaction(input);
+        return { id };
+      }),
+
+    recent: publicProcedure
+      .input(z.object({ limit: z.number().default(50) }).optional())
+      .query(async ({ input }) => {
+        return getRecentX402Transactions(input?.limit ?? 50);
+      }),
+
+    byMatch: publicProcedure
+      .input(z.object({ matchId: z.number() }))
+      .query(async ({ input }) => {
+        return getX402TransactionsByMatch(input.matchId);
       }),
   }),
 });

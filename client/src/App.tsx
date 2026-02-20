@@ -4,13 +4,14 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { WalletProvider } from "./contexts/WalletContext";
 import Home from "./pages/Home";
 import Arena from "./pages/Arena";
 import Shop from "./pages/Shop";
 import Leaderboard from "./pages/Leaderboard";
 import { GameProvider } from "./contexts/GameContext";
+
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -27,12 +28,14 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <GameProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </GameProvider>
+        <WalletProvider>
+          <GameProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </GameProvider>
+        </WalletProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

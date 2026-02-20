@@ -1,6 +1,6 @@
 import { eq, desc, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, matches, leaderboard, skyboxCache, type InsertMatch, type InsertLeaderboardEntry } from "../drizzle/schema";
+import { InsertUser, users, matches, leaderboard, skyboxCache, agentIdentities, x402Transactions, type InsertMatch, type InsertLeaderboardEntry, type InsertAgentIdentity, type InsertX402Transaction } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -188,4 +188,80 @@ export async function getRandomCachedSkybox() {
   if (!db) return null;
   const results = await db.select().from(skyboxCache).where(eq(skyboxCache.status, "complete")).orderBy(sql`RAND()`).limit(1);
   return results.length > 0 ? results[0] : null;
+}
+
+// ─── Agent Identities (ERC-8004) ──────────────────────────────────────────────
+
+export async function getAgentIdentities() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(agentIdentities).orderBy(agentIdentities.agentId);
+}
+
+export async function getAgentById(agentId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const results = await db.select().from(agentIdentities).where(eq(agentIdentities.agentId, agentId)).limit(1);
+  return results.length > 0 ? results[0] : null;
+}
+
+export async function upsertAgentIdentity(data: InsertAgentIdentity) {
+  const db = await getDb();
+  if (!db) return;
+
+  const existing = await db.select().from(agentIdentities).where(eq(agentIdentities.agentId, data.agentId)).limit(1);
+
+  if (existing.length > 0) {
+    await db.update(agentIdentities).set({
+      name: data.name,
+      description: data.description,
+      owner: data.owner,
+      agentRegistry: data.agentRegistry,
+      reputation: data.reputation,
+      primaryWeapon: data.primaryWeapon,
+      secondaryWeapon: data.secondaryWeapon,
+      armor: data.armor,
+      metadata: data.metadata,
+    }).where(eq(agentIdentities.agentId, data.agentId));
+  } else {
+    await db.insert(agentIdentities).values(data);
+  }
+}
+
+export async function updateAgentStats(agentId: number, stats: { kills?: number; deaths?: number; tokensEarned?: number; tokensSpent?: number }) {
+  const db = await getDb();
+  if (!db) return;
+
+  const existing = await db.select().from(agentIdentities).where(eq(agentIdentities.agentId, agentId)).limit(1);
+  if (existing.length === 0) return;
+
+  const entry = existing[0];
+  await db.update(agentIdentities).set({
+    totalKills: (entry.totalKills ?? 0) + (stats.kills ?? 0),
+    totalDeaths: (entry.totalDeaths ?? 0) + (stats.deaths ?? 0),
+    totalMatches: (entry.totalMatches ?? 0) + 1,
+    totalTokensEarned: (entry.totalTokensEarned ?? 0) + (stats.tokensEarned ?? 0),
+    totalTokensSpent: (entry.totalTokensSpent ?? 0) + (stats.tokensSpent ?? 0),
+  }).where(eq(agentIdentities.agentId, agentId));
+}
+
+// ─── x402 Transactions ────────────────────────────────────────────────────────
+
+export async function logX402Transaction(data: InsertX402Transaction) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(x402Transactions).values(data);
+  return result[0].insertId;
+}
+
+export async function getRecentX402Transactions(limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(x402Transactions).orderBy(desc(x402Transactions.createdAt)).limit(limit);
+}
+
+export async function getX402TransactionsByMatch(matchId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(x402Transactions).where(eq(x402Transactions.matchId, matchId)).orderBy(desc(x402Transactions.createdAt));
 }
