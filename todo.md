@@ -467,3 +467,26 @@
 - [x] Update ARENA_PROMPTS to use M4 style IDs
 - [x] Update skybox router to use staging base URL
 - [x] Test skybox generation with Model 4 on staging (4/4 tests passing)
+
+## v16 — Scene Graph Agent Brain + README + ERC-20 Deploy
+
+### Scene Graph in Agent Brain
+- [x] Wire getSceneGraphBriefing() into agent reasoning prompt
+- [x] Agents adapt weapon choice based on arena topology (via arenaContext in LLM prompt)
+- [x] Agents consider positioning from scene graph nodes (via scene graph briefing)
+- [x] Pass scene graph context through game flow (Arena → skybox gen → scene graph → agent brain)
+
+### Submission README
+- [x] Project overview and elevator pitch
+- [x] Architecture diagram description
+- [x] Bounty alignment (Blockade Labs, Base, Kite AI)
+- [x] Tech stack and file structure
+- [x] Team info (coin_artist)
+- [x] How to run instructions
+
+### ERC-20 Deployment
+- [x] Compile Solidity contracts (ArenaToken: 7190 bytes, WeaponToken: 7241 bytes)
+- [x] Create deployment script (deploy-base-sepolia.mjs)
+- [x] Create compilation script (compile-contracts.mjs)
+- [x] Document deployment instructions in README
+- ⏳ Live deployment pending (awaits funded Base Sepolia wallet)

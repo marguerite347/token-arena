@@ -4,6 +4,7 @@
  */
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useGame } from "@/contexts/GameContext";
 
 interface AgentBrainPanelProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ function MemoryBar({ value, max, color, label }: { value: number; max: number; c
 export default function AgentBrainPanel({ isOpen, onClose }: AgentBrainPanelProps) {
   const [selectedAgent, setSelectedAgent] = useState(1);
   const [reasoning, setReasoning] = useState(false);
+  const { state: gameState } = useGame();
 
   const { data: agents } = trpc.agent.list.useQuery(undefined, { enabled: isOpen });
   const { data: decisions } = trpc.agent.decisions.useQuery(
@@ -168,7 +170,7 @@ export default function AgentBrainPanel({ isOpen, onClose }: AgentBrainPanelProp
 
           {/* Trigger Reasoning */}
           <button
-            onClick={() => { setReasoning(true); reasonMutation.mutate({ agentId: selectedAgent }); }}
+            onClick={() => { setReasoning(true); reasonMutation.mutate({ agentId: selectedAgent, styleId: gameState.selectedSkyboxStyle }); }}
             disabled={reasoning || reasonMutation.isPending}
             className="w-full py-2 text-xs font-mono uppercase tracking-wider rounded transition-all"
             style={{

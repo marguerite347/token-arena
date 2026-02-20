@@ -358,7 +358,7 @@ export const appRouter = router({
 
     // ─── Autonomous Reasoning (costs compute) ─────────────────────────────
     reason: publicProcedure
-      .input(z.object({ agentId: z.number() }))
+      .input(z.object({ agentId: z.number(), styleId: z.number().optional() }))
       .mutation(async ({ input }) => {
         // Check compute budget
         const canAfford = await recordComputeSpend(input.agentId, "reasoning", 10, "Strategic reasoning about loadout and purchases");
@@ -374,6 +374,20 @@ export const appRouter = router({
 
         const perf = await buildAgentPerformance(input.agentId);
         if (!perf) return { error: "Agent not found" };
+
+        // Inject scene graph context if arena styleId is provided
+        if (input.styleId) {
+          const cached = await getCachedSkyboxByStyleId(input.styleId);
+          if (cached?.sceneGraph) {
+            const graph = cached.sceneGraph as SceneGraph;
+            perf.arenaContext = getSceneGraphBriefing(graph);
+            console.log(`[AgentBrain] Injected scene graph for style ${input.styleId}: ${graph.nodeCount} nodes`);
+          } else if (cached?.sceneAnalysis) {
+            const analysis = cached.sceneAnalysis as SceneAnalysis;
+            perf.arenaContext = getAgentSceneBriefing(analysis);
+          }
+        }
+
         const decision = await agentReason(perf);
         await executeAgentDecision(input.agentId, decision);
 

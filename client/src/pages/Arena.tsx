@@ -66,6 +66,7 @@ export default function Arena() {
   const craftingInitMut = trpc.crafting.init.useMutation();
   const rollDropsMut = trpc.crafting.rollDrops.useMutation();
   const warmCacheMut = trpc.skybox.warmCache.useMutation();
+  const generateSceneGraphMut = trpc.skybox.generateSceneGraph.useMutation();
 
   // ─── Initialization Effects ──────────────────────────────────────────────────
 
@@ -347,6 +348,22 @@ export default function Arena() {
                 },
               });
               setSkyboxProgress(`✓ Environment ready! (${elapsed}s)`);
+
+              // Trigger scene graph generation in background
+              if (data.fileUrl) {
+                generateSceneGraphMut.mutate(
+                  { imageUrl: data.fileUrl, arenaName: p.slice(0, 60) },
+                  {
+                    onSuccess: (sgResult) => {
+                      if (sgResult?.graph) {
+                        dispatch({ type: "SET_SCENE_ANALYSIS", analysis: sgResult.agentBriefing || "Scene graph generated" });
+                        console.log(`[SceneGraph] Generated: ${sgResult.graph.nodeCount} nodes, ${sgResult.graph.edgeCount} edges`);
+                      }
+                    },
+                    onError: (err) => console.warn("[SceneGraph] Generation failed:", err.message),
+                  }
+                );
+              }
               return;
             }
 
