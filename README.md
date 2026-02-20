@@ -278,8 +278,24 @@ DEPLOYER_PRIVATE_KEY=0x... node scripts/deploy-base-sepolia.mjs
 | Skybox AI | ✅ Live | Blockade Labs Model 4 (staging API) |
 | Scene Graph | ✅ Live | Vision LLM analysis + JSON graph storage |
 | Flywheel Dashboard | ✅ Live | Economics visualization and seed matches |
-| ERC-20 Contracts | 🔵 Ready | Compiled & deployment script ready (awaiting funded wallet) |
-| Base Sepolia Deploy | ⏳ Pending | Requires `DEPLOYER_PRIVATE_KEY` + Base Sepolia ETH |
+| ERC-20 Contracts | ✅ Deployed | 7 contracts live on Base Sepolia |
+| Base Sepolia Deploy | ✅ Complete | [ARENA](https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610) + 6 weapon tokens |
+
+---
+
+## Deployed Contracts (Base Sepolia)
+
+| Token | Symbol | Address |
+|-------|--------|---------|
+| Arena Token | ARENA | [`0x9DB281D2243ea30577783ab3364873E3F0a02610`](https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610) |
+| Plasma Ammo | PLAS | [`0x0676e55A3649984E27eA812941e690AaFd6d989c`](https://sepolia.basescan.org/address/0x0676e55A3649984E27eA812941e690AaFd6d989c) |
+| Railgun Ammo | RAIL | [`0x49C9c24Eb0fb6E596FF4cF3A6620395308fB06Ca`](https://sepolia.basescan.org/address/0x49C9c24Eb0fb6E596FF4cF3A6620395308fB06Ca) |
+| Scatter Ammo | SCAT | [`0x7E6d8bb54ceF2D408DEccA94DE685058181C8444`](https://sepolia.basescan.org/address/0x7E6d8bb54ceF2D408DEccA94DE685058181C8444) |
+| Rocket Ammo | RCKT | [`0x34d2b8faf6e9438c39268e4E4868e04dc7F5b689`](https://sepolia.basescan.org/address/0x34d2b8faf6e9438c39268e4E4868e04dc7F5b689) |
+| Beam Ammo | BEAM | [`0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E`](https://sepolia.basescan.org/address/0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E) |
+| Void Ammo | VOID | [`0x243db4A8B200B59416C2b8d080fd8F8e44e59577`](https://sepolia.basescan.org/address/0x243db4A8B200B59416C2b8d080fd8F8e44e59577) |
+
+Deployer: `0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3` | Network: Base Sepolia (Chain ID 84532)
 
 ---
 

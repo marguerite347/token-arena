@@ -41,26 +41,20 @@ const WEAPON_CONFIGS = [
 
 // ─── Compile Contracts ───────────────────────────────────────────────────────
 function compileContracts() {
-  console.log("📦 Compiling contracts...");
+  console.log("📦 Loading compiled artifacts...");
   
   try {
-    // Use Hardhat to compile if available
-    execSync("npx hardhat compile --config hardhat.config.cjs 2>/dev/null", { 
-      cwd: ROOT, 
-      stdio: "pipe" 
-    });
-    
-    // Read compiled artifacts
+    // Try loading pre-compiled artifacts first (from compile-contracts.mjs)
     const arenaArtifact = JSON.parse(
       readFileSync(path.join(ROOT, "artifacts/contracts/ArenaToken.sol/ArenaToken.json"), "utf-8")
     );
     const weaponArtifact = JSON.parse(
       readFileSync(path.join(ROOT, "artifacts/contracts/WeaponToken.sol/WeaponToken.json"), "utf-8")
     );
-    
+    console.log("   ✅ Loaded pre-compiled artifacts");
     return { arenaArtifact, weaponArtifact };
   } catch {
-    console.log("⚠️  Hardhat compile failed, using pre-compiled ABIs...");
+    console.log("⚠️  No pre-compiled artifacts found. Run: node scripts/compile-contracts.mjs");
     return usePrecompiledABIs();
   }
 }
@@ -148,11 +142,8 @@ async function main() {
   txHashes.ARENA = arena.deploymentTransaction()?.hash;
   console.log(`   ✅ ARENA deployed: ${arenaAddr}`);
 
-  // Mint initial ARENA supply (100M to deployer for distribution)
-  console.log("   💎 Minting 100M ARENA to deployer...");
-  const mintTx = await arena.mint(deployer, ethers.parseEther("100000000"));
-  await mintTx.wait();
-  console.log(`   ✅ Minted 100M ARENA`);
+  // ArenaToken constructor already mints initial supply to owner
+  console.log(`   ✅ Initial supply minted via constructor`);
 
   // Deploy weapon tokens
   for (const weapon of WEAPON_CONFIGS) {
@@ -171,11 +162,8 @@ async function main() {
     txHashes[weapon.symbol] = token.deploymentTransaction()?.hash;
     console.log(`   ✅ ${weapon.symbol} deployed: ${addr}`);
 
-    // Mint initial supply (10% to deployer)
-    const initialMint = BigInt(weapon.maxSupply) / 10n;
-    console.log(`   💎 Minting ${initialMint.toString()} ${weapon.symbol}...`);
-    const wMintTx = await token.mint(deployer, ethers.parseEther(initialMint.toString()));
-    await wMintTx.wait();
+    // WeaponToken constructor already mints 50% of maxSupply to owner
+    console.log(`   ✅ Initial supply minted via constructor`);
   }
 
   // Generate agent wallets (deterministic from deployer)

@@ -489,4 +489,12 @@
 - [x] Create deployment script (deploy-base-sepolia.mjs)
 - [x] Create compilation script (compile-contracts.mjs)
 - [x] Document deployment instructions in README
-- ⏳ Live deployment pending (awaits funded Base Sepolia wallet)
+- [x] Live deployment to Base Sepolia — 7/7 contracts deployed (0.00005 ETH gas)
+- [x] ARENA: 0x9DB281D2243ea30577783ab3364873E3F0a02610
+- [x] PLAS: 0x0676e55A3649984E27eA812941e690AaFd6d989c
+- [x] RAIL: 0x49C9c24Eb0fb6E596FF4cF3A6620395308fB06Ca
+- [x] SCAT: 0x7E6d8bb54ceF2D408DEccA94DE685058181C8444
+- [x] RCKT: 0x34d2b8faf6e9438c39268e4E4868e04dc7F5b689
+- [x] BEAM: 0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E
+- [x] VOID: 0x243db4A8B200B59416C2b8d080fd8F8e44e59577
+- [x] Updated README with deployed contract addresses and BaseScan links
