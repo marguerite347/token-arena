@@ -69,14 +69,18 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         try {
+          console.log(`[Skybox Generate] prompt="${input.prompt.slice(0, 60)}..." styleId=${input.styleId}`);
           const res = await axios.post(`${SKYBOX_API_BASE}/skybox`, {
             prompt: input.prompt,
             skybox_style_id: input.styleId,
             enhance_prompt: input.enhancePrompt,
           }, {
             headers: { "x-api-key": SKYBOX_API_KEY, "Content-Type": "application/json" },
+            timeout: 30000,
           });
+          // POST /skybox returns data at top level (not wrapped in request)
           const data = res.data;
+          console.log(`[Skybox Generate] Success! ID=${data.id} status=${data.status}`);
           await cacheSkybox({ prompt: input.prompt, styleId: input.styleId, skyboxId: data.id, status: data.status || "pending" });
           return {
             id: data.id, status: data.status,
@@ -95,10 +99,14 @@ export const appRouter = router({
         try {
           const res = await axios.get(`${SKYBOX_API_BASE}/imagine/requests/${input.id}`, {
             headers: { "x-api-key": SKYBOX_API_KEY },
+            timeout: 15000,
           });
-          const data = res.data;
+          // The poll endpoint wraps data in { request: { ... } }
+          const data = res.data.request || res.data;
+          console.log(`[Skybox Poll] ID=${input.id} status=${data.status} file_url=${data.file_url ? 'present' : 'empty'}`);
           return { id: data.id, status: data.status as string, fileUrl: data.file_url || "", thumbUrl: data.thumb_url || "", depthMapUrl: data.depth_map_url || "" };
         } catch (e: any) {
+          console.error(`[Skybox Poll] Error for ID=${input.id}:`, e.message);
           return { id: input.id, status: "error", fileUrl: "", thumbUrl: "", depthMapUrl: "" };
         }
       }),

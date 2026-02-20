@@ -128,3 +128,12 @@
 - [x] Dashboard: prediction market activity
 - [x] Tests for prediction market system (34 tests across 7 files)
 - [x] Deploy updated version
+
+## Bug Fixes
+
+- [x] Fix Skybox AI generation: handle ~30s generation time with proper polling, loading state, and timeout
+- [x] Fix server-side poll endpoint: unwrap response from { request: { ... } } wrapper
+- [x] Fix client-side poll: use superjson-compatible input format { json: { id } } for tRPC
+- [x] Add progress bar and rotating status messages during skybox generation
+- [x] Add skybox thumbnail preview when environment is loaded
+- [x] Add vitest tests for poll response parsing (36 tests total across 7 files)

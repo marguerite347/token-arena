@@ -199,7 +199,7 @@ export default function Arena() {
   const handleGenerateSkybox = useCallback(
     async (prompt?: string, styleId?: number) => {
       setSkyboxLoading(true);
-      setSkyboxProgress("Initiating skybox generation...");
+      setSkyboxProgress("Initiating Skybox AI generation...");
       dispatch({ type: "SET_SKYBOX", skybox: { status: "generating" } });
 
       try {
@@ -212,49 +212,75 @@ export default function Arena() {
           enhancePrompt: true,
         });
 
-        setSkyboxProgress(`Skybox created (ID: ${result.id}). Waiting for render...`);
+        if (!result.id) {
+          throw new Error("No skybox ID returned from generation");
+        }
 
+        setSkyboxProgress(`Skybox queued (ID: ${result.id}). Rendering 360° environment...`);
+
+        // Poll with progress indicator — typical generation takes 20-40 seconds
         const pollForCompletion = async (skyboxId: number, attempts = 0): Promise<void> => {
-          if (attempts > 60) throw new Error("Skybox generation timed out");
+          if (attempts > 40) throw new Error("Skybox generation timed out after 2 minutes");
           await new Promise(r => setTimeout(r, 3000));
 
-          const res = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ id: skyboxId }))}`);
-          const json = await res.json();
-          const data = json.result?.data;
+          const elapsed = (attempts + 1) * 3;
+          const progressMessages = [
+            "Generating 360° panorama...",
+            "AI is painting your arena...",
+            "Rendering environment details...",
+            "Applying lighting and atmosphere...",
+            "Finalizing equirectangular projection...",
+          ];
+          const msgIdx = Math.min(Math.floor(elapsed / 8), progressMessages.length - 1);
 
-          if (!data) {
-            setSkyboxProgress(`Polling... attempt ${attempts + 1}`);
+          try {
+            // tRPC with superjson requires input wrapped in { json: { ... } }
+            const inputPayload = { json: { id: skyboxId } };
+            const res = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify(inputPayload))}`);
+            const json = await res.json();
+            // tRPC+superjson wraps the result in { result: { data: { json: { ... } } } }
+            const data = json.result?.data?.json || json.result?.data;
+
+            if (!data || !data.status) {
+              setSkyboxProgress(`${progressMessages[msgIdx]} (${elapsed}s)`);
+              return pollForCompletion(skyboxId, attempts + 1);
+            }
+
+            if (data.status === "complete" && data.fileUrl) {
+              dispatch({
+                type: "SET_SKYBOX",
+                skybox: {
+                  id: data.id,
+                  status: "ready",
+                  imageUrl: data.fileUrl,
+                  thumbUrl: data.thumbUrl || "",
+                  depthMapUrl: data.depthMapUrl || "",
+                  prompt: p,
+                  styleName: `Skybox #${data.id}`,
+                },
+              });
+              setSkyboxProgress(`✓ Environment ready! (${elapsed}s)`);
+              return;
+            }
+
+            if (data.status === "error") throw new Error("Skybox generation failed on server");
+
+            // Still processing
+            setSkyboxProgress(`${progressMessages[msgIdx]} (${elapsed}s)`);
+            return pollForCompletion(skyboxId, attempts + 1);
+          } catch (fetchErr: any) {
+            // Network error during poll — retry
+            console.warn(`[Skybox Poll] Fetch error attempt ${attempts}:`, fetchErr.message);
+            setSkyboxProgress(`Reconnecting... (${elapsed}s)`);
             return pollForCompletion(skyboxId, attempts + 1);
           }
-
-          setSkyboxProgress(`Status: ${data.status}...`);
-
-          if (data.status === "complete" && data.fileUrl) {
-            dispatch({
-              type: "SET_SKYBOX",
-              skybox: {
-                id: data.id,
-                status: "ready",
-                imageUrl: data.fileUrl,
-                thumbUrl: data.thumbUrl || "",
-                depthMapUrl: data.depthMapUrl || "",
-                prompt: p,
-                styleName: `Skybox #${data.id}`,
-              },
-            });
-            setSkyboxProgress("Skybox ready!");
-            return;
-          }
-
-          if (data.status === "error") throw new Error("Skybox generation failed");
-          return pollForCompletion(skyboxId, attempts + 1);
         };
 
         await pollForCompletion(result.id);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Skybox generation failed:", err);
         dispatch({ type: "SET_SKYBOX", skybox: { status: "error" } });
-        setSkyboxProgress("Generation failed. Using default environment.");
+        setSkyboxProgress(`Generation failed: ${err.message || "Unknown error"}. Using default environment.`);
       } finally {
         setSkyboxLoading(false);
       }
@@ -436,11 +462,29 @@ export default function Arena() {
                   </select>
                 </div>
 
-                {skyboxProgress && (
-                  <div className="text-[10px] font-mono text-neon-cyan/70 animate-pulse-neon">{skyboxProgress}</div>
+                {skyboxLoading && (
+                  <div className="mt-2 space-y-2">
+                    <div className="h-1.5 bg-background/50 rounded-full overflow-hidden border border-border/30">
+                      <div className="h-full bg-neon-cyan/70 rounded-full animate-pulse" style={{ width: '100%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    </div>
+                    <div className="text-[10px] font-mono text-neon-cyan/70 animate-pulse">{skyboxProgress}</div>
+                  </div>
                 )}
-                {state.skybox.status === "ready" && (
-                  <div className="text-[10px] font-mono text-neon-green">
+                {!skyboxLoading && skyboxProgress && (
+                  <div className={`text-[10px] font-mono mt-1 ${skyboxProgress.startsWith('✓') ? 'text-neon-green' : skyboxProgress.includes('failed') ? 'text-red-400' : 'text-neon-cyan/70'}`}>
+                    {skyboxProgress}
+                  </div>
+                )}
+                {state.skybox.status === "ready" && state.skybox.thumbUrl && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <img src={state.skybox.thumbUrl} alt="Skybox preview" className="w-12 h-8 rounded border border-neon-cyan/30 object-cover" />
+                    <div className="text-[10px] font-mono text-neon-green">
+                      ✓ Environment loaded: {state.skybox.styleName}
+                    </div>
+                  </div>
+                )}
+                {state.skybox.status === "ready" && !state.skybox.thumbUrl && (
+                  <div className="text-[10px] font-mono text-neon-green mt-1">
                     ✓ Environment loaded: {state.skybox.styleName}
                   </div>
                 )}
