@@ -426,3 +426,73 @@ export const feeConfig = mysqlTable("fee_config", {
 
 export type FeeConfigRow = typeof feeConfig.$inferSelect;
 export type InsertFeeConfig = typeof feeConfig.$inferInsert;
+
+// ============================================================
+// v7 — Prediction Market
+// ============================================================
+
+/**
+ * Prediction Markets — DAO-created markets for match outcomes
+ */
+export const predictionMarkets = mysqlTable("prediction_markets", {
+  id: int("id").autoincrement().primaryKey(),
+  matchId: int("matchId"), // null if pre-match
+  marketType: varchar("marketType", { length: 32 }).notNull(), // match_winner | total_kills | token_volume | survival_count | first_blood | mvp
+  title: varchar("title", { length: 256 }).notNull(),
+  description: text("description").notNull(),
+  options: json("options").notNull(), // [{id, label, odds}]
+  createdByCouncilId: int("createdByCouncilId").notNull(),
+  status: varchar("status", { length: 16 }).notNull().default("open"), // open | locked | resolved | cancelled
+  winningOptionId: int("winningOptionId"),
+  totalPool: bigint("totalPool", { mode: "number" }).notNull().default(0),
+  daoFeeCollected: int("daoFeeCollected").notNull().default(0),
+  lockTime: timestamp("lockTime"), // when betting closes (before match starts)
+  resolvedAt: timestamp("resolvedAt"),
+  governanceCooldown: int("governanceCooldown").notNull().default(300), // seconds before DAO can act after creating market
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PredictionMarketRow = typeof predictionMarkets.$inferSelect;
+export type InsertPredictionMarket = typeof predictionMarkets.$inferInsert;
+
+/**
+ * Prediction Bets — individual bets placed by players and agents
+ */
+export const predictionBets = mysqlTable("prediction_bets", {
+  id: int("id").autoincrement().primaryKey(),
+  marketId: int("marketId").notNull(),
+  bettorType: varchar("bettorType", { length: 16 }).notNull(), // player | agent | spectator
+  bettorId: varchar("bettorId", { length: 128 }).notNull(), // user id, agent id, or wallet address
+  bettorName: varchar("bettorName", { length: 64 }).notNull(),
+  optionId: int("optionId").notNull(),
+  amount: int("amount").notNull(),
+  potentialPayout: int("potentialPayout").notNull().default(0),
+  status: varchar("status", { length: 16 }).notNull().default("active"), // active | won | lost | refunded
+  paidOut: int("paidOut").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PredictionBetRow = typeof predictionBets.$inferSelect;
+export type InsertPredictionBet = typeof predictionBets.$inferInsert;
+
+/**
+ * Ecosystem Snapshots — periodic snapshots of the full ecosystem state for the dashboard
+ */
+export const ecosystemSnapshots = mysqlTable("ecosystem_snapshots", {
+  id: int("id").autoincrement().primaryKey(),
+  agentsAlive: int("agentsAlive").notNull().default(0),
+  agentsDead: int("agentsDead").notNull().default(0),
+  totalMatches: int("totalMatches").notNull().default(0),
+  treasuryBalance: bigint("treasuryBalance", { mode: "number" }).notNull().default(0),
+  totalTokensCirculating: bigint("totalTokensCirculating", { mode: "number" }).notNull().default(0),
+  tokenVelocity: float("tokenVelocity").notNull().default(0),
+  economyHealth: float("economyHealth").notNull().default(0.5),
+  predictionVolume: bigint("predictionVolume", { mode: "number" }).notNull().default(0),
+  activeBets: int("activeBets").notNull().default(0),
+  avgAgentWealth: float("avgAgentWealth").notNull().default(0),
+  giniCoefficient: float("giniCoefficient").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type EcosystemSnapshotRow = typeof ecosystemSnapshots.$inferSelect;
+export type InsertEcosystemSnapshot = typeof ecosystemSnapshots.$inferInsert;

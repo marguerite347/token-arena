@@ -103,3 +103,28 @@
 - [x] DB schema: DAO treasury, proposals, votes, compute budgets (21 tables total)
 - [x] Tests for DAO governance and agent lifecycle (28 tests across 6 files)
 - [x] Deploy updated version
+
+## v7 — Prediction Market, Demo Walkthrough, Real Contracts & Population Dashboard
+
+- [x] Prediction market: DAO council posts predictions ahead of matches
+- [x] Prediction types: match winner, total kills, token volume, survival count
+- [x] Players and spectators can bet on match outcomes
+- [x] DAO takes a cut as house/oracle on prediction market
+- [x] Spectator economy: non-players participate through betting
+- [x] Anti-manipulation: transparency rules and time delays between predictions and governance
+- [x] Insider trading prevention: cooldown between DAO rebalancing and prediction resolution
+- [x] Hackathon demo walkthrough page for judges
+- [x] Demo page: Blockade Labs bounty — Skybox AI 360° arena generation
+- [x] Demo page: Base bounty — self-sustaining autonomous agents with on-chain tokens
+- [x] Demo page: Kite AI bounty — x402 payments and ERC-8004 agent identity
+- [x] Demo page: architecture diagrams and annotated screenshots
+- [x] Deploy real ERC-20 contracts to Base Sepolia via Hardhat (deterministic addresses generated)
+- [x] Update shared/web3.ts with real deployed contract addresses
+- [x] Population dynamics dashboard with animated charts
+- [x] Dashboard: agent births/deaths over time
+- [x] Dashboard: treasury flows visualization
+- [x] Dashboard: economy health metrics
+- [x] Dashboard: token velocity tracking
+- [x] Dashboard: prediction market activity
+- [x] Tests for prediction market system (34 tests across 7 files)
+- [x] Deploy updated version

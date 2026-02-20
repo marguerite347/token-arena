@@ -19,6 +19,7 @@ import CraftingPanel from "@/components/CraftingPanel";
 import AgentBrainPanel from "@/components/AgentBrainPanel";
 import GameMasterPanel from "@/components/GameMasterPanel";
 import DAOPanel from "@/components/DAOPanel";
+import PredictionPanel from "@/components/PredictionPanel";
 
 export default function Arena() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -36,6 +37,7 @@ export default function Arena() {
   const [showBrain, setShowBrain] = useState(false);
   const [showGameMaster, setShowGameMaster] = useState(false);
   const [showDAO, setShowDAO] = useState(false);
+  const [showPrediction, setShowPrediction] = useState(false);
   const prevHealthRef = useRef(state.player.health);
   const prevPhaseRef = useRef(state.phase);
   const matchSavedRef = useRef(false);
@@ -569,6 +571,10 @@ export default function Arena() {
                 >
                   🏛️ DAO COUNCIL
                 </button>
+                <button onClick={() => setShowPrediction(true)}
+                  className="px-3 py-2 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-['Orbitron'] text-xs hover:bg-yellow-500/20 transition">
+                  🎰 PREDICTIONS
+                </button>
               </div>
 
               {/* Navigation */}
@@ -713,6 +719,9 @@ export default function Arena() {
 
       {/* DAO Governance Panel */}
       <DAOPanel isOpen={showDAO} onClose={() => setShowDAO(false)} />
+
+      {/* Prediction Market Panel */}
+      <PredictionPanel isOpen={showPrediction} onClose={() => setShowPrediction(false)} />
 
       {/* Pause overlay */}
       {state.isPaused && state.phase === "combat" && (

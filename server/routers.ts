@@ -28,6 +28,11 @@ import {
   councilDeliberate, playerVote, getEcosystemState, pruneAgentMemory,
   COUNCIL_MEMBERS, DEFAULT_FEES,
 } from "./daoCouncil";
+import {
+  createPredictionMarket, placeBet, resolveMarket, generatePredictions,
+  isGovernanceCooldownActive, getOpenMarkets, getMarketWithBets, getResolvedMarkets,
+  takeEcosystemSnapshot, getEcosystemSnapshots,
+} from "./predictionMarket";
 
 const SKYBOX_API_BASE = "https://backend.blockadelabs.com/api/v1";
 const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "IRmVFdJZMYrjtVBUgb2kq4Xp8YAKCQ4Hq4j8aGZCXYJVixoUFaWh8cwNezQU";
@@ -488,6 +493,85 @@ export const appRouter = router({
         const fee = await calculateFee(input.feeType, input.baseAmount);
         return { fee };
       }),
+  }),
+
+  // ─── Prediction Market ───────────────────────────────────────────────────
+  prediction: router({
+    // Generate predictions using LLM (DAO oracle)
+    generate: publicProcedure
+      .input(z.object({
+        councilMemberId: z.number().default(1),
+        matchContext: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return generatePredictions(input);
+      }),
+
+    // Create a market from generated prediction
+    createMarket: publicProcedure
+      .input(z.object({
+        councilMemberId: z.number(),
+        marketType: z.string(),
+        title: z.string(),
+        description: z.string(),
+        options: z.array(z.object({
+          id: z.number(),
+          label: z.string(),
+          odds: z.number(),
+        })),
+        matchId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return createPredictionMarket(input);
+      }),
+
+    // Place a bet
+    bet: publicProcedure
+      .input(z.object({
+        marketId: z.number(),
+        bettorType: z.enum(["player", "agent", "spectator"]),
+        bettorId: z.string(),
+        bettorName: z.string(),
+        optionId: z.number(),
+        amount: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        return placeBet(input);
+      }),
+
+    // Resolve a market
+    resolve: publicProcedure
+      .input(z.object({
+        marketId: z.number(),
+        winningOptionId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        return resolveMarket(input);
+      }),
+
+    // Get open markets
+    open: publicProcedure.query(async () => getOpenMarkets()),
+
+    // Get market with bets
+    detail: publicProcedure
+      .input(z.object({ marketId: z.number() }))
+      .query(async ({ input }) => getMarketWithBets(input.marketId)),
+
+    // Get resolved markets
+    resolved: publicProcedure
+      .input(z.object({ limit: z.number().default(10) }).optional())
+      .query(async ({ input }) => getResolvedMarkets(input?.limit ?? 10)),
+
+    // Check governance cooldown (anti-manipulation)
+    cooldown: publicProcedure.query(async () => isGovernanceCooldownActive()),
+  }),
+
+  // ─── Ecosystem Dashboard ─────────────────────────────────────────────────
+  ecosystem: router({
+    snapshot: publicProcedure.mutation(async () => takeEcosystemSnapshot()),
+    history: publicProcedure
+      .input(z.object({ limit: z.number().default(50) }).optional())
+      .query(async ({ input }) => getEcosystemSnapshots(input?.limit ?? 50)),
   }),
 });
 

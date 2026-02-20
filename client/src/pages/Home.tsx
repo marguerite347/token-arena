@@ -49,6 +49,12 @@ export default function Home() {
             <button onClick={() => navigate("/leaderboard")} className="text-xs font-mono text-muted-foreground hover:text-neon-amber transition-colors">
               RANKINGS
             </button>
+            <button onClick={() => navigate("/dashboard")} className="text-xs font-mono text-muted-foreground hover:text-neon-magenta transition-colors">
+              ECOSYSTEM
+            </button>
+            <button onClick={() => navigate("/demo")} className="text-xs font-mono text-muted-foreground hover:text-neon-green transition-colors">
+              BOUNTIES
+            </button>
             <div className="hud-panel clip-brutal-sm px-3 py-1">
               <span className="font-display text-sm text-neon-green text-glow-green">{wallet.arenaBalance}</span>
               <span className="text-[9px] font-mono text-neon-green/60 ml-1">ARENA</span>
