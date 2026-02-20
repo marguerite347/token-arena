@@ -6,7 +6,7 @@ import { z } from "zod";
 import axios from "axios";
 import {
   saveMatch, getRecentMatches, upsertLeaderboardEntry, getLeaderboard,
-  cacheSkybox, updateSkyboxCache, getRandomCachedSkybox,
+  cacheSkybox, updateSkyboxCache, getRandomCachedSkybox, getCachedSkyboxByStyleId, getAllCachedSkyboxes,
   getAgentIdentities, getAgentById, upsertAgentIdentity, updateAgentStats, updateAgentLoadout,
   logX402Transaction, getRecentX402Transactions, getX402TransactionsByMatch,
   saveAgentMemory, getAgentMemories,
@@ -111,6 +111,73 @@ export const appRouter = router({
         }
       }),
     getCached: publicProcedure.query(async () => getRandomCachedSkybox()),
+    getCachedByStyle: publicProcedure
+      .input(z.object({ styleId: z.number() }))
+      .query(async ({ input }) => getCachedSkyboxByStyleId(input.styleId)),
+    getAllCached: publicProcedure.query(async () => getAllCachedSkyboxes()),
+    warmCache: publicProcedure.mutation(async () => {
+      // Pre-generate all 5 preset skyboxes in background
+      const { ARENA_PROMPTS } = await import("@shared/arenaPrompts");
+      const cached = await getAllCachedSkyboxes();
+      const cachedStyleIds = new Set(cached.map(c => c.styleId));
+      const toGenerate = ARENA_PROMPTS.filter(a => !cachedStyleIds.has(a.styleId));
+      console.log(`[Skybox Cache] ${cached.length} cached, ${toGenerate.length} to generate`);
+      
+      // Fire off generation for uncached presets (don't await — run in background)
+      for (const arena of toGenerate) {
+        try {
+          const res = await axios.post(`${SKYBOX_API_BASE}/skybox`, {
+            prompt: arena.prompt,
+            skybox_style_id: arena.styleId,
+            enhance_prompt: true,
+          }, {
+            headers: { "x-api-key": SKYBOX_API_KEY, "Content-Type": "application/json" },
+            timeout: 30000,
+          });
+          const data = res.data;
+          const cacheId = await cacheSkybox({ prompt: arena.prompt, styleId: arena.styleId, skyboxId: data.id, status: "pending" });
+          console.log(`[Skybox Cache] Queued ${arena.name} (ID=${data.id}, cacheId=${cacheId})`);
+          
+          // Poll in background
+          (async () => {
+            for (let i = 0; i < 40; i++) {
+              await new Promise(r => setTimeout(r, 3000));
+              try {
+                const pollRes = await axios.get(`${SKYBOX_API_BASE}/imagine/requests/${data.id}`, {
+                  headers: { "x-api-key": SKYBOX_API_KEY },
+                  timeout: 15000,
+                });
+                const pollData = pollRes.data.request || pollRes.data;
+                if (pollData.status === "complete" && pollData.file_url) {
+                  if (cacheId) {
+                    await updateSkyboxCache(cacheId, {
+                      skyboxId: data.id,
+                      fileUrl: pollData.file_url,
+                      thumbUrl: pollData.thumb_url || "",
+                      depthMapUrl: pollData.depth_map_url || "",
+                      status: "complete",
+                    });
+                  }
+                  console.log(`[Skybox Cache] ✓ ${arena.name} cached successfully`);
+                  break;
+                }
+                if (pollData.status === "error") {
+                  console.error(`[Skybox Cache] ✗ ${arena.name} generation failed`);
+                  break;
+                }
+              } catch { /* retry */ }
+            }
+          })();
+          
+          // Small delay between requests to avoid rate limiting
+          await new Promise(r => setTimeout(r, 2000));
+        } catch (e: any) {
+          console.error(`[Skybox Cache] Failed to queue ${arena.name}:`, e.message);
+        }
+      }
+      
+      return { queued: toGenerate.length, alreadyCached: cached.length };
+    }),
   }),
 
   // ─── Match History ──────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import * as THREE from "three";
-import { useGame, type Agent, type Projectile, WEAPONS } from "@/contexts/GameContext";
+import { useGame, type Agent, type Projectile, WEAPONS, type WeaponType } from "@/contexts/GameContext";
+import { updateAgentAI, notifyAgentDamaged, resetAgentStates } from "@/lib/aiCombat";
 
 interface GameEngineOptions {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -319,65 +320,82 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
         camera.lookAt(cx, 1, cz);
       }
 
-      // AI behavior + firing
-      for (const agent of s.agents) {
+      // ─── SMART AI COMBAT ──────────────────────────────────────────────
+      for (let i = 0; i < s.agents.length; i++) {
+        const agent = s.agents[i];
         if (!agent.isAlive) continue;
 
-        // Find nearest target
-        const targets = s.mode === "aivai"
-          ? s.agents.filter((a) => a.id !== agent.id && a.isAlive)
-          : [s.player, ...s.agents.filter((a) => a.id !== agent.id && a.isAlive)].filter((a) => a.isAlive);
-        if (targets.length === 0) continue;
+        const action = updateAgentAI(
+          agent, i, s.agents, s.player, s.projectiles,
+          s.mode as "pvai" | "aivai", dt
+        );
+        if (!action) continue;
 
-        let nearest = targets[0], nearDist = Infinity;
-        for (const t of targets) {
-          const dx = t.x - agent.x, dz = t.z - agent.z;
-          const d2 = Math.sqrt(dx * dx + dz * dz);
-          if (d2 < nearDist) { nearDist = d2; nearest = t; }
+        // Apply movement
+        d({ type: "UPDATE_AGENT", id: agent.id, updates: {
+          x: action.movement.x,
+          z: action.movement.z,
+          rotation: action.movement.rotation,
+        }});
+
+        // Apply weapon switch
+        if (action.weaponSwitch && WEAPONS[action.weaponSwitch]) {
+          d({ type: "UPDATE_AGENT", id: agent.id, updates: {
+            weapon: WEAPONS[action.weaponSwitch],
+          }});
         }
 
-        // Movement
-        const dx = nearest.x - agent.x, dz = nearest.z - agent.z;
-        const tAngle = Math.atan2(dx, dz);
-        let newRot = agent.rotation;
-        const aDiff = tAngle - agent.rotation;
-        newRot += Math.sign(aDiff) * Math.min(Math.abs(aDiff), 3 * dt);
-
-        const mSpd = 3 * dt;
-        let nx = agent.x, nz = agent.z;
-        if (nearDist > 8) { nx += Math.sin(newRot) * mSpd; nz += Math.cos(newRot) * mSpd; }
-        else if (nearDist < 4) { nx += Math.cos(newRot) * mSpd * 0.7; nz -= Math.sin(newRot) * mSpd * 0.7; }
-
-        const bDist = Math.sqrt(nx * nx + nz * nz);
-        if (bDist > 18) { nx *= 18 / bDist; nz *= 18 / bDist; }
-
-        d({ type: "UPDATE_AGENT", id: agent.id, updates: { x: nx, z: nz, rotation: newRot } });
-
-        // AI firing
-        if (agent.tokens >= agent.weapon.tokenCost && Math.random() < 0.03) {
-          const target = targets[Math.floor(Math.random() * targets.length)];
+        // Apply firing
+        if (action.fire && agent.tokens >= agent.weapon.tokenCost) {
+          const target = action.fire.target;
           const tdx = target.x - agent.x, tdz = target.z - agent.z;
           const dist = Math.sqrt(tdx * tdx + tdz * tdz);
-          if (dist < 15 && dist > 0.5) {
+          if (dist > 0.5) {
             const nnx = tdx / dist, nnz = tdz / dist;
             d({ type: "UPDATE_AGENT", id: agent.id, updates: { tokens: agent.tokens - agent.weapon.tokenCost } });
             const now = Date.now();
-            d({
-              type: "ADD_PROJECTILE",
-              projectile: {
+            const w = agent.weapon;
+            const aim = action.fire.aimOffset;
+
+            if (w.type === "scatter") {
+              for (let j = 0; j < 5; j++) {
+                d({ type: "ADD_PROJECTILE", projectile: {
+                  id: `p-${now}-${agent.id}-${j}-${Math.random().toString(36).slice(2, 5)}`,
+                  ownerId: agent.id,
+                  x: agent.x, y: 1.2, z: agent.z,
+                  vx: (nnx + aim.x + (Math.random() - 0.5) * 0.3) * w.projectileSpeed,
+                  vy: (aim.y + (Math.random() - 0.5) * 0.2) * w.projectileSpeed * 0.3,
+                  vz: (nnz + aim.z + (Math.random() - 0.5) * 0.3) * w.projectileSpeed,
+                  damage: w.damage, tokenValue: w.tokenCost,
+                  color: w.color, type: w.type, createdAt: now,
+                }});
+              }
+            } else if (w.type === "nova") {
+              for (let j = 0; j < 12; j++) {
+                const a = (j / 12) * Math.PI * 2;
+                d({ type: "ADD_PROJECTILE", projectile: {
+                  id: `p-${now}-${agent.id}-${j}-${Math.random().toString(36).slice(2, 5)}`,
+                  ownerId: agent.id,
+                  x: agent.x, y: 1.2, z: agent.z,
+                  vx: Math.sin(a) * w.projectileSpeed,
+                  vy: 0,
+                  vz: Math.cos(a) * w.projectileSpeed,
+                  damage: w.damage, tokenValue: w.tokenCost,
+                  color: w.color, type: w.type, createdAt: now,
+                }});
+              }
+            } else {
+              d({ type: "ADD_PROJECTILE", projectile: {
                 id: `p-${now}-${agent.id}-${Math.random().toString(36).slice(2, 6)}`,
                 ownerId: agent.id,
                 x: agent.x, y: 1.2, z: agent.z,
-                vx: (nnx + (Math.random() - 0.5) * 0.15) * agent.weapon.projectileSpeed,
-                vy: (Math.random() - 0.5) * 0.5,
-                vz: (nnz + (Math.random() - 0.5) * 0.15) * agent.weapon.projectileSpeed,
-                damage: agent.weapon.damage,
-                tokenValue: agent.weapon.tokenCost,
-                color: agent.weapon.color,
-                type: agent.weapon.type,
-                createdAt: now,
-              },
-            });
+                vx: (nnx + aim.x) * w.projectileSpeed,
+                vy: aim.y * w.projectileSpeed * 0.3,
+                vz: (nnz + aim.z) * w.projectileSpeed,
+                damage: w.damage, tokenValue: w.tokenCost,
+                color: w.color, type: w.type, createdAt: now,
+              }});
+            }
           }
         }
       }
@@ -402,6 +420,7 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
             const dmg = Math.max(1, p.damage - agent.armorValue * 0.01 * p.damage);
             const hp = Math.max(0, agent.health - dmg);
             d({ type: "UPDATE_AGENT", id: agent.id, updates: { health: hp } });
+            notifyAgentDamaged(agent.id, p.ownerId);
             if (p.ownerId !== s.player.id) {
               // Agent-to-agent: tokens go to the target
             } else {

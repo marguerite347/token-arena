@@ -15,7 +15,7 @@
 - [x] Add RANKINGS nav link to Home page
 - [x] Add weapon switch indicator to HUD
 - [x] Add Base L2 wallet integration UI (simulated on-chain with wallet connect flow)
-- [ ] Improve AI agent behavior (smarter targeting, evasion, weapon switching)
+- [x] Improve AI agent behavior (smarter targeting, evasion, weapon switching)
 - [x] Final testing and checkpoint
 
 ## v3 — Base L2 Wallet + x402 + ERC-8004
@@ -137,3 +137,39 @@
 - [x] Add progress bar and rotating status messages during skybox generation
 - [x] Add skybox thumbnail preview when environment is loaded
 - [x] Add vitest tests for poll response parsing (36 tests total across 7 files)
+
+## v9 — Pre-Game Lobby, Prediction Ticker, Smart AI, Skybox Cache
+
+### Skybox Caching
+- [x] Auto-generate and cache all 5 preset skyboxes on first server load
+- [x] Serve cached skybox URLs instantly when available
+- [x] Background refresh of cached skyboxes periodically
+
+### Smarter AI Combat
+- [x] Priority targeting: focus low-health enemies first
+- [x] Evasion maneuvers: dodge when under fire, strafe unpredictably
+- [x] Dynamic weapon switching based on range and ammo
+- [x] Personality-driven combat styles per agent (aggressive, defensive, opportunist, berserker, sniper, tactician)
+- [x] Make AI vs AI spectator mode genuinely exciting to watch
+
+### Real-Time Prediction Ticker
+- [x] Bloomberg-terminal-style ticker streaming across arena view
+- [x] Updates on: bets placed, agent deaths, weapons crafted, odds shifts
+- [x] Live pot display and odds updates
+- [x] Scrolling marquee with neon styling matching game aesthetic
+
+### Pre-Game Lobby Flow
+- [x] Match ends → results screen with token tally
+- [x] Skybox generation kicks off in background automatically
+- [x] Lobby phase: DAO council deliberation (animated)
+- [x] Lobby phase: prediction market opens (bets come in, odds update)
+- [x] Lobby phase: shop/crafting window available
+- [x] Lobby phase: arena preview slowly resolving
+- [x] Skybox ready → "ENTERING ARENA" cinematic transition
+- [x] Every second of wait filled with meaningful activity
+
+### Tests
+- [x] AI combat logic tests (8 tests)
+- [x] Prediction ticker odds calculation tests
+- [x] Skybox cache endpoint logic tests
+- [x] All 44 tests passing across 8 files

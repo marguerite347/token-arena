@@ -1,4 +1,4 @@
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser, users, matches, leaderboard, skyboxCache, agentIdentities, x402Transactions,
@@ -145,6 +145,19 @@ export async function getRandomCachedSkybox() {
   if (!db) return null;
   const results = await db.select().from(skyboxCache).where(eq(skyboxCache.status, "complete")).orderBy(sql`RAND()`).limit(1);
   return results.length > 0 ? results[0] : null;
+}
+
+export async function getCachedSkyboxByStyleId(styleId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const results = await db.select().from(skyboxCache).where(and(eq(skyboxCache.styleId, styleId), eq(skyboxCache.status, "complete"))).limit(1);
+  return results.length > 0 ? results[0] : null;
+}
+
+export async function getAllCachedSkyboxes() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(skyboxCache).where(eq(skyboxCache.status, "complete"));
 }
 
 // ─── Agent Identities (ERC-8004) ──────────────────────────────────────────────

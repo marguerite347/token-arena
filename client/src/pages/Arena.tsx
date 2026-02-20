@@ -20,6 +20,8 @@ import AgentBrainPanel from "@/components/AgentBrainPanel";
 import GameMasterPanel from "@/components/GameMasterPanel";
 import DAOPanel from "@/components/DAOPanel";
 import PredictionPanel from "@/components/PredictionPanel";
+import PredictionTicker from "@/components/PredictionTicker";
+import PreGameLobby from "@/components/PreGameLobby";
 
 export default function Arena() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,6 +40,9 @@ export default function Arena() {
   const [showGameMaster, setShowGameMaster] = useState(false);
   const [showDAO, setShowDAO] = useState(false);
   const [showPrediction, setShowPrediction] = useState(false);
+  const [showLobby, setShowLobby] = useState(false);
+  const [lobbyArenaName, setLobbyArenaName] = useState("");
+  const [lobbyMatchMode, setLobbyMatchMode] = useState<"pvai" | "aivai">("pvai");
   const prevHealthRef = useRef(state.player.health);
   const prevPhaseRef = useRef(state.phase);
   const matchSavedRef = useRef(false);
@@ -57,6 +62,20 @@ export default function Arena() {
     if (!craftingSeeded.current) {
       craftingSeeded.current = true;
       craftingInitMut.mutate();
+    }
+  }, []);
+
+  // Warm skybox cache on first load (pre-generate all 5 presets)
+  const warmCacheMut = trpc.skybox.warmCache.useMutation();
+  const cacheWarmed = useRef(false);
+  useEffect(() => {
+    if (!cacheWarmed.current) {
+      cacheWarmed.current = true;
+      warmCacheMut.mutate(undefined, {
+        onSuccess: (data) => {
+          console.log(`[Skybox Cache] Warmed: ${data.alreadyCached} cached, ${data.queued} queued`);
+        },
+      });
     }
   }, []);
 
@@ -326,12 +345,39 @@ export default function Arena() {
     }
   }, [state.phase]);
 
-  const handleStartPvAI = () => startMatch("pvai", 4);
-  const handleStartAIvAI = () => startMatch("aivai", 6);
+  // Start match with lobby flow
+  const handleStartPvAI = () => {
+    setLobbyMatchMode("pvai");
+    setShowLobby(true);
+    // If no skybox is ready, generate one
+    if (state.skybox.status !== "ready") {
+      const randomArena = ARENA_PROMPTS[Math.floor(Math.random() * ARENA_PROMPTS.length)];
+      setLobbyArenaName(randomArena.name);
+      handleGenerateSkybox(randomArena.prompt, randomArena.styleId);
+    } else {
+      setLobbyArenaName(state.skybox.styleName || "Custom Arena");
+    }
+  };
+  const handleStartAIvAI = () => {
+    setLobbyMatchMode("aivai");
+    setShowLobby(true);
+    if (state.skybox.status !== "ready") {
+      const randomArena = ARENA_PROMPTS[Math.floor(Math.random() * ARENA_PROMPTS.length)];
+      setLobbyArenaName(randomArena.name);
+      handleGenerateSkybox(randomArena.prompt, randomArena.styleId);
+    } else {
+      setLobbyArenaName(state.skybox.styleName || "Custom Arena");
+    }
+  };
   const handleQuickArena = (idx: number) => {
     const arena = ARENA_PROMPTS[idx];
+    setLobbyArenaName(arena.name);
     handleGenerateSkybox(arena.prompt, arena.styleId);
   };
+  const handleLobbyStartMatch = useCallback((mode: "pvai" | "aivai") => {
+    setShowLobby(false);
+    startMatch(mode, mode === "pvai" ? 4 : 6);
+  }, [startMatch]);
 
   return (
     <div className={`relative w-screen h-screen overflow-hidden bg-background ${screenShake ? "animate-shake" : ""}`}>
@@ -366,6 +412,9 @@ export default function Arena() {
 
       {/* HUD Overlay (only during combat) */}
       {(state.phase === "combat" || state.phase === "countdown") && <GameHUD />}
+
+      {/* Bloomberg-style Prediction Ticker during combat */}
+      <PredictionTicker />
 
       {/* Countdown Overlay */}
       <AnimatePresence>
@@ -721,11 +770,17 @@ export default function Arena() {
                     onClick={() => {
                       setShowResults(false);
                       dispatch({ type: "RESET_MATCH" });
-                      startMatch(state.mode, state.mode === "pvai" ? 4 : 6);
+                      // Go through lobby flow for next match
+                      setLobbyMatchMode(state.mode as "pvai" | "aivai");
+                      setShowLobby(true);
+                      // Generate new skybox for next match
+                      const randomArena = ARENA_PROMPTS[Math.floor(Math.random() * ARENA_PROMPTS.length)];
+                      setLobbyArenaName(randomArena.name);
+                      handleGenerateSkybox(randomArena.prompt, randomArena.styleId);
                     }}
                     className="hud-panel clip-brutal-sm px-6 py-2 font-mono text-sm text-neon-cyan hover:bg-neon-cyan/10 transition-colors pointer-events-auto"
                   >
-                    PLAY AGAIN
+                    NEXT MATCH
                   </button>
                   <button
                     onClick={() => { setShowResults(false); dispatch({ type: "RESET_MATCH" }); navigate("/shop"); }}
@@ -766,6 +821,19 @@ export default function Arena() {
 
       {/* Prediction Market Panel */}
       <PredictionPanel isOpen={showPrediction} onClose={() => setShowPrediction(false)} />
+
+      {/* Pre-Game Lobby (during skybox generation) */}
+      {showLobby && (
+        <PreGameLobby
+          skyboxReady={state.skybox.status === "ready"}
+          skyboxProgress={skyboxProgress}
+          onStartMatch={handleLobbyStartMatch}
+          onSelectArena={handleQuickArena}
+          onCustomArena={(prompt) => handleGenerateSkybox(prompt)}
+          matchMode={lobbyMatchMode}
+          arenaName={lobbyArenaName}
+        />
+      )}
 
       {/* Pause overlay */}
       {state.isPaused && state.phase === "combat" && (
