@@ -15,6 +15,9 @@ import { soundEngine } from "@/lib/soundEngine";
 import { trpc } from "@/lib/trpc";
 import { DEFAULT_AI_AGENTS, WEAPON_TOKENS } from "@shared/web3";
 import { motion, AnimatePresence } from "framer-motion";
+import CraftingPanel from "@/components/CraftingPanel";
+import AgentBrainPanel from "@/components/AgentBrainPanel";
+import GameMasterPanel from "@/components/GameMasterPanel";
 
 export default function Arena() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,6 +31,9 @@ export default function Arena() {
   const [hitFlash, setHitFlash] = useState(false);
   const [screenShake, setScreenShake] = useState(false);
   const [showAgentPanel, setShowAgentPanel] = useState(false);
+  const [showCrafting, setShowCrafting] = useState(false);
+  const [showBrain, setShowBrain] = useState(false);
+  const [showGameMaster, setShowGameMaster] = useState(false);
   const prevHealthRef = useRef(state.player.health);
   const prevPhaseRef = useRef(state.phase);
   const matchSavedRef = useRef(false);
@@ -38,6 +44,17 @@ export default function Arena() {
   const generateSkyboxMut = trpc.skybox.generate.useMutation();
   const saveMatchMut = trpc.match.save.useMutation();
   const logX402Mut = trpc.x402.log.useMutation();
+  const craftingInitMut = trpc.crafting.init.useMutation();
+  const rollDropsMut = trpc.crafting.rollDrops.useMutation();
+
+  // Seed crafting materials/recipes on first load
+  const craftingSeeded = useRef(false);
+  useEffect(() => {
+    if (!craftingSeeded.current) {
+      craftingSeeded.current = true;
+      craftingInitMut.mutate();
+    }
+  }, []);
 
   // Initialize sound engine on first interaction
   useEffect(() => {
@@ -86,6 +103,16 @@ export default function Arena() {
     }
     prevProjCountRef.current = state.projectiles.length;
   }, [state.projectiles.length, state.phase, state.player.id]);
+
+  // Roll material drops on kills
+  const prevKillsRef = useRef(state.player.kills);
+  useEffect(() => {
+    if (state.player.kills > prevKillsRef.current && state.phase === "combat") {
+      const streak = state.player.kills;
+      rollDropsMut.mutate({ weaponUsed: state.player.weapon.type, killStreak: streak, agentId: 1 });
+    }
+    prevKillsRef.current = state.player.kills;
+  }, [state.player.kills, state.phase]);
 
   // Wire wallet to getting hit — receive tokens
   useEffect(() => {
@@ -514,6 +541,28 @@ export default function Arena() {
                 </div>
               </div>
 
+              {/* Advanced Panels */}
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <button
+                  onClick={() => setShowCrafting(true)}
+                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-neon-green hover:bg-neon-green/10 transition-colors pointer-events-auto text-center"
+                >
+                  ⚒ CRAFTING LAB
+                </button>
+                <button
+                  onClick={() => setShowBrain(true)}
+                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-purple-400 hover:bg-purple-400/10 transition-colors pointer-events-auto text-center"
+                >
+                  🧠 AGENT BRAIN
+                </button>
+                <button
+                  onClick={() => setShowGameMaster(true)}
+                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-neon-amber hover:bg-neon-amber/10 transition-colors pointer-events-auto text-center"
+                >
+                  🎲 GAME MASTER
+                </button>
+              </div>
+
               {/* Navigation */}
               <div className="flex items-center justify-center gap-6">
                 <button
@@ -644,6 +693,15 @@ export default function Arena() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Crafting Panel */}
+      <CraftingPanel agentId={1} isOpen={showCrafting} onClose={() => setShowCrafting(false)} />
+
+      {/* Agent Brain Panel */}
+      <AgentBrainPanel isOpen={showBrain} onClose={() => setShowBrain(false)} />
+
+      {/* Game Master Panel */}
+      <GameMasterPanel isOpen={showGameMaster} onClose={() => setShowGameMaster(false)} />
 
       {/* Pause overlay */}
       {state.isPaused && state.phase === "combat" && (

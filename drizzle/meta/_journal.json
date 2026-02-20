@@ -22,6 +22,20 @@
       "when": 1771586545933,
       "tag": "0002_pink_lady_deathstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1771606863737,
+      "tag": "0003_fuzzy_the_liberteens",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1771607492199,
+      "tag": "0004_shallow_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

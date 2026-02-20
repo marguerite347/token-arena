@@ -7,10 +7,21 @@ import axios from "axios";
 import {
   saveMatch, getRecentMatches, upsertLeaderboardEntry, getLeaderboard,
   cacheSkybox, updateSkyboxCache, getRandomCachedSkybox,
-  getAgentIdentities, getAgentById, upsertAgentIdentity, updateAgentStats,
+  getAgentIdentities, getAgentById, upsertAgentIdentity, updateAgentStats, updateAgentLoadout,
   logX402Transaction, getRecentX402Transactions, getX402TransactionsByMatch,
+  saveAgentMemory, getAgentMemories,
+  saveAgentDecision, getAgentDecisionHistory,
+  seedMaterials, getAllMaterials, getMaterialByName,
+  seedRecipes, getAvailableRecipes, getRecipeById, saveRecipe, getEmergentRecipes,
+  saveCraftedItem, getCraftedItemsByAgent, getRecentCraftedItems, transferCraftedItem,
+  getAgentInventoryItems, addToInventory, removeFromInventory,
+  saveTrade, getRecentTrades,
+  saveMetaSnapshot, getLatestMetaSnapshot, getMetaSnapshots,
 } from "./db";
 import { DEFAULT_AI_AGENTS } from "@shared/web3";
+import { agentReason, executeAgentDecision, buildAgentPerformance } from "./agentBrain";
+import { DEFAULT_MATERIALS, DEFAULT_RECIPES, generateEmergentRecipe, rollMaterialDrops } from "./craftingEngine";
+import { runGameMasterAnalysis, buildDefaultMeta } from "./gameMaster";
 
 const SKYBOX_API_BASE = "https://backend.blockadelabs.com/api/v1";
 const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "IRmVFdJZMYrjtVBUgb2kq4Xp8YAKCQ4Hq4j8aGZCXYJVixoUFaWh8cwNezQU";
@@ -39,7 +50,6 @@ export const appRouter = router({
         return [];
       }
     }),
-
     generate: publicProcedure
       .input(z.object({
         prompt: z.string().min(1).max(600),
@@ -53,35 +63,21 @@ export const appRouter = router({
             skybox_style_id: input.styleId,
             enhance_prompt: input.enhancePrompt,
           }, {
-            headers: {
-              "x-api-key": SKYBOX_API_KEY,
-              "Content-Type": "application/json",
-            },
+            headers: { "x-api-key": SKYBOX_API_KEY, "Content-Type": "application/json" },
           });
-
           const data = res.data;
-          await cacheSkybox({
-            prompt: input.prompt,
-            styleId: input.styleId,
-            skyboxId: data.id,
-            status: data.status || "pending",
-          });
-
+          await cacheSkybox({ prompt: input.prompt, styleId: input.styleId, skyboxId: data.id, status: data.status || "pending" });
           return {
-            id: data.id,
-            status: data.status,
-            fileUrl: data.file_url || "",
-            thumbUrl: data.thumb_url || "",
+            id: data.id, status: data.status,
+            fileUrl: data.file_url || "", thumbUrl: data.thumb_url || "",
             depthMapUrl: data.depth_map_url || "",
-            pusherChannel: data.pusher_channel || "",
-            pusherEvent: data.pusher_event || "",
+            pusherChannel: data.pusher_channel || "", pusherEvent: data.pusher_event || "",
           };
         } catch (e: any) {
           console.error("[Skybox] Failed to generate:", e.message);
           throw new Error(`Skybox generation failed: ${e.message}`);
         }
       }),
-
     poll: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
@@ -90,73 +86,45 @@ export const appRouter = router({
             headers: { "x-api-key": SKYBOX_API_KEY },
           });
           const data = res.data;
-          return {
-            id: data.id,
-            status: data.status as string,
-            fileUrl: data.file_url || "",
-            thumbUrl: data.thumb_url || "",
-            depthMapUrl: data.depth_map_url || "",
-          };
+          return { id: data.id, status: data.status as string, fileUrl: data.file_url || "", thumbUrl: data.thumb_url || "", depthMapUrl: data.depth_map_url || "" };
         } catch (e: any) {
-          console.error("[Skybox] Failed to poll:", e.message);
           return { id: input.id, status: "error", fileUrl: "", thumbUrl: "", depthMapUrl: "" };
         }
       }),
-
-    getCached: publicProcedure.query(async () => {
-      const cached = await getRandomCachedSkybox();
-      return cached;
-    }),
+    getCached: publicProcedure.query(async () => getRandomCachedSkybox()),
   }),
 
   // ─── Match History ──────────────────────────────────────────────────────────
   match: router({
     save: publicProcedure
       .input(z.object({
-        mode: z.string(),
-        duration: z.number(),
-        skyboxPrompt: z.string().optional(),
-        skyboxUrl: z.string().optional(),
-        playerName: z.string(),
-        playerKills: z.number(),
-        playerDeaths: z.number(),
-        tokensEarned: z.number(),
-        tokensSpent: z.number(),
-        tokenNet: z.number(),
-        result: z.string(),
-        weaponUsed: z.string().optional(),
-        agentData: z.any().optional(),
-        walletAddress: z.string().optional(),
+        mode: z.string(), duration: z.number(),
+        skyboxPrompt: z.string().optional(), skyboxUrl: z.string().optional(),
+        playerName: z.string(), playerKills: z.number(), playerDeaths: z.number(),
+        tokensEarned: z.number(), tokensSpent: z.number(), tokenNet: z.number(),
+        result: z.string(), weaponUsed: z.string().optional(),
+        agentData: z.any().optional(), walletAddress: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const id = await saveMatch(input);
         await upsertLeaderboardEntry({
-          playerName: input.playerName,
-          kills: input.playerKills,
-          deaths: input.playerDeaths,
-          tokensEarned: input.tokensEarned,
-          tokensSpent: input.tokensSpent,
-          won: input.result === "victory",
-          weapon: input.weaponUsed || "plasma",
+          playerName: input.playerName, kills: input.playerKills, deaths: input.playerDeaths,
+          tokensEarned: input.tokensEarned, tokensSpent: input.tokensSpent,
+          won: input.result === "victory", weapon: input.weaponUsed || "plasma",
           walletAddress: input.walletAddress,
         });
         return { id };
       }),
-
     recent: publicProcedure
       .input(z.object({ limit: z.number().default(20) }).optional())
-      .query(async ({ input }) => {
-        return getRecentMatches(input?.limit ?? 20);
-      }),
+      .query(async ({ input }) => getRecentMatches(input?.limit ?? 20)),
   }),
 
   // ─── Leaderboard ────────────────────────────────────────────────────────────
   leaderboard: router({
     get: publicProcedure
       .input(z.object({ limit: z.number().default(50) }).optional())
-      .query(async ({ input }) => {
-        return getLeaderboard(input?.limit ?? 50);
-      }),
+      .query(async ({ input }) => getLeaderboard(input?.limit ?? 50)),
   }),
 
   // ─── Agent Identity (ERC-8004) ──────────────────────────────────────────────
@@ -164,82 +132,242 @@ export const appRouter = router({
     list: publicProcedure.query(async () => {
       const agents = await getAgentIdentities();
       if (agents.length === 0) {
-        // Seed default agents on first call
         for (const agent of DEFAULT_AI_AGENTS) {
           await upsertAgentIdentity({
-            agentId: agent.agentId,
-            name: agent.name,
-            description: agent.description,
-            owner: agent.owner,
-            agentRegistry: agent.agentRegistry,
+            agentId: agent.agentId, name: agent.name, description: agent.description,
+            owner: agent.owner, agentRegistry: agent.agentRegistry,
             reputation: Math.round(agent.reputation * 100),
-            primaryWeapon: agent.loadout.primaryWeapon,
-            secondaryWeapon: agent.loadout.secondaryWeapon,
-            armor: agent.loadout.armor,
-            metadata: agent.metadata,
+            primaryWeapon: agent.loadout.primaryWeapon, secondaryWeapon: agent.loadout.secondaryWeapon,
+            armor: agent.loadout.armor, metadata: agent.metadata,
           });
         }
         return getAgentIdentities();
       }
       return agents;
     }),
-
     get: publicProcedure
       .input(z.object({ agentId: z.number() }))
-      .query(async ({ input }) => {
-        return getAgentById(input.agentId);
-      }),
-
+      .query(async ({ input }) => getAgentById(input.agentId)),
     updateStats: publicProcedure
       .input(z.object({
-        agentId: z.number(),
-        kills: z.number().default(0),
-        deaths: z.number().default(0),
-        tokensEarned: z.number().default(0),
-        tokensSpent: z.number().default(0),
+        agentId: z.number(), kills: z.number().default(0), deaths: z.number().default(0),
+        tokensEarned: z.number().default(0), tokensSpent: z.number().default(0),
       }))
       .mutation(async ({ input }) => {
-        await updateAgentStats(input.agentId, {
-          kills: input.kills,
-          deaths: input.deaths,
-          tokensEarned: input.tokensEarned,
-          tokensSpent: input.tokensSpent,
-        });
+        await updateAgentStats(input.agentId, { kills: input.kills, deaths: input.deaths, tokensEarned: input.tokensEarned, tokensSpent: input.tokensSpent });
         return { success: true };
       }),
+
+    // ─── Autonomous Reasoning ─────────────────────────────────────────────
+    reason: publicProcedure
+      .input(z.object({ agentId: z.number() }))
+      .mutation(async ({ input }) => {
+        const perf = await buildAgentPerformance(input.agentId);
+        if (!perf) return { error: "Agent not found" };
+        const decision = await agentReason(perf);
+        await executeAgentDecision(input.agentId, decision);
+
+        // Execute the decision
+        if (decision.action === "change_loadout") {
+          const [primary, secondary] = decision.target.split(",");
+          if (primary) await updateAgentLoadout(input.agentId, { primaryWeapon: primary.trim(), secondaryWeapon: secondary?.trim() });
+        }
+
+        return { decision, performance: { winRate: perf.recentMatches.length > 0 ? perf.recentMatches.filter(m => m.won).length / perf.recentMatches.length : 0, tokenBalance: perf.totalTokenBalance } };
+      }),
+
+    decisions: publicProcedure
+      .input(z.object({ agentId: z.number(), limit: z.number().default(10) }))
+      .query(async ({ input }) => getAgentDecisionHistory(input.agentId, input.limit)),
+
+    memories: publicProcedure
+      .input(z.object({ agentId: z.number(), limit: z.number().default(10) }))
+      .query(async ({ input }) => getAgentMemories(input.agentId, input.limit)),
+
+    inventory: publicProcedure
+      .input(z.object({ agentId: z.number() }))
+      .query(async ({ input }) => getAgentInventoryItems(input.agentId)),
   }),
 
   // ─── x402 Transactions ──────────────────────────────────────────────────────
   x402: router({
     log: publicProcedure
       .input(z.object({
-        paymentId: z.string(),
-        txHash: z.string(),
-        action: z.string(),
-        tokenSymbol: z.string(),
-        amount: z.number(),
-        fromAddress: z.string(),
-        toAddress: z.string(),
-        matchId: z.number().optional(),
-        agentId: z.number().optional(),
+        paymentId: z.string(), txHash: z.string(), action: z.string(),
+        tokenSymbol: z.string(), amount: z.number(),
+        fromAddress: z.string(), toAddress: z.string(),
+        matchId: z.number().optional(), agentId: z.number().optional(),
         success: z.number().default(1),
       }))
       .mutation(async ({ input }) => {
         const id = await logX402Transaction(input);
         return { id };
       }),
-
     recent: publicProcedure
       .input(z.object({ limit: z.number().default(50) }).optional())
-      .query(async ({ input }) => {
-        return getRecentX402Transactions(input?.limit ?? 50);
-      }),
-
+      .query(async ({ input }) => getRecentX402Transactions(input?.limit ?? 50)),
     byMatch: publicProcedure
       .input(z.object({ matchId: z.number() }))
-      .query(async ({ input }) => {
-        return getX402TransactionsByMatch(input.matchId);
+      .query(async ({ input }) => getX402TransactionsByMatch(input.matchId)),
+  }),
+
+  // ─── Crafting System ────────────────────────────────────────────────────────
+  crafting: router({
+    // Seed default materials and recipes
+    init: publicProcedure.mutation(async () => {
+      await seedMaterials(DEFAULT_MATERIALS);
+      await seedRecipes(DEFAULT_RECIPES);
+      return { success: true };
+    }),
+
+    materials: publicProcedure.query(async () => getAllMaterials()),
+
+    recipes: publicProcedure.query(async () => getAvailableRecipes()),
+
+    emergentRecipes: publicProcedure.query(async () => getEmergentRecipes()),
+
+    recentItems: publicProcedure
+      .input(z.object({ limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => getRecentCraftedItems(input?.limit ?? 20)),
+
+    // Roll material drops from a kill
+    rollDrops: publicProcedure
+      .input(z.object({ weaponUsed: z.string(), killStreak: z.number(), agentId: z.number() }))
+      .mutation(async ({ input }) => {
+        const drops = rollMaterialDrops(input.weaponUsed, input.killStreak);
+        // Add drops to agent inventory
+        for (const drop of drops) {
+          const mat = await getMaterialByName(drop.materialName);
+          if (mat) {
+            await addToInventory({ agentId: input.agentId, itemType: "material", itemId: mat.id, quantity: drop.quantity });
+          }
+        }
+        return { drops };
       }),
+
+    // Craft an item from a recipe
+    craft: publicProcedure
+      .input(z.object({ recipeId: z.number(), agentId: z.number() }))
+      .mutation(async ({ input }) => {
+        const recipe = await getRecipeById(input.recipeId);
+        if (!recipe) return { error: "Recipe not found" };
+
+        // Save the crafted item
+        const itemId = await saveCraftedItem({
+          recipeId: recipe.id,
+          craftedBy: input.agentId,
+          ownedBy: input.agentId,
+          itemType: recipe.resultType,
+          itemName: recipe.resultName,
+          stats: recipe.resultStats,
+          rarity: recipe.craftingCost > 50 ? "epic" : recipe.craftingCost > 30 ? "rare" : "uncommon",
+        });
+
+        return { success: true, itemId, itemName: recipe.resultName, itemType: recipe.resultType };
+      }),
+
+    // Generate an emergent recipe (LLM-powered)
+    discover: publicProcedure
+      .input(z.object({ agentId: z.number(), agentName: z.string() }))
+      .mutation(async ({ input }) => {
+        const materials = await getAllMaterials();
+        const recipes = await getAvailableRecipes();
+        const materialNames = materials.map(m => m.name);
+        const recipeNames = recipes.map(r => r.name);
+
+        const meta = await getLatestMetaSnapshot();
+        const metaContext = meta?.analysis || "Early game — no dominant strategies yet";
+
+        const newRecipe = await generateEmergentRecipe(
+          input.agentName, input.agentId, materialNames, recipeNames, metaContext,
+        );
+
+        if (newRecipe) {
+          const id = await saveRecipe(newRecipe);
+          return { success: true, recipe: { ...newRecipe, id } };
+        }
+        return { success: false, error: "Failed to generate recipe" };
+      }),
+  }),
+
+  // ─── Trading System ─────────────────────────────────────────────────────────
+  trade: router({
+    execute: publicProcedure
+      .input(z.object({
+        sellerAgentId: z.number(), buyerAgentId: z.number(),
+        itemType: z.string(), itemId: z.number(), price: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        // Transfer item
+        if (input.itemType === "crafted") {
+          await transferCraftedItem(input.itemId, input.buyerAgentId);
+        }
+        // Log the trade
+        const tradeId = await saveTrade({
+          sellerAgentId: input.sellerAgentId, buyerAgentId: input.buyerAgentId,
+          itemType: input.itemType, itemId: input.itemId, price: input.price,
+        });
+        return { success: true, tradeId };
+      }),
+    recent: publicProcedure
+      .input(z.object({ limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => getRecentTrades(input?.limit ?? 20)),
+  }),
+
+  // ─── Master Game Design Agent ───────────────────────────────────────────────
+  gameMaster: router({
+    analyze: publicProcedure.mutation(async () => {
+      // Build meta from current game state
+      const agents = await getAgentIdentities();
+      const meta = buildDefaultMeta();
+
+      // Enrich with real agent data
+      meta.agentStrategies = agents.map(a => ({
+        agentName: a.name,
+        primaryWeapon: a.primaryWeapon ?? "plasma",
+        winRate: (a.totalMatches ?? 0) > 0 ? ((a.totalKills ?? 0) / Math.max(1, (a.totalKills ?? 0) + (a.totalDeaths ?? 0))) : 0.5,
+        tokenBalance: ((a.totalTokensEarned ?? 0) - (a.totalTokensSpent ?? 0)) + 200,
+      }));
+
+      const sustainableCount = meta.agentStrategies.filter(a => a.tokenBalance > 200).length;
+      meta.economyStats.agentSustainabilityRate = agents.length > 0 ? sustainableCount / agents.length : 0.5;
+
+      const decision = await runGameMasterAnalysis(meta);
+
+      // Save the snapshot
+      await saveMetaSnapshot({
+        analysis: decision.analysis,
+        dominantStrategy: decision.dominantStrategy,
+        economyHealth: decision.economyHealth,
+        actionsTaken: decision.actions,
+        newItemsIntroduced: decision.newRecipe ? [decision.newRecipe] : null,
+        balanceChanges: null,
+        matchesAnalyzed: agents.length,
+      });
+
+      // If the game master introduced a new recipe, save it
+      if (decision.newRecipe) {
+        await saveRecipe({
+          name: decision.newRecipe.name,
+          description: decision.newRecipe.description,
+          resultType: decision.newRecipe.resultType,
+          resultName: decision.newRecipe.resultName,
+          resultStats: decision.newRecipe.resultStats,
+          ingredients: decision.newRecipe.ingredients,
+          craftingCost: decision.newRecipe.craftingCost,
+          discoveredBy: null,
+          isEmergent: 1,
+        });
+      }
+
+      return decision;
+    }),
+
+    latestSnapshot: publicProcedure.query(async () => getLatestMetaSnapshot()),
+
+    history: publicProcedure
+      .input(z.object({ limit: z.number().default(10) }).optional())
+      .query(async ({ input }) => getMetaSnapshots(input?.limit ?? 10)),
   }),
 });
 

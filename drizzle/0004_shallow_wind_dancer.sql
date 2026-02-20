@@ -1,0 +1,1 @@
+ALTER TABLE `game_meta_snapshots` MODIFY COLUMN `dominantStrategy` text;

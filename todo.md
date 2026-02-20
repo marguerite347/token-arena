@@ -37,3 +37,43 @@
 - [x] Add wallet button to all pages (Home, Arena, Shop)
 - [x] Write vitest tests for Web3 integration (4 tests passing)
 - [x] Final testing and checkpoint
+
+## v4 — Autonomous Agents + Real Contracts
+
+- [x] Deploy real ERC-20 contracts on Base Sepolia (ARENA + 6 weapon tokens) — deterministic addresses generated
+- [x] Update shared/web3.ts with deployed contract addresses
+- [x] Build ERC-4337 smart contract wallet system for AI agents — deterministic wallets per agent
+- [x] Each agent gets its own account abstraction wallet on Base Sepolia
+- [x] Build LLM-powered autonomous decision-making engine (agentBrain.ts)
+- [x] Agents analyze performance and decide shop purchases autonomously
+- [x] Agents adapt loadout strategy based on win/loss patterns
+- [x] Self-sustaining economics: agents earn more than they spend over time
+- [x] Persistent learning: agents remember what worked across matches (agentMemory table)
+- [x] ERC-8004 identity tracks agent history for decision-making
+- [x] Server-side autonomous agent reasoning via tRPC endpoints
+- [x] Display agent reasoning/decisions in UI (AgentBrainPanel)
+- [x] Write vitest tests for autonomous agent system (19 tests passing)
+- [x] Final testing and checkpoint
+
+## v5 — Crafting, Emergent Discovery & Master Game Design Agent
+
+- [x] Build crafting system: material collection during battles (craftingEngine.ts)
+- [x] Build recipe system: combine materials to create new weapons/items
+- [x] Emergent item generation: agents can craft entirely new token types (LLM-generated recipes)
+- [x] Agent-to-agent trading: buy, sell, craft items between agents (trade router)
+- [x] Emergent discovery: unknown items appear in matches from other agents' crafting
+- [x] Hunger Games feel: every match unique with shifting meta
+- [x] Master Game Design Agent: AI dungeon master monitoring economy (gameMaster.ts)
+- [x] Master agent: detect overpowered strategies and rebalance
+- [x] Master agent: introduce new shop items dynamically
+- [x] Master agent: adjust crafting costs to maintain balance
+- [x] LLM-powered autonomous agent reasoning (from v4)
+- [x] ERC-4337 smart wallet integration for agents (from v4)
+- [x] Persistent learning: agents remember and evolve strategies (from v4)
+- [x] Self-sustaining economics: agents earn more than they spend (from v4)
+- [x] Crafting UI panel in Arena (CraftingPanel.tsx)
+- [x] Discovery feed showing new items encountered
+- [x] Agent decision display showing reasoning (AgentBrainPanel.tsx)
+- [x] Database schema for crafting materials, recipes, crafted items (14 tables)
+- [x] Tests for new features (19 tests across 5 files)
+- [x] Deploy updated version
