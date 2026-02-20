@@ -22,6 +22,12 @@ import { DEFAULT_AI_AGENTS } from "@shared/web3";
 import { agentReason, executeAgentDecision, buildAgentPerformance } from "./agentBrain";
 import { DEFAULT_MATERIALS, DEFAULT_RECIPES, generateEmergentRecipe, rollMaterialDrops } from "./craftingEngine";
 import { runGameMasterAnalysis, buildDefaultMeta } from "./gameMaster";
+import {
+  initializeCouncil, getTreasuryBalance, recordFee, calculateFee,
+  recordComputeSpend, checkAgentBankruptcy, killAgent, spawnAgent,
+  councilDeliberate, playerVote, getEcosystemState, pruneAgentMemory,
+  COUNCIL_MEMBERS, DEFAULT_FEES,
+} from "./daoCouncil";
 
 const SKYBOX_API_BASE = "https://backend.blockadelabs.com/api/v1";
 const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "IRmVFdJZMYrjtVBUgb2kq4Xp8YAKCQ4Hq4j8aGZCXYJVixoUFaWh8cwNezQU";
@@ -106,14 +112,18 @@ export const appRouter = router({
         agentData: z.any().optional(), walletAddress: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const id = await saveMatch(input);
+        // Calculate and record match entry fee
+        const entryFee = await calculateFee("match_entry", input.tokensEarned + input.tokensSpent);
+        await recordFee("match_fee", entryFee, `Match entry fee from ${input.playerName}`);
+
+        const id = await saveMatch({ ...input, entryFee });
         await upsertLeaderboardEntry({
           playerName: input.playerName, kills: input.playerKills, deaths: input.playerDeaths,
           tokensEarned: input.tokensEarned, tokensSpent: input.tokensSpent,
           won: input.result === "victory", weapon: input.weaponUsed || "plasma",
           walletAddress: input.walletAddress,
         });
-        return { id };
+        return { id, entryFee };
       }),
     recent: publicProcedure
       .input(z.object({ limit: z.number().default(20) }).optional())
@@ -158,22 +168,39 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    // ─── Autonomous Reasoning ─────────────────────────────────────────────
+    // ─── Autonomous Reasoning (costs compute) ─────────────────────────────
     reason: publicProcedure
       .input(z.object({ agentId: z.number() }))
       .mutation(async ({ input }) => {
+        // Check compute budget
+        const canAfford = await recordComputeSpend(input.agentId, "reasoning", 10, "Strategic reasoning about loadout and purchases");
+        if (!canAfford) {
+          // Check bankruptcy
+          const bankStatus = await checkAgentBankruptcy(input.agentId);
+          if (bankStatus.isBankrupt) {
+            await killAgent(input.agentId, bankStatus.reason || "Cannot afford compute for reasoning");
+            return { error: "Agent is bankrupt and has been terminated", bankrupt: true };
+          }
+          return { error: "Insufficient compute budget for reasoning" };
+        }
+
         const perf = await buildAgentPerformance(input.agentId);
         if (!perf) return { error: "Agent not found" };
         const decision = await agentReason(perf);
         await executeAgentDecision(input.agentId, decision);
 
-        // Execute the decision
         if (decision.action === "change_loadout") {
           const [primary, secondary] = decision.target.split(",");
           if (primary) await updateAgentLoadout(input.agentId, { primaryWeapon: primary.trim(), secondaryWeapon: secondary?.trim() });
         }
 
-        return { decision, performance: { winRate: perf.recentMatches.length > 0 ? perf.recentMatches.filter(m => m.won).length / perf.recentMatches.length : 0, tokenBalance: perf.totalTokenBalance } };
+        return {
+          decision,
+          performance: {
+            winRate: perf.recentMatches.length > 0 ? perf.recentMatches.filter(m => m.won).length / perf.recentMatches.length : 0,
+            tokenBalance: perf.totalTokenBalance,
+          },
+        };
       }),
 
     decisions: publicProcedure
@@ -187,6 +214,15 @@ export const appRouter = router({
     inventory: publicProcedure
       .input(z.object({ agentId: z.number() }))
       .query(async ({ input }) => getAgentInventoryItems(input.agentId)),
+
+    // ─── Agent Lifecycle ──────────────────────────────────────────────────
+    checkBankruptcy: publicProcedure
+      .input(z.object({ agentId: z.number() }))
+      .query(async ({ input }) => checkAgentBankruptcy(input.agentId)),
+
+    pruneMemory: publicProcedure
+      .input(z.object({ agentId: z.number() }))
+      .mutation(async ({ input }) => pruneAgentMemory(input.agentId)),
   }),
 
   // ─── x402 Transactions ──────────────────────────────────────────────────────
@@ -197,10 +233,15 @@ export const appRouter = router({
         tokenSymbol: z.string(), amount: z.number(),
         fromAddress: z.string(), toAddress: z.string(),
         matchId: z.number().optional(), agentId: z.number().optional(),
+        feeAmount: z.number().default(0), feeRecipient: z.string().optional(),
         success: z.number().default(1),
       }))
       .mutation(async ({ input }) => {
         const id = await logX402Transaction(input);
+        // Record fee to treasury if applicable
+        if (input.feeAmount > 0) {
+          await recordFee("shop_fee", input.feeAmount, `x402 fee: ${input.action} ${input.tokenSymbol}`, input.agentId);
+        }
         return { id };
       }),
     recent: publicProcedure
@@ -213,29 +254,22 @@ export const appRouter = router({
 
   // ─── Crafting System ────────────────────────────────────────────────────────
   crafting: router({
-    // Seed default materials and recipes
     init: publicProcedure.mutation(async () => {
       await seedMaterials(DEFAULT_MATERIALS);
       await seedRecipes(DEFAULT_RECIPES);
       return { success: true };
     }),
-
     materials: publicProcedure.query(async () => getAllMaterials()),
-
     recipes: publicProcedure.query(async () => getAvailableRecipes()),
-
     emergentRecipes: publicProcedure.query(async () => getEmergentRecipes()),
-
     recentItems: publicProcedure
       .input(z.object({ limit: z.number().default(20) }).optional())
       .query(async ({ input }) => getRecentCraftedItems(input?.limit ?? 20)),
 
-    // Roll material drops from a kill
     rollDrops: publicProcedure
       .input(z.object({ weaponUsed: z.string(), killStreak: z.number(), agentId: z.number() }))
       .mutation(async ({ input }) => {
         const drops = rollMaterialDrops(input.weaponUsed, input.killStreak);
-        // Add drops to agent inventory
         for (const drop of drops) {
           const mat = await getMaterialByName(drop.materialName);
           if (mat) {
@@ -245,41 +279,40 @@ export const appRouter = router({
         return { drops };
       }),
 
-    // Craft an item from a recipe
     craft: publicProcedure
       .input(z.object({ recipeId: z.number(), agentId: z.number() }))
       .mutation(async ({ input }) => {
         const recipe = await getRecipeById(input.recipeId);
         if (!recipe) return { error: "Recipe not found" };
 
-        // Save the crafted item
+        // Crafting tax goes to DAO treasury
+        const craftTax = await calculateFee("crafting_tax", recipe.craftingCost);
+        await recordFee("craft_tax", craftTax, `Crafting tax: ${recipe.name} by agent ${input.agentId}`, input.agentId);
+
         const itemId = await saveCraftedItem({
-          recipeId: recipe.id,
-          craftedBy: input.agentId,
-          ownedBy: input.agentId,
-          itemType: recipe.resultType,
-          itemName: recipe.resultName,
+          recipeId: recipe.id, craftedBy: input.agentId, ownedBy: input.agentId,
+          itemType: recipe.resultType, itemName: recipe.resultName,
           stats: recipe.resultStats,
           rarity: recipe.craftingCost > 50 ? "epic" : recipe.craftingCost > 30 ? "rare" : "uncommon",
         });
-
-        return { success: true, itemId, itemName: recipe.resultName, itemType: recipe.resultType };
+        return { success: true, itemId, itemName: recipe.resultName, itemType: recipe.resultType, craftTax };
       }),
 
-    // Generate an emergent recipe (LLM-powered)
     discover: publicProcedure
       .input(z.object({ agentId: z.number(), agentName: z.string() }))
       .mutation(async ({ input }) => {
+        // Discovery costs compute
+        const canAfford = await recordComputeSpend(input.agentId, "craft_discover", 15, "Discovering new crafting recipe");
+        if (!canAfford) return { success: false, error: "Insufficient compute budget for discovery" };
+
         const materials = await getAllMaterials();
         const recipes = await getAvailableRecipes();
-        const materialNames = materials.map(m => m.name);
-        const recipeNames = recipes.map(r => r.name);
-
         const meta = await getLatestMetaSnapshot();
         const metaContext = meta?.analysis || "Early game — no dominant strategies yet";
 
         const newRecipe = await generateEmergentRecipe(
-          input.agentName, input.agentId, materialNames, recipeNames, metaContext,
+          input.agentName, input.agentId,
+          materials.map(m => m.name), recipes.map(r => r.name), metaContext,
         );
 
         if (newRecipe) {
@@ -298,30 +331,30 @@ export const appRouter = router({
         itemType: z.string(), itemId: z.number(), price: z.number(),
       }))
       .mutation(async ({ input }) => {
-        // Transfer item
+        // Trade tax goes to DAO treasury
+        const tradeTax = await calculateFee("trade_tax", input.price);
+        await recordFee("trade_tax", tradeTax, `Trade tax: ${input.itemType} #${input.itemId}`, input.buyerAgentId);
+
         if (input.itemType === "crafted") {
           await transferCraftedItem(input.itemId, input.buyerAgentId);
         }
-        // Log the trade
         const tradeId = await saveTrade({
           sellerAgentId: input.sellerAgentId, buyerAgentId: input.buyerAgentId,
-          itemType: input.itemType, itemId: input.itemId, price: input.price,
+          itemType: input.itemType, itemId: input.itemId, price: input.price, tradeTax,
         });
-        return { success: true, tradeId };
+        return { success: true, tradeId, tradeTax };
       }),
     recent: publicProcedure
       .input(z.object({ limit: z.number().default(20) }).optional())
       .query(async ({ input }) => getRecentTrades(input?.limit ?? 20)),
   }),
 
-  // ─── Master Game Design Agent ───────────────────────────────────────────────
+  // ─── Master Game Design Agent → DAO Council ────────────────────────────────
   gameMaster: router({
     analyze: publicProcedure.mutation(async () => {
-      // Build meta from current game state
       const agents = await getAgentIdentities();
       const meta = buildDefaultMeta();
 
-      // Enrich with real agent data
       meta.agentStrategies = agents.map(a => ({
         agentName: a.name,
         primaryWeapon: a.primaryWeapon ?? "plasma",
@@ -334,7 +367,6 @@ export const appRouter = router({
 
       const decision = await runGameMasterAnalysis(meta);
 
-      // Save the snapshot
       await saveMetaSnapshot({
         analysis: decision.analysis,
         dominantStrategy: decision.dominantStrategy,
@@ -345,29 +377,117 @@ export const appRouter = router({
         matchesAnalyzed: agents.length,
       });
 
-      // If the game master introduced a new recipe, save it
       if (decision.newRecipe) {
         await saveRecipe({
-          name: decision.newRecipe.name,
-          description: decision.newRecipe.description,
-          resultType: decision.newRecipe.resultType,
-          resultName: decision.newRecipe.resultName,
-          resultStats: decision.newRecipe.resultStats,
-          ingredients: decision.newRecipe.ingredients,
-          craftingCost: decision.newRecipe.craftingCost,
-          discoveredBy: null,
-          isEmergent: 1,
+          name: decision.newRecipe.name, description: decision.newRecipe.description,
+          resultType: decision.newRecipe.resultType, resultName: decision.newRecipe.resultName,
+          resultStats: decision.newRecipe.resultStats, ingredients: decision.newRecipe.ingredients,
+          craftingCost: decision.newRecipe.craftingCost, discoveredBy: null, isEmergent: 1,
         });
       }
 
       return decision;
     }),
-
     latestSnapshot: publicProcedure.query(async () => getLatestMetaSnapshot()),
-
     history: publicProcedure
       .input(z.object({ limit: z.number().default(10) }).optional())
       .query(async ({ input }) => getMetaSnapshots(input?.limit ?? 10)),
+  }),
+
+  // ─── DAO Governance ─────────────────────────────────────────────────────────
+  dao: router({
+    // Initialize the DAO council and fee structure
+    init: publicProcedure.mutation(async () => {
+      const result = await initializeCouncil();
+      return result;
+    }),
+
+    // Get full ecosystem state
+    ecosystem: publicProcedure.query(async () => getEcosystemState()),
+
+    // Get treasury balance
+    treasury: publicProcedure.query(async () => getTreasuryBalance()),
+
+    // Get council members
+    council: publicProcedure.query(async () => {
+      return COUNCIL_MEMBERS.map((m, i) => ({
+        id: i + 1,
+        name: m.name,
+        philosophy: m.philosophy,
+        description: m.description,
+      }));
+    }),
+
+    // Council deliberation — all 5 members vote on a proposal
+    deliberate: publicProcedure
+      .input(z.object({
+        proposalType: z.string(),
+        context: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return councilDeliberate(input.proposalType, input.context);
+      }),
+
+    // Player vote on a proposal (weight based on ARENA balance)
+    playerVote: publicProcedure
+      .input(z.object({
+        proposalId: z.number(),
+        vote: z.enum(["for", "against"]),
+        arenaBalance: z.number().default(0),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const userId = ctx.user?.id || 0;
+        const userName = ctx.user?.name || "Anonymous";
+        return playerVote(input.proposalId, userId, userName, input.vote, input.arenaBalance);
+      }),
+
+    // Spawn a new agent (requires DAO vote or treasury funds)
+    spawnAgent: publicProcedure
+      .input(z.object({
+        name: z.string(),
+        description: z.string(),
+        proposalId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return spawnAgent(input.name, input.description, input.proposalId);
+      }),
+
+    // Kill a bankrupt agent
+    killAgent: publicProcedure
+      .input(z.object({
+        agentId: z.number(),
+        reason: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return killAgent(input.agentId, input.reason);
+      }),
+
+    // Record a fee to the treasury
+    recordFee: publicProcedure
+      .input(z.object({
+        txType: z.string(),
+        amount: z.number(),
+        description: z.string(),
+        relatedAgentId: z.number().optional(),
+        relatedMatchId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await recordFee(input.txType, input.amount, input.description, input.relatedAgentId, input.relatedMatchId);
+        return { success: true };
+      }),
+
+    // Get current fee configuration
+    fees: publicProcedure.query(async () => {
+      return DEFAULT_FEES;
+    }),
+
+    // Calculate a specific fee
+    calculateFee: publicProcedure
+      .input(z.object({ feeType: z.string(), baseAmount: z.number() }))
+      .query(async ({ input }) => {
+        const fee = await calculateFee(input.feeType, input.baseAmount);
+        return { fee };
+      }),
   }),
 });
 

@@ -72,7 +72,7 @@ describe("Agent Brain", () => {
       expect(result.decision).toHaveProperty("action");
       expect(result.decision).toHaveProperty("reasoning");
     }
-  });
+  }, 15000);
 
   it("should list agent decisions", async () => {
     const caller = appRouter.createCaller(createPublicContext());

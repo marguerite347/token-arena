@@ -36,6 +36,13 @@
       "when": 1771607492199,
       "tag": "0004_shallow_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1771608049898,
+      "tag": "0005_lazy_cerise",
+      "breakpoints": true
     }
   ]
 }

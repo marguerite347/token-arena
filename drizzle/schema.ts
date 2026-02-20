@@ -10,6 +10,7 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  arenaBalance: bigint("arenaBalance", { mode: "number" }).notNull().default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -37,6 +38,7 @@ export const matches = mysqlTable("matches", {
   weaponUsed: varchar("weaponUsed", { length: 32 }),
   agentData: json("agentData"),
   walletAddress: varchar("walletAddress", { length: 64 }),
+  entryFee: int("entryFee").notNull().default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -100,6 +102,12 @@ export const agentIdentities = mysqlTable("agent_identities", {
   totalMatches: int("totalMatches").notNull().default(0),
   totalTokensEarned: bigint("totalTokensEarned", { mode: "number" }).notNull().default(0),
   totalTokensSpent: bigint("totalTokensSpent", { mode: "number" }).notNull().default(0),
+  computeBudget: bigint("computeBudget", { mode: "number" }).notNull().default(1000),
+  computeSpent: bigint("computeSpent", { mode: "number" }).notNull().default(0),
+  generation: int("generation").notNull().default(1),
+  alive: int("alive").notNull().default(1),
+  deathReason: varchar("deathReason", { length: 64 }),
+  spawnedBy: int("spawnedBy"),
   metadata: json("metadata"),
   active: int("active").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -123,6 +131,8 @@ export const x402Transactions = mysqlTable("x402_transactions", {
   toAddress: varchar("toAddress", { length: 64 }).notNull(),
   matchId: int("matchId"),
   agentId: int("agentId"),
+  feeAmount: int("feeAmount").notNull().default(0),
+  feeRecipient: varchar("feeRecipient", { length: 64 }),
   success: int("success").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -132,16 +142,17 @@ export type InsertX402Transaction = typeof x402Transactions.$inferInsert;
 
 /**
  * Agent Memory — persistent learning across matches
- * Stores LLM-generated insights, strategy evaluations, and learned patterns
  */
 export const agentMemory = mysqlTable("agent_memory", {
   id: int("id").autoincrement().primaryKey(),
   agentId: int("agentId").notNull(),
-  memoryType: varchar("memoryType", { length: 32 }).notNull(), // strategy | weapon_eval | economy | trade | craft
-  content: text("content").notNull(), // LLM-generated insight
+  memoryType: varchar("memoryType", { length: 32 }).notNull(),
+  content: text("content").notNull(),
   confidence: float("confidence").notNull().default(0.5),
-  matchesUsed: int("matchesUsed").notNull().default(0), // how many matches this memory informed
-  successRate: float("successRate").notNull().default(0), // outcome when using this memory
+  matchesUsed: int("matchesUsed").notNull().default(0),
+  successRate: float("successRate").notNull().default(0),
+  computeCost: int("computeCost").notNull().default(1),
+  isPrivate: int("isPrivate").notNull().default(1),
   active: int("active").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -156,12 +167,13 @@ export type InsertAgentMemory = typeof agentMemory.$inferInsert;
 export const agentDecisions = mysqlTable("agent_decisions", {
   id: int("id").autoincrement().primaryKey(),
   agentId: int("agentId").notNull(),
-  action: varchar("action", { length: 32 }).notNull(), // buy_weapon | change_loadout | craft | trade | save_tokens
-  target: varchar("target", { length: 64 }).notNull(), // what was bought/crafted/traded
-  reasoning: text("reasoning").notNull(), // LLM-generated explanation
+  action: varchar("action", { length: 32 }).notNull(),
+  target: varchar("target", { length: 64 }).notNull(),
+  reasoning: text("reasoning").notNull(),
   cost: int("cost").notNull().default(0),
+  computeCost: int("computeCost").notNull().default(0),
   confidence: float("confidence").notNull().default(0.5),
-  outcome: varchar("outcome", { length: 16 }), // success | failure | pending
+  outcome: varchar("outcome", { length: 16 }),
   matchId: int("matchId"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -176,10 +188,10 @@ export const craftingMaterials = mysqlTable("crafting_materials", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 64 }).notNull().unique(),
   description: text("description").notNull(),
-  rarity: varchar("rarity", { length: 16 }).notNull().default("common"), // common | uncommon | rare | epic | legendary
-  category: varchar("category", { length: 32 }).notNull(), // energy_core | metal_shard | crystal | circuit | exotic_matter | void_essence
+  rarity: varchar("rarity", { length: 16 }).notNull().default("common"),
+  category: varchar("category", { length: 32 }).notNull(),
   color: varchar("color", { length: 16 }).notNull().default("#FFFFFF"),
-  dropRate: float("dropRate").notNull().default(0.1), // probability per kill
+  dropRate: float("dropRate").notNull().default(0.1),
   active: int("active").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -188,20 +200,20 @@ export type CraftingMaterialRow = typeof craftingMaterials.$inferSelect;
 export type InsertCraftingMaterial = typeof craftingMaterials.$inferInsert;
 
 /**
- * Crafting Recipes — how to combine materials into items
- * Can be discovered by agents or introduced by the Master Game Design Agent
+ * Crafting Recipes
  */
 export const craftingRecipes = mysqlTable("crafting_recipes", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 64 }).notNull(),
   description: text("description").notNull(),
-  resultType: varchar("resultType", { length: 32 }).notNull(), // weapon | armor | consumable | trap | environmental | ammo
+  resultType: varchar("resultType", { length: 32 }).notNull(),
   resultName: varchar("resultName", { length: 64 }).notNull(),
-  resultStats: json("resultStats").notNull(), // { damage, fireRate, range, special, etc }
-  ingredients: json("ingredients").notNull(), // [{ materialId, quantity }]
-  craftingCost: int("craftingCost").notNull().default(10), // ARENA tokens to craft
-  discoveredBy: int("discoveredBy"), // agentId who first discovered this recipe
-  isEmergent: int("isEmergent").notNull().default(0), // 1 if LLM-generated
+  resultStats: json("resultStats").notNull(),
+  ingredients: json("ingredients").notNull(),
+  craftingCost: int("craftingCost").notNull().default(10),
+  craftingTax: int("craftingTax").notNull().default(2),
+  discoveredBy: int("discoveredBy"),
+  isEmergent: int("isEmergent").notNull().default(0),
   active: int("active").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -210,20 +222,19 @@ export type CraftingRecipeRow = typeof craftingRecipes.$inferSelect;
 export type InsertCraftingRecipe = typeof craftingRecipes.$inferInsert;
 
 /**
- * Crafted Items — unique items created by agents
- * Each becomes a new token type in the game economy
+ * Crafted Items
  */
 export const craftedItems = mysqlTable("crafted_items", {
   id: int("id").autoincrement().primaryKey(),
   recipeId: int("recipeId").notNull(),
-  craftedBy: int("craftedBy").notNull(), // agentId
-  ownedBy: int("ownedBy").notNull(), // current owner agentId
+  craftedBy: int("craftedBy").notNull(),
+  ownedBy: int("ownedBy").notNull(),
   itemType: varchar("itemType", { length: 32 }).notNull(),
   itemName: varchar("itemName", { length: 64 }).notNull(),
   stats: json("stats").notNull(),
-  tokenSymbol: varchar("tokenSymbol", { length: 16 }), // if tokenized
+  tokenSymbol: varchar("tokenSymbol", { length: 16 }),
   rarity: varchar("rarity", { length: 16 }).notNull().default("common"),
-  usesRemaining: int("usesRemaining"), // null = infinite
+  usesRemaining: int("usesRemaining"),
   active: int("active").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -232,13 +243,13 @@ export type CraftedItemRow = typeof craftedItems.$inferSelect;
 export type InsertCraftedItem = typeof craftedItems.$inferInsert;
 
 /**
- * Agent Inventory — what materials and items each agent holds
+ * Agent Inventory
  */
 export const agentInventory = mysqlTable("agent_inventory", {
   id: int("id").autoincrement().primaryKey(),
   agentId: int("agentId").notNull(),
-  itemType: varchar("itemType", { length: 16 }).notNull(), // material | crafted | weapon | consumable
-  itemId: int("itemId").notNull(), // references craftingMaterials.id or craftedItems.id
+  itemType: varchar("itemType", { length: 16 }).notNull(),
+  itemId: int("itemId").notNull(),
   quantity: int("quantity").notNull().default(1),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -247,16 +258,16 @@ export type AgentInventoryRow = typeof agentInventory.$inferSelect;
 export type InsertAgentInventory = typeof agentInventory.$inferInsert;
 
 /**
- * Game Meta Snapshots — Master Game Design Agent's view of the economy
+ * Game Meta Snapshots
  */
 export const gameMetaSnapshots = mysqlTable("game_meta_snapshots", {
   id: int("id").autoincrement().primaryKey(),
-  analysis: text("analysis").notNull(), // LLM-generated meta analysis
+  analysis: text("analysis").notNull(),
   dominantStrategy: text("dominantStrategy"),
-  economyHealth: float("economyHealth").notNull().default(0.5), // 0=broken, 1=perfect
-  actionsTaken: json("actionsTaken"), // what the master agent did in response
-  newItemsIntroduced: json("newItemsIntroduced"), // items added to shop
-  balanceChanges: json("balanceChanges"), // cost/stat adjustments
+  economyHealth: float("economyHealth").notNull().default(0.5),
+  actionsTaken: json("actionsTaken"),
+  newItemsIntroduced: json("newItemsIntroduced"),
+  balanceChanges: json("balanceChanges"),
   matchesAnalyzed: int("matchesAnalyzed").notNull().default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -265,7 +276,7 @@ export type GameMetaSnapshotRow = typeof gameMetaSnapshots.$inferSelect;
 export type InsertGameMetaSnapshot = typeof gameMetaSnapshots.$inferInsert;
 
 /**
- * Agent Trades — buy/sell/trade between agents
+ * Agent Trades
  */
 export const agentTrades = mysqlTable("agent_trades", {
   id: int("id").autoincrement().primaryKey(),
@@ -273,10 +284,145 @@ export const agentTrades = mysqlTable("agent_trades", {
   buyerAgentId: int("buyerAgentId").notNull(),
   itemType: varchar("itemType", { length: 32 }).notNull(),
   itemId: int("itemId").notNull(),
-  price: int("price").notNull(), // in ARENA tokens
+  price: int("price").notNull(),
+  tradeTax: int("tradeTax").notNull().default(0),
   status: varchar("status", { length: 16 }).notNull().default("completed"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
 export type AgentTradeRow = typeof agentTrades.$inferSelect;
 export type InsertAgentTrade = typeof agentTrades.$inferInsert;
+
+// ============================================================
+// v6 — DAO Governance, Agent Lifecycle & Token Economics
+// ============================================================
+
+/**
+ * DAO Council Members — master agents with different philosophies
+ * Each has voting power and a distinct approach to game balance
+ */
+export const daoCouncilMembers = mysqlTable("dao_council_members", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 64 }).notNull().unique(),
+  philosophy: varchar("philosophy", { length: 32 }).notNull(), // growth | stability | chaos | fairness | innovation
+  description: text("description").notNull(),
+  votingWeight: int("votingWeight").notNull().default(1),
+  totalVotes: int("totalVotes").notNull().default(0),
+  proposalsCreated: int("proposalsCreated").notNull().default(0),
+  personality: text("personality").notNull(), // LLM system prompt for this council member
+  active: int("active").notNull().default(1),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DaoCouncilMemberRow = typeof daoCouncilMembers.$inferSelect;
+export type InsertDaoCouncilMember = typeof daoCouncilMembers.$inferInsert;
+
+/**
+ * DAO Proposals — decisions that the council votes on
+ */
+export const daoProposals = mysqlTable("dao_proposals", {
+  id: int("id").autoincrement().primaryKey(),
+  proposedBy: int("proposedBy").notNull(), // council member id
+  proposalType: varchar("proposalType", { length: 32 }).notNull(), // spawn_agent | kill_agent | new_item | fee_change | nerf | buff | economy_intervention
+  title: varchar("title", { length: 128 }).notNull(),
+  description: text("description").notNull(),
+  parameters: json("parameters").notNull(), // type-specific params
+  status: varchar("status", { length: 16 }).notNull().default("voting"), // voting | passed | rejected | executed | expired
+  votesFor: int("votesFor").notNull().default(0),
+  votesAgainst: int("votesAgainst").notNull().default(0),
+  playerVotesFor: int("playerVotesFor").notNull().default(0),
+  playerVotesAgainst: int("playerVotesAgainst").notNull().default(0),
+  executedAt: timestamp("executedAt"),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DaoProposalRow = typeof daoProposals.$inferSelect;
+export type InsertDaoProposal = typeof daoProposals.$inferInsert;
+
+/**
+ * DAO Votes — individual votes from council members and players
+ */
+export const daoVotes = mysqlTable("dao_votes", {
+  id: int("id").autoincrement().primaryKey(),
+  proposalId: int("proposalId").notNull(),
+  voterType: varchar("voterType", { length: 16 }).notNull(), // council | player
+  voterId: int("voterId").notNull(), // council member id or user id
+  voterName: varchar("voterName", { length: 64 }).notNull(),
+  vote: varchar("vote", { length: 8 }).notNull(), // for | against
+  weight: int("weight").notNull().default(1), // based on ARENA balance for players
+  reasoning: text("reasoning"), // LLM-generated for council members
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DaoVoteRow = typeof daoVotes.$inferSelect;
+export type InsertDaoVote = typeof daoVotes.$inferInsert;
+
+/**
+ * DAO Treasury — tracks all fee inflows and expenditures
+ */
+export const daoTreasury = mysqlTable("dao_treasury", {
+  id: int("id").autoincrement().primaryKey(),
+  txType: varchar("txType", { length: 32 }).notNull(), // match_fee | craft_tax | shop_fee | trade_tax | death_tax | conversion_spread | spawn_cost | compute_grant | data_purchase
+  amount: int("amount").notNull(),
+  direction: varchar("direction", { length: 8 }).notNull(), // inflow | outflow
+  description: text("description").notNull(),
+  relatedAgentId: int("relatedAgentId"),
+  relatedMatchId: int("relatedMatchId"),
+  relatedProposalId: int("relatedProposalId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DaoTreasuryRow = typeof daoTreasury.$inferSelect;
+export type InsertDaoTreasury = typeof daoTreasury.$inferInsert;
+
+/**
+ * Agent Lifecycle Events — births, deaths, resurrections
+ */
+export const agentLifecycleEvents = mysqlTable("agent_lifecycle_events", {
+  id: int("id").autoincrement().primaryKey(),
+  agentId: int("agentId").notNull(),
+  eventType: varchar("eventType", { length: 16 }).notNull(), // spawn | death | resurrect
+  reason: text("reason").notNull(),
+  computeBudgetAtEvent: bigint("computeBudgetAtEvent", { mode: "number" }).notNull().default(0),
+  tokenBalanceAtEvent: bigint("tokenBalanceAtEvent", { mode: "number" }).notNull().default(0),
+  proposalId: int("proposalId"), // if spawned/killed by DAO vote
+  generation: int("generation").notNull().default(1),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AgentLifecycleEventRow = typeof agentLifecycleEvents.$inferSelect;
+export type InsertAgentLifecycleEvent = typeof agentLifecycleEvents.$inferInsert;
+
+/**
+ * Compute Ledger — tracks compute token spending per agent
+ * Every LLM call, Skybox generation, memory maintenance costs compute
+ */
+export const computeLedger = mysqlTable("compute_ledger", {
+  id: int("id").autoincrement().primaryKey(),
+  agentId: int("agentId").notNull(),
+  action: varchar("action", { length: 32 }).notNull(), // reasoning | memory_maintain | skybox_gen | craft_discover | trade_negotiate | memory_prune
+  computeCost: int("computeCost").notNull(),
+  description: text("description").notNull(),
+  success: int("success").notNull().default(1),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ComputeLedgerRow = typeof computeLedger.$inferSelect;
+export type InsertComputeLedger = typeof computeLedger.$inferInsert;
+
+/**
+ * Fee Configuration — current fee rates set by the DAO
+ */
+export const feeConfig = mysqlTable("fee_config", {
+  id: int("id").autoincrement().primaryKey(),
+  feeType: varchar("feeType", { length: 32 }).notNull().unique(), // match_entry | crafting_tax | shop_tx | trade_tax | death_tax | conversion_spread | memory_maintain
+  rate: float("rate").notNull(), // percentage (0.05 = 5%)
+  flatAmount: int("flatAmount").notNull().default(0), // flat fee in ARENA tokens
+  description: text("description").notNull(),
+  setByProposalId: int("setByProposalId"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FeeConfigRow = typeof feeConfig.$inferSelect;
+export type InsertFeeConfig = typeof feeConfig.$inferInsert;

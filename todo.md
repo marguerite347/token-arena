@@ -77,3 +77,29 @@
 - [x] Database schema for crafting materials, recipes, crafted items (14 tables)
 - [x] Tests for new features (19 tests across 5 files)
 - [x] Deploy updated version
+
+## v6 — DAO Governance, Agent Lifecycle & Token Economics
+
+- [x] Agent spawn/death cycle: agents die when bankrupt (can't afford compute/ammo)
+- [x] Master Game Design Agent becomes a DAO council of multiple master agents
+- [x] Each DAO master agent has a different philosophy (growth, stability, chaos, fairness, innovation)
+- [x] DAO voting system for major decisions (spawning, new items, fee adjustments, nerfs)
+- [x] Fee structure: match entry fees flow to DAO treasury
+- [x] Fee structure: crafting taxes flow to DAO treasury
+- [x] Fee structure: shop transaction fees flow to DAO treasury
+- [x] Fee structure: token conversion spreads flow to DAO treasury
+- [x] Fee structure: death taxes (bankrupt agent assets) flow to DAO treasury
+- [x] Token-to-compute flywheel: tokens pay for LLM calls and Skybox generations
+- [x] Compute budget per agent: better play = more tokens = more compute
+- [x] Natural selection: agents that can't sustain compute die
+- [x] Agent memory economics: memory costs compute tokens to maintain
+- [x] Agents choose what's worth remembering (memory pruning decisions)
+- [x] Memory is private per agent (competitive advantage)
+- [x] DAO only sees aggregate stats, must buy specific agent data
+- [x] ARENA token holders have voting power in master DAO
+- [x] Player-governed game: token holders vote on proposals
+- [x] DAO treasury dashboard showing inflows/outflows
+- [x] Agent lifecycle display showing births, deaths, population
+- [x] DB schema: DAO treasury, proposals, votes, compute budgets (21 tables total)
+- [x] Tests for DAO governance and agent lifecycle (28 tests across 6 files)
+- [x] Deploy updated version

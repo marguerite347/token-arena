@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import CraftingPanel from "@/components/CraftingPanel";
 import AgentBrainPanel from "@/components/AgentBrainPanel";
 import GameMasterPanel from "@/components/GameMasterPanel";
+import DAOPanel from "@/components/DAOPanel";
 
 export default function Arena() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,6 +35,7 @@ export default function Arena() {
   const [showCrafting, setShowCrafting] = useState(false);
   const [showBrain, setShowBrain] = useState(false);
   const [showGameMaster, setShowGameMaster] = useState(false);
+  const [showDAO, setShowDAO] = useState(false);
   const prevHealthRef = useRef(state.player.health);
   const prevPhaseRef = useRef(state.phase);
   const matchSavedRef = useRef(false);
@@ -561,6 +563,12 @@ export default function Arena() {
                 >
                   🎲 GAME MASTER
                 </button>
+                <button
+                  onClick={() => setShowDAO(true)}
+                  className="hud-panel clip-brutal-sm px-3 py-2 font-mono text-[10px] text-cyan-400 hover:bg-cyan-400/10 transition-colors pointer-events-auto text-center"
+                >
+                  🏛️ DAO COUNCIL
+                </button>
               </div>
 
               {/* Navigation */}
@@ -702,6 +710,9 @@ export default function Arena() {
 
       {/* Game Master Panel */}
       <GameMasterPanel isOpen={showGameMaster} onClose={() => setShowGameMaster(false)} />
+
+      {/* DAO Governance Panel */}
+      <DAOPanel isOpen={showDAO} onClose={() => setShowDAO(false)} />
 
       {/* Pause overlay */}
       {state.isPaused && state.phase === "combat" && (
