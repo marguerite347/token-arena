@@ -302,7 +302,7 @@ function computeMovement(
   } else {
     // ─── Health-based retreat ──────────────────────────────────────────
     const healthPct = agent.health / agent.maxHealth;
-    if (healthPct < traits.retreatHealthPct && dist < 8) {
+    if (healthPct < traits.retreatHealthPct && dist < 8 && dist > 0.01) {
       // Run away from target
       const retreatX = -dx / dist;
       const retreatZ = -dz / dist;

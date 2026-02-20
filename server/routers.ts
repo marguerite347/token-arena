@@ -603,12 +603,12 @@ export const appRouter = router({
     // Place a bet
     bet: publicProcedure
       .input(z.object({
-        marketId: z.number(),
+        marketId: z.number().int().positive(),
         bettorType: z.enum(["player", "agent", "spectator"]),
-        bettorId: z.string(),
-        bettorName: z.string(),
-        optionId: z.number(),
-        amount: z.number(),
+        bettorId: z.string().min(1).max(128),
+        bettorName: z.string().min(1).max(64),
+        optionId: z.number().int().nonnegative(),
+        amount: z.number().int().positive().max(1_000_000),
       }))
       .mutation(async ({ input }) => {
         return placeBet(input);

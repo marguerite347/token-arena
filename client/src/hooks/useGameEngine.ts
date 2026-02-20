@@ -474,7 +474,11 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
         if (alive.length <= 1) d({ type: "SET_PHASE", phase: "victory" });
       }
       if (s.matchTime >= s.matchDuration) {
-        d({ type: "SET_PHASE", phase: s.player.isAlive ? "victory" : "defeat" });
+        if (s.mode === "aivai") {
+          d({ type: "SET_PHASE", phase: "victory" });
+        } else {
+          d({ type: "SET_PHASE", phase: s.player.isAlive ? "victory" : "defeat" });
+        }
       }
     }
 
@@ -606,10 +610,42 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
 
     return () => {
       cancelAnimationFrame(animFrame.current);
-      agentMeshes.current.forEach((g) => sceneRef.current?.remove(g));
+      // Dispose agent meshes (geometry + material)
+      agentMeshes.current.forEach((g) => {
+        g.traverse((child) => {
+          if ((child as THREE.Mesh).geometry) (child as THREE.Mesh).geometry.dispose();
+          const mat = (child as THREE.Mesh).material;
+          if (mat) {
+            if (Array.isArray(mat)) mat.forEach(m => m.dispose());
+            else (mat as THREE.Material).dispose();
+          }
+        });
+        sceneRef.current?.remove(g);
+      });
       agentMeshes.current.clear();
-      projMeshes.current.forEach((pv) => { sceneRef.current?.remove(pv.mesh); if (pv.trail) sceneRef.current?.remove(pv.trail); });
+      // Dispose projectile meshes
+      projMeshes.current.forEach((pv) => {
+        if (pv.mesh.geometry) pv.mesh.geometry.dispose();
+        if (pv.mesh.material) {
+          if (Array.isArray(pv.mesh.material)) pv.mesh.material.forEach(m => m.dispose());
+          else (pv.mesh.material as THREE.Material).dispose();
+        }
+        sceneRef.current?.remove(pv.mesh);
+        if (pv.trail) sceneRef.current?.remove(pv.trail);
+      });
       projMeshes.current.clear();
+      // Dispose skybox
+      if (skyboxMeshRef.current) {
+        skyboxMeshRef.current.geometry?.dispose();
+        const skyMat = skyboxMeshRef.current.material;
+        if (skyMat && !Array.isArray(skyMat) && (skyMat as THREE.MeshBasicMaterial).map) {
+          (skyMat as THREE.MeshBasicMaterial).map!.dispose();
+        }
+        if (skyMat) {
+          if (Array.isArray(skyMat)) skyMat.forEach(m => m.dispose());
+          else (skyMat as THREE.Material).dispose();
+        }
+      }
       rendererRef.current?.dispose();
       initDone.current = false;
     };
