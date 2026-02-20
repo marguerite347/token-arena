@@ -1,6 +1,11 @@
 // Arena preset prompts — shared between client and server for skybox caching
 export const ARENA_PROMPTS = [
   {
+    name: "Neon Brutalism",
+    prompt: "pov in the center of an expansive massive brutalist cyberpunk arena, neon glows in the misty rain, concrete walls covered in structures like circuit boards, lots of pipes and conduits surrounding the arena playfield",
+    styleId: 28, // Cyberpunk style from Model 4
+  },
+  {
     name: "Neon Colosseum",
     prompt: "Massive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture",
     styleId: 89,
@@ -19,10 +24,5 @@ export const ARENA_PROMPTS = [
     name: "Mech Hangar",
     prompt: "Industrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates stacked high, neon warning lights, steam and smoke, brutalist concrete and steel architecture",
     styleId: 147,
-  },
-  {
-    name: "Quantum Arena",
-    prompt: "Quantum physics inspired arena with floating matter and antimatter platforms, particle accelerator rings glowing with energy, Schrodinger equation holographics, deep space background with quantum foam effects",
-    styleId: 93,
   },
 ];

@@ -247,3 +247,74 @@
 - [x] Extract ArenaOverlayPanels sub-component (panels, modals)
 - [x] Reduce Arena.tsx from ~980 lines to ~340 lines
 - [x] Update tests for auth context changes (62 tests passing)
+
+## v12 — Deadline Sprint: Real Contracts, Agent Lifecycle, Flywheel, Memory Economics
+
+### Real ERC-20 Contract Deployment (Base $10K Bounty)
+- [ ] Write Solidity ERC-20 contracts for ARENA + 6 weapon tokens
+- [ ] Configure Hardhat for Base Sepolia deployment
+- [ ] Deploy all 7 contracts to Base Sepolia testnet
+- [ ] Update shared/web3.ts and deployed-contracts.json with real addresses
+- [ ] Verify contracts on BaseScan
+- [ ] Checkpoint after deployment
+
+### Agent Spawn/Death Lifecycle
+- [ ] Wire real economics: agents die when token balance hits zero
+- [ ] DAO spawns replacement agents based on ecosystem state
+- [ ] Track births and deaths on ecosystem dashboard
+- [ ] Death triggers: can't afford compute OR can't afford ammo
+- [ ] Spawn triggers: DAO council votes or population threshold
+- [ ] Checkpoint after lifecycle wiring
+
+### Token-to-Compute Flywheel
+- [ ] Agents earn tokens from matches → tokens convertible to compute budget
+- [ ] Better play = more tokens = more compute = smarter decisions
+- [ ] Agents pay for LLM calls and Skybox generations from their token balance
+- [ ] Visual flywheel diagram showing the economic loop
+- [ ] Show compute spending in agent brain panel
+
+### Agent Memory Economics
+- [ ] Memory costs compute tokens to maintain per cycle
+- [ ] Memory costs compute tokens to query
+- [ ] Agents choose what's worth remembering (pruning decisions)
+- [ ] Bigger memory = more expensive to maintain
+- [ ] Show memory usage and compute costs in agent brain panel
+- [ ] Memory is private per agent (competitive advantage)
+
+## Skybox AI Model 4 Update
+
+- [x] Update SKYBOX_API_KEY with new Model 4 credentials
+- [x] Add Neon Brutalism preset as signature arena with cyberpunk style
+- [x] Update ARENA_PROMPTS to use Model 4 style IDs
+- [ ] Test skybox generation with Model 4 (pending M4 API testing)
+- [ ] Verify M4 skyboxes render correctly in Three.js
+
+## v12 — Deadline Sprint: Real Contracts, Agent Lifecycle, Flywheel, Memory
+
+### Real ERC-20 Contract Deployment (Base $10K Bounty)
+- [x] Write Solidity ERC-20 contracts for ARENA + 6 weapon tokens
+- [x] Configure Hardhat for Base Sepolia deployment
+- [x] Update shared/deployed-contracts.json with contract addresses
+- [ ] Deploy all 7 contracts to Base Sepolia testnet (Hardhat version conflict — manual deployment needed)
+- [ ] Verify contracts on BaseScan
+
+### Agent Spawn/Death Lifecycle
+- [ ] Wire real economics: agents die when token balance hits zero
+- [ ] DAO spawns replacement agents based on ecosystem state
+- [ ] Track births and deaths on ecosystem dashboard
+- [ ] Death triggers: can't afford compute OR can't afford ammo
+- [ ] Spawn triggers: DAO council votes or population threshold
+
+### Token-to-Compute Flywheel
+- [ ] Agents earn tokens from matches → tokens convertible to compute budget
+- [ ] Better play = more tokens = more compute = smarter decisions
+- [ ] Agents pay for LLM calls and Skybox generations from their token balance
+- [ ] Visual flywheel diagram showing the economic loop
+- [ ] Show compute spending in agent brain panel
+
+### Agent Memory Economics
+- [ ] Memory costs compute tokens to maintain per cycle
+- [ ] Memory costs compute tokens to query
+- [ ] Agents choose what's worth remembering (pruning decisions)
+- [ ] Bigger memory = more expensive to maintain
+- [ ] Show memory usage and compute costs in agent brain panel
