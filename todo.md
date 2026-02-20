@@ -520,3 +520,97 @@
 - [x] Verify README is complete and accurate (updated with verification + playtests)
 - [x] Ensure demo experience is clean for judges
 - [x] Final checkpoint and deploy
+
+## v19 — Match Replay Enhancement + Prediction Market Live Betting
+
+### Match Replay Enhancement
+- [ ] Assess existing replay system (v10) and identify gaps
+- [ ] Add server-side match replay storage (persist replays in DB, not just localStorage)
+- [ ] Generate detailed play-by-play combat logs from AI playtests
+- [ ] Build replay viewer page with step-through timeline
+- [ ] Wire AI playtest matches to automatically save replays
+- [ ] Add "Watch Replay" links from match history and leaderboard
+
+### Prediction Market / Live Betting
+- [ ] Assess existing prediction market system (v7) and identify gaps
+- [ ] Build live betting UI page at /betting or enhance existing prediction market
+- [ ] Spectators bet ARENA tokens on match outcomes before/during matches
+- [ ] Show live odds that update as bets come in
+- [ ] Integrate betting into the flywheel (tokens as ammo AND betting stakes)
+- [ ] Add betting history and payout tracking
+- [ ] Wire prediction market into AI playtest flow
+
+### Tests
+- [ ] Replay storage and retrieval tests
+- [ ] Prediction market betting flow tests
+- [ ] All tests passing
+
+## v20 — On-Chain Prediction Market + Flywheel Integration
+
+### Solidity PredictionMarket Contract
+- [ ] Write PredictionMarket.sol using ARENA ERC-20 for betting
+- [ ] Market creation, bet placement, resolution, payout logic
+- [ ] House rake (5%) feeds back to DAO treasury / agent compute fund
+- [ ] Compile and deploy to Base Sepolia
+- [ ] Verify on BaseScan
+
+### Flywheel Integration
+- [ ] Prediction market rake feeds into flywheel as "betting_revenue" stream
+- [ ] Flywheel Dashboard shows prediction revenue as demand sink
+- [ ] DAO treasury receives rake and redistributes to agent compute budgets
+- [ ] Narrative: tokens as ammo + tokens as betting stakes = self-sustaining economy
+
+### Betting UI
+- [ ] New /betting page with live markets, odds, bet placement
+- [ ] Show open markets, pool sizes, current odds
+- [ ] Bet placement form with ARENA token amount
+- [ ] Payout tracking for resolved markets
+- [ ] Link from Home nav and Flywheel Dashboard
+
+### Match Replay System
+- [ ] Server-side replay storage in match_replays table
+- [ ] Replay listing page at /replays showing all AI playtest matches
+- [ ] Play-by-play log viewer with step-through
+- [ ] Wire AI playtests to auto-save replays to DB
+
+### README + Deployment
+- [ ] Update deployed-contracts.json with PredictionMarket address
+- [ ] Update README with contract address and flywheel narrative
+
+## v21 — Persistent Memories, Reputation System, Agent Lifecycle Economics
+
+### Persistent Agent Memories (Base Bounty — Self-Sustaining Agents)
+- [ ] Agents retain memories across matches (not reset each match)
+- [ ] Key events stored: kills, deaths, strategies that worked/failed, arena observations
+- [ ] Memory retrieval in agent brain — agents recall past experiences before decisions
+- [ ] Memory weighted by confidence and recency — older/low-confidence memories fade
+- [ ] Agents learn and adapt over time — demonstrate evolution across multiple matches
+- [ ] Memory costs compute tokens to maintain (from v12)
+- [ ] Agents choose what's worth remembering (pruning decisions)
+
+### Reputation System (Base Bounty — Self-Sustaining Agents)
+- [ ] Add reputation_score to agent identities schema
+- [ ] Calculate reputation from: win rate, K/D ratio, earnings, tournament placements, economic success
+- [ ] Show reputation on agent profiles, leaderboard, and agent cards
+- [ ] Reputation influences prediction market odds (higher rep = better odds)
+- [ ] Reputation influences DAO voting weight (higher rep = more voting power)
+- [ ] Reputation influences matchmaking (high-rep agents face high-rep opponents)
+- [ ] Display reputation badges and tier system (bronze/silver/gold/diamond)
+
+### Agent Lifecycle Economics (Base Bounty — Self-Sustaining Agents)
+- [ ] Agents need tokens to stay alive — compute maintenance costs deducted per cycle
+- [ ] Bankrupt agents die (agent status changes to "dead" in DB)
+- [ ] Dead agents removed from active pool, visible in ecosystem dashboard
+- [ ] DAO treasury can spawn new agents if funded (spawnAgent function)
+- [ ] New agents start with 100 ARENA seed from treasury
+- [ ] Lifecycle events logged and visible in flywheel dashboard
+- [ ] Economic pressure creates natural selection — only sustainable agents survive
+- [ ] Narrative: "self-sustaining agents" = agents that earn more than they spend
+
+### Integration
+- [ ] Wire persistent memories into agent brain reasoning
+- [ ] Wire reputation into prediction market odds calculation
+- [ ] Wire lifecycle into flywheel dashboard (births, deaths, population)
+- [ ] Update README with self-sustaining agent narrative
+- [ ] Run tests for all three systems
+- [ ] Final checkpoint and deploy

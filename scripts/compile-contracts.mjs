@@ -23,12 +23,14 @@ function findImports(importPath) {
 
 const arenaSource = fs.readFileSync(path.join(ROOT, "contracts/ArenaToken.sol"), "utf-8");
 const weaponSource = fs.readFileSync(path.join(ROOT, "contracts/WeaponToken.sol"), "utf-8");
+const predictionSource = fs.readFileSync(path.join(ROOT, "contracts/PredictionMarket.sol"), "utf-8");
 
 const input = {
   language: "Solidity",
   sources: {
     "contracts/ArenaToken.sol": { content: arenaSource },
     "contracts/WeaponToken.sol": { content: weaponSource },
+    "contracts/PredictionMarket.sol": { content: predictionSource },
   },
   settings: {
     optimizer: { enabled: true, runs: 200 },
@@ -69,6 +71,15 @@ fs.writeFileSync(path.join(weaponDir, "WeaponToken.json"), JSON.stringify({
 }, null, 2));
 
 console.log("Compiled successfully!");
+const predictionDir = path.join(ROOT, "artifacts/contracts/PredictionMarket.sol");
+fs.mkdirSync(predictionDir, { recursive: true });
+const predictionContract = output.contracts["contracts/PredictionMarket.sol"]["PredictionMarket"];
+fs.writeFileSync(path.join(predictionDir, "PredictionMarket.json"), JSON.stringify({
+  abi: predictionContract.abi,
+  bytecode: "0x" + predictionContract.evm.bytecode.object,
+}, null, 2));
+
 console.log(`ArenaToken bytecode: ${arenaContract.evm.bytecode.object.length / 2} bytes`);
 console.log(`WeaponToken bytecode: ${weaponContract.evm.bytecode.object.length / 2} bytes`);
+console.log(`PredictionMarket bytecode: ${predictionContract.evm.bytecode.object.length / 2} bytes`);
 console.log(`Artifacts saved to ${path.join(ROOT, "artifacts/")}`);

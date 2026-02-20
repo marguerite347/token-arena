@@ -10,10 +10,11 @@
  */
 
 import { invokeLLM } from "./_core/llm";
-import { getAgentIdentities, updateAgentStats, logX402Transaction, saveMatch, upsertLeaderboardEntry, saveAgentMemory, saveAgentDecision } from "./db";
+import { getDb, getAgentIdentities, updateAgentStats, logX402Transaction, saveMatch, upsertLeaderboardEntry, saveAgentMemory, saveAgentDecision } from "./db";
 import { recordComputeSpend, recordFee } from "./daoCouncil";
 import { ARENA_PROMPTS } from "../shared/arenaPrompts";
 import { WEAPON_TOKENS } from "../shared/web3";
+import { matchReplays } from "../drizzle/schema";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -51,6 +52,7 @@ interface PlaytestMatchResult {
   matchId: number | null;
   arena: string;
   duration: number;
+  replayId?: string;
   agents: Array<{
     agentId: number;
     name: string;
@@ -492,10 +494,108 @@ async function runPlaytestMatch(
     });
   }
 
+  // ─── Generate Synthetic Replay Data ────────────────────────────────────
+  const replayId = `replay-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const AGENT_COLORS: Record<string, string> = {
+    "NEXUS-7": "#00f0ff", "PHANTOM": "#ff3366", "TITAN": "#39ff14",
+    "ECHO": "#ffb800", "VIPER": "#9b59b6", "SENTINEL": "#e74c3c",
+  };
+  const a1Color = AGENT_COLORS[agent1.name] || "#00f0ff";
+  const a2Color = AGENT_COLORS[agent2.name] || "#ff3366";
+
+  // Generate frames from combat ticks — simulate positions
+  const replayFrames: any[] = [];
+  const replayEvents: any[] = [];
+  const replayHighlights: any[] = [];
+  let a1x = -8, a1z = 0, a2x = 8, a2z = 0;
+  let a1hp = agent1.maxHp, a2hp = agent2.maxHp;
+  let frameKillCount = 0;
+
+  for (let tick = 0; tick <= maxTicks; tick++) {
+    const t = tick * 1000; // ms
+    // Simulate movement — agents circle and approach each other
+    const angle1 = tick * 0.05 + Math.sin(tick * 0.02) * 2;
+    const angle2 = tick * 0.05 + Math.PI + Math.cos(tick * 0.03) * 2;
+    const radius = Math.max(3, 10 - tick * 0.05);
+    a1x = Math.cos(angle1) * radius + (Math.random() - 0.5) * 0.5;
+    a1z = Math.sin(angle1) * radius + (Math.random() - 0.5) * 0.5;
+    a2x = Math.cos(angle2) * radius + (Math.random() - 0.5) * 0.5;
+    a2z = Math.sin(angle2) * radius + (Math.random() - 0.5) * 0.5;
+
+    // Update HP from combat log events at this tick
+    const tickEvents = combatLog.filter(e => e.tick === tick);
+    for (const evt of tickEvents) {
+      if (evt.type === "attack" && evt.target === agent1.name) a1hp = Math.max(0, a1hp - (evt.damage || 0));
+      if (evt.type === "attack" && evt.target === agent2.name) a2hp = Math.max(0, a2hp - (evt.damage || 0));
+      if (evt.type === "kill") {
+        frameKillCount++;
+        replayEvents.push({ type: "kill", timestamp: t, data: { killerName: evt.actor, victimName: evt.target, weapon: evt.weapon } });
+        if (frameKillCount === 1) {
+          replayHighlights.push({ timestamp: t, duration: 3000, type: "first_blood", title: "FIRST BLOOD", description: `${evt.actor} draws first blood on ${evt.target}!`, involvedAgents: [evt.actor, evt.target || ""], importance: 7 });
+        }
+      }
+      if (evt.type === "spawn" && evt.actor !== "SYSTEM") {
+        if (evt.actor === agent1.name) a1hp = Math.floor(agent1.maxHp * 0.6);
+        if (evt.actor === agent2.name) a2hp = Math.floor(agent2.maxHp * 0.6);
+      }
+    }
+
+    // Record frame every 3 ticks (like 10fps)
+    if (tick % 3 === 0) {
+      replayFrames.push({
+        timestamp: t,
+        agents: [
+          { id: `agent-${agent1.agentId}`, name: agent1.name, x: a1x, y: 0, z: a1z, rotation: Math.atan2(a2x - a1x, a2z - a1z), health: Math.max(0, a1hp), maxHealth: agent1.maxHp, tokens: agent1.tokenBalance, weapon: agent1.primaryWeapon, isAlive: a1hp > 0, kills: agent1.kills, color: a1Color },
+          { id: `agent-${agent2.agentId}`, name: agent2.name, x: a2x, y: 0, z: a2z, rotation: Math.atan2(a1x - a2x, a1z - a2z), health: Math.max(0, a2hp), maxHealth: agent2.maxHp, tokens: agent2.tokenBalance, weapon: agent2.primaryWeapon, isAlive: a2hp > 0, kills: agent2.kills, color: a2Color },
+        ],
+        projectiles: [],
+      });
+    }
+  }
+
+  // Add match end highlight
+  replayHighlights.push({
+    timestamp: maxTicks * 1000,
+    duration: 5000,
+    type: "clutch",
+    title: `${winner} WINS!`,
+    description: `${winner} claims victory with ${agent1Won ? agent1.kills : agent2.kills} kills!`,
+    involvedAgents: [winner],
+    importance: 10,
+  });
+
+  // Save replay to database
+  try {
+    const db = await getDb();
+    if (db) {
+      await db.insert(matchReplays).values({
+        matchId: matchId ?? undefined,
+        replayId,
+        mode: "ai_playtest",
+        duration: maxTicks * 1000,
+        totalKills: agent1.kills + agent2.kills,
+        mvpName: winner,
+        mvpKills: agent1Won ? agent1.kills : agent2.kills,
+        mvpTokens: agent1Won ? agent1Earned : agent2Earned,
+        result: `${winner} wins`,
+        skyboxPrompt: arena.prompt,
+        agents: [{ id: `agent-${agent1.agentId}`, name: agent1.name, color: a1Color }, { id: `agent-${agent2.agentId}`, name: agent2.name, color: a2Color }],
+        highlights: replayHighlights,
+        events: replayEvents,
+        frames: replayFrames,
+        combatLog: combatLog,
+      });
+      console.log(`[AIPlaytest] Replay saved: ${replayId}`);
+    }
+  } catch (e: any) {
+    console.error(`[AIPlaytest] Failed to save replay:`, e.message);
+  }
+
   return {
     matchId,
     arena: arena.name,
     duration: rounds,
+    replayId,
     agents: [
       {
         agentId: agent1.agentId,

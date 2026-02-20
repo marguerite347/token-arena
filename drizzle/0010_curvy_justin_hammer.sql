@@ -1,0 +1,22 @@
+CREATE TABLE `match_replays` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`matchId` int,
+	`replayId` varchar(64) NOT NULL,
+	`mode` varchar(16) NOT NULL DEFAULT 'aivai',
+	`duration` int NOT NULL DEFAULT 0,
+	`totalKills` int NOT NULL DEFAULT 0,
+	`mvpName` varchar(64),
+	`mvpKills` int NOT NULL DEFAULT 0,
+	`mvpTokens` int NOT NULL DEFAULT 0,
+	`result` varchar(128),
+	`skyboxUrl` text,
+	`skyboxPrompt` text,
+	`agents` json,
+	`highlights` json,
+	`events` json,
+	`frames` json,
+	`combatLog` json,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `match_replays_id` PRIMARY KEY(`id`),
+	CONSTRAINT `match_replays_replayId_unique` UNIQUE(`replayId`)
+);

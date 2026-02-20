@@ -17,7 +17,10 @@ import {
   getAgentInventoryItems, addToInventory, removeFromInventory,
   saveTrade, getRecentTrades,
   saveMetaSnapshot, getLatestMetaSnapshot, getMetaSnapshots,
+  getDb,
 } from "./db";
+import { matchReplays } from "../drizzle/schema";
+import { desc, eq } from "drizzle-orm";
 import { DEFAULT_AI_AGENTS } from "@shared/web3";
 import { agentReason, executeAgentDecision, buildAgentPerformance } from "./agentBrain";
 import { DEFAULT_MATERIALS, DEFAULT_RECIPES, generateEmergentRecipe, rollMaterialDrops } from "./craftingEngine";
@@ -37,6 +40,7 @@ import { analyzeArenaScene, getAgentSceneBriefing, getGameMasterSpawnContext, ge
 import type { SceneAnalysis, SceneGraph } from "./arenaVision";
 import { getSceneGraphBriefing, getSceneGraphItemContext, sceneGraphToLearningData } from "@shared/sceneGraph";
 import { getAllFlywheelData, getAgentEconomics, getEcosystemHealth } from "./agentLifecycle";
+
 
 // Blockade Labs Staging API — Model 4 styles (IDs 172-188)
 const SKYBOX_API_BASE = "https://backend-staging.blockadelabs.com/api/v1/skybox";
@@ -879,6 +883,41 @@ export const appRouter = router({
         const { runPlaytestSession } = await import("./aiPlaytest");
         const session = await runPlaytestSession(count, useLLM);
         return session;
+      }),
+  }),
+
+  // ─── Replay System ───────────────────────────────────────────────────────
+  replay: router({
+    // List all replays with optional filtering
+    list: publicProcedure
+      .input(z.object({
+        limit: z.number().max(100).default(50),
+        mode: z.enum(["aivai", "pvp"]).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        
+        if (input?.mode) {
+          return db.select().from(matchReplays)
+            .where(eq(matchReplays.mode, input.mode))
+            .orderBy(desc(matchReplays.createdAt))
+            .limit(input?.limit ?? 50);
+        }
+        return db.select().from(matchReplays)
+          .orderBy(desc(matchReplays.createdAt))
+          .limit(input?.limit ?? 50);
+      }),
+
+    // Get single replay by ID
+    detail: publicProcedure
+      .input(z.object({ replayId: z.string() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const result = await db.select().from(matchReplays)
+          .where(eq(matchReplays.replayId, input.replayId)).limit(1);
+        return result.length > 0 ? result[0] : null;
       }),
   }),
 });

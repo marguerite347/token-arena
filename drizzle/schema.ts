@@ -500,3 +500,31 @@ export const ecosystemSnapshots = mysqlTable("ecosystem_snapshots", {
 
 export type EcosystemSnapshotRow = typeof ecosystemSnapshots.$inferSelect;
 export type InsertEcosystemSnapshot = typeof ecosystemSnapshots.$inferInsert;
+
+/**
+ * Match Replays — server-side storage of match replay data
+ * Stores compressed replay frames, events, highlights for playback
+ */
+export const matchReplays = mysqlTable("match_replays", {
+  id: int("id").autoincrement().primaryKey(),
+  matchId: int("matchId"),
+  replayId: varchar("replayId", { length: 64 }).notNull().unique(),
+  mode: varchar("mode", { length: 16 }).notNull().default("aivai"),
+  duration: int("duration").notNull().default(0), // ms
+  totalKills: int("totalKills").notNull().default(0),
+  mvpName: varchar("mvpName", { length: 64 }),
+  mvpKills: int("mvpKills").notNull().default(0),
+  mvpTokens: int("mvpTokens").notNull().default(0),
+  result: varchar("result", { length: 128 }),
+  skyboxUrl: text("skyboxUrl"),
+  skyboxPrompt: text("skyboxPrompt"),
+  agents: json("agents"), // [{id, name, color}]
+  highlights: json("highlights"), // ReplayHighlight[]
+  events: json("events"), // ReplayEvent[] (kills, weapon switches, etc.)
+  frames: json("frames"), // Compressed ReplayFrame[] (every 3rd frame)
+  combatLog: json("combatLog"), // Detailed play-by-play text log
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type MatchReplayRow = typeof matchReplays.$inferSelect;
+export type InsertMatchReplay = typeof matchReplays.$inferInsert;

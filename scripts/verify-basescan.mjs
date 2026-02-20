@@ -148,6 +148,11 @@ async function main() {
   const weaponSources = collectAllSources("contracts/WeaponToken.sol", weaponSource);
   const weaponInput = buildStandardInput(weaponSources);
 
+  console.log("\nResolving PredictionMarket dependencies...");
+  const predictionSource = fs.readFileSync(path.join(ROOT, "contracts/PredictionMarket.sol"), "utf-8");
+  const predictionSources = collectAllSources("contracts/PredictionMarket.sol", predictionSource);
+  const predictionInput = buildStandardInput(predictionSources);
+
   const results = {};
 
   // 1. ARENA
@@ -177,16 +182,29 @@ async function main() {
     await new Promise(r => setTimeout(r, 2000)); // rate limit
   }
 
+  // 3. PredictionMarket
+  if (deployed.contracts.PredictionMarket) {
+    const predArgs = ethers.AbiCoder.defaultAbiCoder().encode(
+      ["address", "address"],
+      [deployed.contracts.ARENA, DEPLOYER]
+    ).slice(2);
+    const pmGuid = await submitVerification(
+      deployed.contracts.PredictionMarket, "PredictionMarket", "contracts/PredictionMarket.sol", predictionInput, predArgs
+    );
+    if (pmGuid) results.PredictionMarket = await pollStatus(pmGuid);
+    else results.PredictionMarket = false;
+  }
+
   // Summary
   console.log("\n═══════════════════════════════════════════════════════");
   console.log("  VERIFICATION SUMMARY");
   console.log("═══════════════════════════════════════════════════════");
   let verified = 0;
   for (const [sym, ok] of Object.entries(results)) {
-    console.log(`  ${sym.padEnd(8)} ${deployed.contracts[sym]}  ${ok ? "✅ Verified" : "❌ Failed"}`);
+    console.log(`  ${sym.padEnd(20)} ${deployed.contracts[sym]}  ${ok ? "✅ Verified" : "❌ Failed"}`);
     if (ok) verified++;
   }
-  console.log(`\n  ${verified}/7 contracts verified on BaseScan`);
+  console.log(`\n  ${verified}/${Object.keys(results).length} contracts verified on BaseScan`);
   console.log("═══════════════════════════════════════════════════════");
 }
 
