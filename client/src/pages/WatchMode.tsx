@@ -1152,11 +1152,11 @@ export default function WatchMode() {
 
       // Bob agent meshes
       agentMeshesRef.current.forEach((mesh) => {
-        mesh.position.y = Math.sin(elapsed * 2 + mesh.position.x) * 0.05;
+        if (mesh) mesh.position.y = Math.sin(elapsed * 2 + mesh.position.x) * 0.05;
       });
 
       // Pulse lights
-      if (pointLightsRef.current.length >= 3) {
+      if (pointLightsRef.current && pointLightsRef.current.length >= 3) {
         pointLightsRef.current[0].intensity = 2 + Math.sin(elapsed * 1.5) * 0.5;
         pointLightsRef.current[1].intensity = 2 + Math.cos(elapsed * 1.5) * 0.5;
         pointLightsRef.current[2].intensity = 1.5 + Math.sin(elapsed * 0.8) * 0.3;
@@ -1165,15 +1165,7 @@ export default function WatchMode() {
       // Rotate arena ring
       if (arenaRingRef.current) arenaRingRef.current.rotation.z = elapsed * 0.1;
 
-      // Pulse platform edges
-      if (platformsRef.current) {
-        platformsRef.current.children.forEach((child) => {
-          if (child instanceof THREE.LineSegments) {
-            const mat = child.material as THREE.LineBasicMaterial;
-            mat.opacity = 0.3 + Math.sin(elapsed * 2 + child.position.x) * 0.2;
-          }
-        });
-      }
+      // Pulse platform edges (removed - platforms deleted)
 
       composer.render(delta);
     };
