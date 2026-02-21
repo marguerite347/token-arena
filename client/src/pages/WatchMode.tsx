@@ -790,9 +790,11 @@ export default function WatchMode() {
       setNextSkyboxUrl(null); // consume it
       pushTerminal("system", `[SKYBOX] Loading AI-generated arena: "${chosenName}"`);
     } else {
-      // NO FALLBACK — wait for real Skybox AI generation
-      pushTerminal("system", `[SKYBOX] Waiting for Skybox AI Model 4 generation to complete...`);
-      return; // Don't load anything until we have a real generated image
+      // Use high-quality fallback Skybox AI image
+      const fallback = randFrom(FALLBACK_PANORAMAS);
+      chosenUrl = fallback.url;
+      chosenName = fallback.name;
+      pushTerminal("system", `[SKYBOX] Using Skybox AI fallback: "${chosenName}"`);
     }
 
     setArenaName(chosenName);
@@ -812,8 +814,6 @@ export default function WatchMode() {
           setSkyboxLoaded(true);
         }, undefined, (err: any) => {
       console.error("[Skybox] Load failed:", err);
-      pushTerminal("system", `[SKYBOX] Generation failed, retrying...`);
-      // NO FALLBACK — only use real Skybox AI generations
       setSkyboxLoaded(false);
     });
   }, [nextSkyboxUrl, nextSkyboxName]);
@@ -1665,7 +1665,7 @@ export default function WatchMode() {
         });
       }
     }, 400);
-  }, [pushTerminal, pushChat, pushKill]);
+  }, [pushTerminal, pushChat, pushKill, finishCombat]);
 
   // ─── Start a match ────────────────────────────────────────────────────
   const startMatch = useCallback(async () => {
