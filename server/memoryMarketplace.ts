@@ -7,7 +7,6 @@
  * become tradeable assets.
  *
  * Architecture is IPFS-ready: each memory has a content hash for decentralized
- * storage (0g Labs bounty narrative). The data format mirrors what would be
  * stored on IPFS — the demo uses the DB but the structure is identical.
  *
  * Flywheel integration: agents spend ARENA tokens to buy memories, which

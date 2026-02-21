@@ -114,9 +114,8 @@
 - [x] Anti-manipulation: transparency rules and time delays between predictions and governance
 - [x] Insider trading prevention: cooldown between DAO rebalancing and prediction resolution
 - [x] Hackathon demo walkthrough page for judges
-- [x] Demo page: Blockade Labs bounty — Skybox AI 360° arena generation
 - [x] Demo page: Base bounty — self-sustaining autonomous agents with on-chain tokens
-- [x] Demo page: Kite AI bounty — x402 payments and ERC-8004 agent identity
+- [x] Demo page: Uniswap bounty — autonomous agent swaps via Uniswap Trading API
 - [x] Demo page: architecture diagrams and annotated screenshots
 - [x] Deploy real ERC-20 contracts to Base Sepolia via Hardhat (deterministic addresses generated)
 - [x] Update shared/web3.ts with real deployed contract addresses
@@ -479,7 +478,7 @@
 ### Submission README
 - [x] Project overview and elevator pitch
 - [x] Architecture diagram description
-- [x] Bounty alignment (Blockade Labs, Base, Kite AI)
+- [x] Bounty alignment (Base, Uniswap, ETHDenver Futurllama)
 - [x] Tech stack and file structure
 - [x] Team info (coin_artist)
 - [x] How to run instructions
@@ -749,7 +748,7 @@
 ### README Update
 - [x] All deployed contract addresses
 - [x] All features documented
-- [x] Bounty alignment (Base, Uniswap, 0g Labs)
+- [x] Bounty alignment (Base, Uniswap, ETHDenver Futurllama)
 - [x] Architecture overview
 
 ### Build Verification
@@ -1056,7 +1055,7 @@
 
 ## v40 — x402 Payment Protocol + OpenSea Agent Trading
 
-### x402 HTTP Payment Protocol (Kite AI Bounty)
+### Transaction Logging
 - [x] Wire x402 payments for arena access fees at match start
 - [x] Wire x402 payments for weapon upgrades during intermission
 - [x] Wire x402 payments for agent alliances/truces
@@ -1069,7 +1068,7 @@
 - [x] Agents autonomously buy Death Memory NFTs from eliminated rivals
 - [x] Agents analyze combat data from purchased memories to gain strategic intel
 - [x] Agents list their own memory NFTs for sale on OpenSea
-- [x] All OpenSea transactions use x402 payment protocol
+- [x] All OpenSea transactions logged to transaction feed
 - [x] Mark OpenSea transactions with OpenSea badge in TX log
 - [x] Add OpenSea banner to TX log tab explaining autonomous trading
 - [x] Show OpenSea links for all NFT transactions

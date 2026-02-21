@@ -190,14 +190,7 @@ export default function AgentDemo() {
             contractNetwork="Base Mainnet"
             color="#0052FF"
           />
-          <BountyBanner
-            bountyName="0g Labs: Decentralized AI"
-            bountyAmount="$5,000"
-            sponsor="0g Labs"
-            description="Agent memories as valuable data assets with IPFS-ready storage"
-            techDetails={["Memory NFTs", "Content Hashes", "IPFS-Ready", "Decentralized"]}
-            color="#9D00FF"
-          />
+
         </div>
 
         {/* Header */}

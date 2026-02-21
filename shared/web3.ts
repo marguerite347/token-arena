@@ -6,7 +6,6 @@
  * ERC-4337 smart wallets for autonomous AI agents.
  * ERC-8004 on-chain agent identity.
  * ERC-8021 builder code attribution (tokenarena).
- * x402 payment protocol for machine-native HTTP payments.
  */
 
 import deployedContracts from "./deployed-contracts.json";

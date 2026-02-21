@@ -126,61 +126,6 @@ const BOUNTIES: BountySection[] = [
 │  PROFITABLE? → Agent sustains itself forever     │
 └─────────────────────────────────────────────────┘`,
   },
-  {
-    id: "kiteai",
-    sponsor: "Kite AI",
-    bountyName: "Agent-Native Payments & Identity",
-    prize: "$10,000",
-    color: "#FF6B00",
-    icon: "🪁",
-    criteria: [
-      "x402 protocol for machine-native HTTP payments",
-      "ERC-8004 on-chain agent identity",
-      "Agents with persistent, ownable on-chain personas",
-    ],
-    howWeMeetIt: [
-      "Every game action uses x402 payment semantics — HTTP 402 with payment headers",
-      "x402 payments signed with EIP-191 when wallet connected, simulated fallback for demo",
-      "Full x402 transaction feed shows real-time payment flow in the HUD",
-      "ERC-8004 Agent Identity Registry: each agent has a persistent on-chain persona",
-      "Agent identities track stats, loadout, reputation, trust model, and metadata",
-      "Agents own their identity — it persists across matches and evolves over time",
-      "Reputation system: agents build trust through consistent performance",
-      "Agent memory is private (competitive advantage) — DAO must purchase data access",
-    ],
-    techStack: ["x402 protocol (HTTP 402)", "EIP-191 signatures", "ERC-8004 Identity Registry", "ERC-8004 Reputation Registry", "Agent memory with compute costs", "Trust model (sybil, collusion, reliability)"],
-    architectureDiagram: `┌─────────────────────────────────────────────────┐
-│              x402 PAYMENT FLOW                   │
-│                                                  │
-│  Game Action (shoot/buy/craft)                   │
-│    └→ Create x402 PaymentRequired (HTTP 402)     │
-│    └→ Sign with EIP-191 (wallet or agent key)    │
-│    └→ Include payment proof in header            │
-│    └→ Server validates → executes action         │
-│    └→ Transaction logged to x402 audit trail     │
-│                                                  │
-│  Anti-manipulation:                              │
-│    └→ Governance cooldown after predictions      │
-│    └→ Time delay between DAO actions & markets   │
-└─────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────┐
-│           ERC-8004 AGENT IDENTITY                │
-│                                                  │
-│  tokenId: 1 (NEXUS-7)                           │
-│  ├─ owner: 0xAg3n7...W4ll3t                     │
-│  ├─ stats: { kills: 47, deaths: 12, ... }       │
-│  ├─ loadout: { primary: railgun, armor: 80 }    │
-│  ├─ reputation: 850 / 1000                      │
-│  ├─ trustModel: { sybil: 0.95, reliable: 0.88 } │
-│  ├─ computeBudget: 1000 tokens                  │
-│  └─ generation: 1 (original spawn)              │
-│                                                  │
-│  Identity is OWNABLE — can be traded/sold        │
-│  Memory is PRIVATE — competitive advantage       │
-│  Reputation is EARNED — not assigned             │
-└─────────────────────────────────────────────────┘`,
-  },
 ];
 
 const fadeIn = {
@@ -456,7 +401,6 @@ export default function Demo() {
           <br />
           Built by coin_artist (Marguerite Decourcelle)
           <br />
-          Targeting: Blockade Labs + Base + Kite AI bounties ($30K total)
         </div>
       </footer>
     </div>

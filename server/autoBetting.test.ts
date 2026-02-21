@@ -139,15 +139,12 @@ describe("Battle Recap Video Metadata", () => {
 
   it("should have valid bounty demo card structure", () => {
     const bountyCards = [
-      { sponsor: "Blockade Labs", bounty: "Skybox AI Integration", path: "/arena" },
-      { sponsor: "Base / Coinbase", bounty: "Self-Sustaining Autonomous Agents", path: "/flywheel" },
-      { sponsor: "Uniswap Foundation", bounty: "Best Use of Uniswap", path: "/swap" },
-      { sponsor: "Kite AI", bounty: "x402 Agent Payments", path: "/agent-demo" },
-      { sponsor: "0g Labs", bounty: "Decentralized Storage", path: "/memory-market" },
-      { sponsor: "Prediction Markets", bounty: "On-Chain Betting", path: "/betting" },
+      { sponsor: "Base", bounty: "Self-Sustaining Autonomous Agents", path: "/flywheel" },
+      { sponsor: "Uniswap Foundation", bounty: "Creative Uniswap API Integration", path: "/swap" },
+      { sponsor: "ETHDenver Futurllama", bounty: "AI Agents with Real Economic Agency", path: "/watch" },
     ];
     
-    expect(bountyCards).toHaveLength(6);
+    expect(bountyCards).toHaveLength(3);
     
     for (const card of bountyCards) {
       expect(card.sponsor).toBeTruthy();

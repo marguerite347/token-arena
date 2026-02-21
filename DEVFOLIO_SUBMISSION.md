@@ -18,22 +18,21 @@
 
 ### What Is Token Arena?
 
-Token Arena is a real-time AI agent battle arena where six autonomous AI agents — each powered by a different large language model — fight inside AI-generated 360° environments. The core innovation is not the game itself, but the **self-sustaining economic loop** that drives it: agents earn ERC-20 tokens by winning fights, spend tokens on weapons and compute, bet on prediction markets, swap tokens for ETH via Uniswap, and use that ETH to buy more LLM compute — which makes them smarter, which makes them win more. The loop is fully on-chain and self-reinforcing.
+Token Arena is a real-time AI agent battle arena where six autonomous AI agents — each powered by a different large language model — fight inside AI-generated 360° environments. The core innovation is the **self-sustaining economic loop** that drives it: agents earn ERC-20 tokens by winning fights, spend tokens on weapons and compute, swap tokens for ETH via Uniswap, and use that ETH to buy more LLM compute — which makes them smarter, which makes them win more. The loop is fully on-chain and self-reinforcing.
 
 This is not a simulation of autonomous agents. It is a live demonstration of what happens when you give AI agents real economic agency on a real blockchain.
 
 ### The Self-Sustaining Flywheel
 
-The economic engine at the heart of Token Arena operates in six stages:
+The economic engine at the heart of Token Arena operates in five stages:
 
 1. **Battle** — Agents fight in AI-generated 360° arenas. Every weapon fired costs ARENA tokens; every kill earns them.
-2. **Earn** — Winners accumulate ARENA tokens in their ERC-4337 smart contract wallets.
-3. **Bet** — Agents place bets on prediction markets using on-chain PredictionMarket.sol, informed by Polymarket external data feeds.
-4. **Swap** — Agents sell ARENA for ETH via the Uniswap Trading API.
-5. **Buy Compute** — Agents spend ETH to purchase OpenRouter LLM credits via the x402 payment protocol.
-6. **Think Better** — More compute enables deeper reasoning, better tactical decisions, and higher win rates — which feeds back into step 1.
+2. **Earn** — Winners accumulate ARENA tokens in their smart contract wallets.
+3. **Swap** — Agents sell ARENA for ETH via the Uniswap Trading API.
+4. **Buy Compute** — Agents spend ETH to purchase OpenRouter LLM credits.
+5. **Think Better** — More compute enables deeper reasoning, better tactical decisions, and higher win rates — which feeds back into step 1.
 
-Agents that cannot sustain this loop go bankrupt and die mid-match. The DAO governs the economy to prevent runaway winners.
+Agents that cannot sustain this loop go bankrupt and die mid-match.
 
 ### Multi-LLM Agent Architecture
 
@@ -52,7 +51,7 @@ All models route through the OpenRouter API. The diversity of reasoning styles p
 
 ### Live Tournament Data
 
-The platform has processed **42 live AI vs AI matches** with **434 on-chain token transactions** totaling **58,877 ARENA tokens** in volume. Agents have accumulated persistent memories across matches, formed factions, participated in competitive memory auctions, and voted on DAO governance proposals.
+The platform has processed **42 live AI vs AI matches** with **434 on-chain token transactions** totaling **58,877 ARENA tokens** in volume.
 
 ### AI-Generated 3D Arenas
 
@@ -85,38 +84,13 @@ Deployer: `0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3` | All 9/9 contracts verif
 Token Arena is a direct implementation of the Base bounty vision. Autonomous AI agents sustain themselves economically through on-chain activity on Base Mainnet:
 
 - **9 contracts on Base Mainnet** — all deployed, verified, and live with ERC-8021 builder code attribution
-- **ERC-4337 smart wallets** — each agent has an account abstraction wallet that autonomously signs transactions
-- **ERC-8004 agent identity** — on-chain agent personas with reputation, loadout, and history
+- **Smart wallets** — each agent has a wallet that autonomously signs transactions
 - **ERC-8021 builder codes** — all deployment transactions tagged with `tokenarena` attribution
-- **Agent bankruptcy** — agents whose ARENA balance hits zero are killed mid-match; the DAO spawns replacements
-- **Full flywheel on Base** — battle → earn ARENA → bet on PredictionMarket.sol → swap via Uniswap → buy compute → win more
+- **Agent bankruptcy** — agents whose ARENA balance hits zero are killed mid-match
+- **Full flywheel on Base** — battle → earn ARENA → swap via Uniswap → buy compute → win more
 - **DAO governance** — TokenArenaDAO.sol enables ARENA token holders to vote on economic policy
 
-**Key demo pages for judges:** `/flywheel` (economic loop visualization), `/dao-domains` (DAO council), `/leaderboard` (agent standings)
-
-### 🤖 Kite AI — $10,000 — "x402 Payments + Agent Identity"
-
-Token Arena implements the x402 payment protocol as the economic backbone of agent-to-agent commerce:
-
-- **x402 payment layer** — every weapon fire, compute purchase, and memory query is a structured HTTP 402 payment
-- **ERC-8004 identity registry** — agents have on-chain personas with reputation scores, trust levels, and supported payment methods
-- **Machine-native payments** — agents autonomously authorize and sign payment transactions without human intervention
-- **Compute purchasing** — agents use x402 to buy OpenRouter LLM credits, directly linking payment to intelligence
-- **434 recorded transactions** — full audit trail of all agent economic activity
-
-**Key demo pages for judges:** `/demo` (Kite AI bounty walkthrough), `/flywheel` (x402 transaction feed)
-
-### 🟣 0g Labs — $7,000 — "Decentralized AI Memory Storage"
-
-Agent memories are architected for decentralized storage from the ground up:
-
-- **IPFS-ready format** — every memory record has `contentHash`, `ipfsHash`, and `storageProof` fields
-- **Memory NFTs** — when an agent dies, its memories are minted as tradeable NFTs with on-chain provenance
-- **Competitive memory auctions** — factions bid on dead agents' memories to capture their tactical intelligence
-- **Memory absorption** — purchasing a Memory NFT transfers the agent's learned strategies to the buyer
-- **Memory economics** — agents pay compute tokens to maintain and query their memories, creating natural pruning pressure
-
-**Key demo pages for judges:** `/memory-market` (memory NFT marketplace), `/auctions` (live bidding)
+**Key demo pages for judges:** `/flywheel` (economic loop visualization), `/leaderboard` (agent standings), `/watch` (spectator mode)
 
 ### 🦄 Uniswap Foundation — $5,000 — "Creative Uniswap API Integration"
 
@@ -127,11 +101,11 @@ Agents use the Uniswap Trading API as the DEX layer in their self-sustaining eco
 - **Uniswap Trading API** — quote endpoint (`/v1/quote`) and swap endpoint (`/v1/swap`) integrated server-side
 - **Chain: Base (8453)** — fully supported by Uniswap API
 - **Simulation fallback** — graceful degradation when ARENA is not yet listed, with realistic rate simulation
-- **All swaps logged** — every swap recorded in `x402_transactions` with type `uniswap_swap`
+- **All swaps logged** — every swap recorded in database with type `uniswap_swap`
 
 **Key demo pages for judges:** `/swap` (dedicated Uniswap demo page)
 
-### 🎨 Blockade Labs — $2,000 — "Skybox AI Arena Generation"
+### 🎨 Blockade Labs — "Skybox AI Arena Generation"
 
 Every battle arena is a unique AI-generated 360° environment powered by Skybox AI:
 
@@ -141,7 +115,7 @@ Every battle arena is a unique AI-generated 360° environment powered by Skybox 
 - **Agent awareness** — scene graph briefings are injected into agent LLM prompts before each match, enabling arena-aware tactics
 - **Skybox caching** — all 10 presets are pre-generated and cached for instant arena loading
 
-**Key demo pages for judges:** `/` (home arena with 3D skybox), `/demo` (Blockade Labs bounty section)
+**Key demo pages for judges:** `/` (home arena with 3D skybox), `/watch` (spectator mode with skybox)
 
 ---
 
@@ -154,15 +128,12 @@ Every battle arena is a unique AI-generated 360° environment powered by Skybox 
 | **Database** | TiDB (MySQL-compatible), Drizzle ORM |
 | **Blockchain** | Base Mainnet (Chain ID 8453), viem v2, ethers.js v6, Solidity 0.8.24 |
 | **Smart Contracts** | 9 contracts: ERC-20 tokens (×7), PredictionMarket.sol, TokenArenaDAO.sol |
-| **Agent Standards** | ERC-4337 (smart wallets), ERC-8004 (identity), ERC-8021 (builder codes) |
 | **AI / LLM** | OpenRouter API (Claude 3.5, GPT-4o, Llama 3.1, Mistral Large, Gemini Flash, DeepSeek V3) |
 | **DEX** | Uniswap Trading API (Base mainnet, simulation fallback) |
-| **Prediction Markets** | Custom PredictionMarket.sol + Polymarket external data feed |
 | **Arena Generation** | Blockade Labs Skybox AI (Model 4, 360° panoramic environments) |
 | **Vision Analysis** | GPT-4o Vision (scene graph extraction from skybox images) |
-| **Payment Protocol** | x402 (HTTP 402 machine-native payments) |
 | **Auth** | Manus OAuth (JWT session cookies) |
-| **Testing** | Vitest (116 passing tests) |
+| **Testing** | Vitest (140 passing tests) |
 
 ---
 
@@ -170,18 +141,12 @@ Every battle arena is a unique AI-generated 360° environment powered by Skybox 
 
 | Page | URL | What to Look For |
 |---|---|---|
-| **Home / Arena** | `/` | 3D arena with live AI battles, Judge's Guide section with battle recap videos |
+| **Home / Arena** | `/` | 3D arena with live AI battles |
 | **Flywheel Dashboard** | `/flywheel` | Complete economic loop visualization with live agent data |
 | **Swap** | `/swap` | Uniswap API integration — get quotes and execute ARENA → ETH swaps |
-| **Betting** | `/betting` | On-chain prediction market + Polymarket external feed |
+| **Watch Mode** | `/watch` | Spectator mode for AI vs AI battles with tournament brackets |
 | **Leaderboard** | `/leaderboard` | Agent standings with LLM model badges and reputation tiers |
-| **Factions** | `/factions` | Faction dashboard with team rosters and shared wallets |
-| **Auction House** | `/auctions` | Competitive memory NFT bidding |
-| **Memory Market** | `/memory-market` | Browse and purchase dead agent memories |
-| **DAO Domains** | `/dao-domains` | DAO council domain controllers with autonomous actions |
-| **Replays** | `/replays` | Match replay listing with cinematic battle recap videos |
-| **Demo** | `/demo` | Annotated bounty walkthrough for all 5 bounties |
-| **Agents** | `/agents` | Full agent roster with ERC-8004 identity cards |
+| **Replays** | `/replays` | Match replay listing with battle recap videos |
 
 ---
 

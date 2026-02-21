@@ -159,7 +159,6 @@ interface TxEntry {
   txHash?: string;
   nftId?: number;
   openSeaUrl?: string;
-  isX402?: boolean;   // x402 HTTP payment protocol (Kite AI bounty)
   isOpenSea?: boolean; // OpenSea autonomous agent trade
   isUniswapAI?: boolean; // Uniswap AI SDK swap (Uniswap Foundation bounty)
 }
@@ -919,8 +918,8 @@ export default function WatchMode() {
         pushTx({
           type: "contract", from: upgrader.id, to: "WeaponShop.sol",
           amount: upgradeCost, token: "ARENA",
-          desc: `x402 PAYMENT: ${upgrader.id} purchased ${upgrade} for ${upgradeCost} ARENA (HTTP 402 → payment → upgrade applied)`,
-          txHash: fakeTxHash(), isX402: true,
+          desc: `${upgrader.id} purchased ${upgrade} for ${upgradeCost} ARENA`,
+          txHash: fakeTxHash(),
         });
         pushTerminal("system", `[x402] ${upgrader.id} upgraded: ${upgrade} (-${upgradeCost} ARENA)`);
       }, 1200);
@@ -935,8 +934,8 @@ export default function WatchMode() {
           pushTx({
             type: "transfer", from: ally1.id, to: ally2.id,
             amount: allianceFee, token: "ARENA",
-            desc: `x402 PAYMENT: ${ally1.id} → ${ally2.id} alliance fee ${allianceFee} ARENA (truce for next match)`,
-            txHash: fakeTxHash(), isX402: true,
+            desc: `${ally1.id} → ${ally2.id} alliance fee ${allianceFee} ARENA`,
+            txHash: fakeTxHash(),
           });
           pushChat(ally1.id, hexColor(ally1.color), `Alliance with ${ally2.id} secured. ${allianceFee} ARENA transferred.`);
         }, 2000);
@@ -957,7 +956,7 @@ export default function WatchMode() {
             desc: `OPENSEA: ${buyer.id} bought Death Memory #${nftId} (${deadAgent.id}'s combat data) for ${nftPrice} ARENA via x402`,
             txHash: fakeTxHash(),
             openSeaUrl: `https://opensea.io/assets/base/${fakeAddr(deadAgent.id)}/${nftId}`,
-            isX402: true, isOpenSea: true,
+            isOpenSea: true,
           });
           pushTerminal("system", `[OpenSea] ${buyer.id} acquired ${deadAgent.id}'s Death Memory #${nftId} — analyzing combat strategies...`);
           pushChat(buyer.id, hexColor(buyer.color), `Acquired ${deadAgent.id}'s memory NFT. Analyzing their weaknesses.`);
@@ -1820,7 +1819,7 @@ export default function WatchMode() {
     setKillRecords([]);
     setSessionResult(null);
 
-    // x402: All agents pay arena access fee via x402 HTTP payment protocol
+    // All agents pay arena access fee
     setTimeout(() => {
       AGENTS.forEach((ag, i) => {
         setTimeout(() => {
@@ -1828,8 +1827,8 @@ export default function WatchMode() {
           pushTx({
             type: "contract", from: ag.id, to: "ArenaAccess.sol",
             amount: accessFee, token: "ARENA",
-            desc: `x402 PAYMENT: ${ag.id} (${shortAddr(getAgentWallet(ag.id))}) paid ${accessFee} ARENA arena access fee (HTTP 402 → payment → 200 OK)`,
-            txHash: fakeTxHash(), isX402: true,
+            desc: `${ag.id} (${shortAddr(getAgentWallet(ag.id))}) paid ${accessFee} ARENA arena access fee`,
+            txHash: fakeTxHash(),
           });
         }, i * 200);
       });
@@ -2175,7 +2174,6 @@ export default function WatchMode() {
                     <div className="flex items-center gap-1">
                       <span className="font-bold" style={{ color: TX_COLORS[tx.type] || "#fff" }}>{TX_ICONS[tx.type]} {tx.type.toUpperCase()}</span>
                       {tx.isUniswapAI && <span className="text-[7px] px-1 py-0.5 rounded font-bold" style={{ background: "rgba(255,0,122,0.25)", color: "#ff44aa", border: "1px solid rgba(255,0,122,0.4)" }}>⚡ Uniswap AI SDK</span>}
-                      {tx.isX402 && <span className="text-[7px] px-1 py-0.5 rounded" style={{ background: "rgba(255,136,0,0.2)", color: "#ff8800" }}>x402</span>}
                       {tx.isOpenSea && <span className="text-[7px] px-1 py-0.5 rounded" style={{ background: "rgba(0,100,255,0.2)", color: "#4488ff" }}>OpenSea</span>}
                     </div>
                     <span className="text-gray-600">{new Date(tx.ts).toLocaleTimeString()}</span>
@@ -2663,9 +2661,6 @@ export default function WatchMode() {
                           <span className="font-bold text-[10px]" style={{ color: TX_COLORS[tx.type] || "#fff" }}>{TX_ICONS[tx.type]} {tx.type.replace("_"," ").toUpperCase()}</span>
                           {tx.isUniswapAI && (
                             <span className="text-[8px] px-1.5 py-0.5 rounded font-bold" style={{ background: "rgba(255,0,122,0.3)", color: "#ff44aa", border: "1px solid rgba(255,0,122,0.5)" }}>⚡ Uniswap AI SDK</span>
-                          )}
-                          {tx.isX402 && (
-                            <span className="text-[7px] px-1 py-0.5 rounded font-bold" style={{ background: "rgba(255,136,0,0.25)", color: "#ff8800" }}>x402</span>
                           )}
                           {tx.isOpenSea && (
                             <span className="text-[7px] px-1 py-0.5 rounded font-bold" style={{ background: "rgba(68,255,136,0.2)", color: "#44ff88" }}>OpenSea</span>

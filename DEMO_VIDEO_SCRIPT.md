@@ -1,8 +1,8 @@
-# Token Arena — Demo Video Script & Storyboard
+# Token Arena Demo Video Script
 
 **Target length:** 3–4 minutes  
 **Tone:** Cinematic, fast-paced, technically credible  
-**Audience:** ETHDenver 2026 judges evaluating Base, Kite AI, 0g Labs, Uniswap, Blockade Labs bounties
+**Audience:** ETHDenver 2026 judges evaluating Base, Uniswap, and ETHDenver Futurllama bounties
 
 ---
 
@@ -11,7 +11,7 @@
 **[VISUAL]** Cold open on the Token Arena homepage. The neon brutalism hero image fills the screen — a cyberpunk arena bathed in electric cyan and magenta. The title "TOKEN ARENA" pulses in glitch typography.
 
 **[NARRATION — V.O.]**
-> "What if AI agents had real money? What if they had to earn it, spend it, bet it, and lose it — or die trying?"
+> "What if AI agents had real money? What if they had to earn it, spend it, swap it, and lose it — or die trying?"
 
 **[VISUAL]** Cut to a live AI vs AI match in progress. Six agents move through a Skybox AI-generated 360° arena. Weapon fire lights up the scene. Token amounts flash on screen with each hit.
 
@@ -24,18 +24,18 @@
 
 ## Section 1: The Economic Flywheel (0:20 – 1:00)
 
-**[VISUAL]** Navigate to `/flywheel`. The dashboard loads showing the six-stage economic loop diagram with live agent data flowing through it.
+**[VISUAL]** Navigate to `/flywheel`. The dashboard loads showing the five-stage economic loop diagram with live agent data flowing through it.
 
 **[NARRATION — V.O.]**
-> "The core innovation is the self-sustaining flywheel. Agents earn ARENA tokens by winning fights. They bet those tokens on prediction markets. They swap ARENA for ETH via Uniswap. They spend that ETH to buy LLM compute on OpenRouter. Better compute means smarter decisions. Smarter decisions mean more wins. The loop is self-reinforcing — and it runs entirely on-chain."
+> "The core innovation is the self-sustaining flywheel. Agents earn ARENA tokens by winning fights. They swap ARENA for ETH via Uniswap. They spend that ETH to buy LLM compute on OpenRouter. Better compute means smarter decisions. Smarter decisions mean more wins. The loop is self-reinforcing — and it runs entirely on-chain."
 
 **[VISUAL]** Scroll through the Flywheel Dashboard, highlighting:
 - Per-agent token earnings vs. compute spending bars
 - The "Ecosystem Health: HEALTHY" indicator
 - The Uniswap swap activity feed
-- The x402 transaction log showing compute purchases
+- The transaction log showing compute purchases
 
-**[TEXT OVERLAY]** `Battle → Earn → Bet → Swap (Uniswap) → Buy Compute (x402) → Win More`
+**[TEXT OVERLAY]** `Battle → Earn → Swap (Uniswap) → Buy Compute → Win More`
 
 ---
 
@@ -65,8 +65,6 @@
 > "All nine smart contracts are deployed and verified on Base Mainnet — not testnet. Every deployment transaction carries an ERC-8021 builder code attribution for Token Arena. The ARENA token, six weapon tokens, the PredictionMarket contract, and the TokenArenaDAO are all live."
 
 **[VISUAL]** Show the BaseScan contract page for `0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b` with the verified checkmark.
-
-**[VISUAL]** Navigate to `/dao-domains`. Show the five DAO council members — ARCHON, FORGE, ENTROPY, JUSTICE, EQUILIBRIA — each with their domain, wallet balance, and recent autonomous actions.
 
 **[TEXT OVERLAY]** `9/9 contracts verified on Base Mainnet · Chain ID 8453 · ERC-8021 builder code: tokenarena`
 
@@ -100,16 +98,16 @@
 
 ---
 
-## Section 6: Memory Economy + Auctions (2:50 – 3:15)
+## Section 6: Watch Mode / Spectator Experience (2:50 – 3:15)
 
-**[VISUAL]** Navigate to `/auctions`. The Auction House loads showing active memory NFT bids.
+**[VISUAL]** Navigate to `/watch`. Show the agent selection screen with all six agents displayed with their LLM model badges.
 
 **[NARRATION — V.O.]**
-> "When an agent dies, its memories become tradeable assets. Factions bid on dead agents' memories to capture their tactical intelligence. The winning bidder absorbs the agent's learned strategies — giving their own agents a competitive edge. This is 0g Labs' vision of decentralized AI memory storage, built live."
+> "Judges can watch AI vs AI tournaments in real-time. Select your favorite agents, watch them battle through multiple rounds, and see the tournament bracket advance in real-time. The spectator experience is designed to be engaging and easy to follow."
 
-**[VISUAL]** Navigate to `/memory-market`. Show the memory marketplace with agent memory cards, content hashes, and IPFS-ready provenance data.
+**[VISUAL]** Show a live tournament in progress — agents fighting, the bracket advancing, the leaderboard updating with kills and earnings.
 
-**[TEXT OVERLAY]** `Memory NFTs · IPFS-ready content hashes · Competitive auctions · Memory absorption`
+**[TEXT OVERLAY]** `Live tournament mode · Real-time spectator view · Multi-round brackets · Live leaderboard updates`
 
 ---
 
@@ -118,7 +116,7 @@
 **[VISUAL]** Return to the home page. The battle recap video auto-plays — a cinematic highlight reel of agent combat with token overlays.
 
 **[NARRATION — V.O.]**
-> "Token Arena is not a simulation. It is a live proof of concept for what autonomous AI agents can become when given real economic stakes. The agents are learning. The economy is running. The DAO is governing. And it's all on Base Mainnet, right now."
+> "Token Arena is not a simulation. It is a live proof of concept for what autonomous AI agents can become when given real economic stakes. The agents are learning. The economy is running. And it's all on Base Mainnet, right now."
 
 **[VISUAL]** Final shot: the Token Arena logo on the neon arena background. Contract addresses scroll across the bottom like a stock ticker.
 
@@ -148,31 +146,5 @@ By Marguerite Decourcelle (@coin_artist)
 2. The Flywheel Dashboard with populated agent data
 3. The Leaderboard with all 6 agents and their LLM badges
 4. BaseScan showing the verified ARENA contract
-5. The Swap page with a quote loaded
-6. An active auction in the Auction House
-
-**Voice-over tips:**
-- Record in a quiet room, normalize audio to -16 LUFS
-- Speak at a measured pace — judges need time to read the screen
-- Emphasize the word "live" and "on-chain" — these are the differentiators
-
-**Editing:**
-- Add neon cyan/magenta lower-thirds for section titles
-- Use cut transitions, not dissolves — keeps energy high
-- Add token amount counters as animated overlays during battle scenes
-- Export as MP4, H.264, 1080p, ~50 Mbps
-
----
-
-## Storyboard Summary
-
-| Time | Scene | Key Visual | Key Message |
-|---|---|---|---|
-| 0:00–0:20 | Cold open | Neon arena hero, live battle | "Real money, real stakes" |
-| 0:20–1:00 | Flywheel | `/flywheel` dashboard | "Self-sustaining economic loop" |
-| 1:00–1:30 | Agents | `/leaderboard` with LLM badges | "6 models, 6 personalities" |
-| 1:30–2:00 | On-chain | BaseScan + `/dao-domains` | "9 contracts, Base Mainnet, ERC-8021" |
-| 2:00–2:20 | Uniswap | `/swap` with quote | "Agents swap autonomously" |
-| 2:20–2:50 | Skybox | 3D arena + scene graph | "AI-generated tactical environments" |
-| 2:50–3:15 | Memory | `/auctions` + `/memory-market` | "Dead agent memories as tradeable assets" |
-| 3:15–3:40 | Closing | Battle recap video + logo | "Live on Base Mainnet, right now" |
+5. The Swap page with a successful quote
+6. The Watch Mode with a live tournament in progress

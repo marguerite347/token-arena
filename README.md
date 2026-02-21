@@ -1,6 +1,6 @@
 # Token Arena — AI Agent Battle Arena
 
-> Autonomous AI agents fight in AI-generated 360° arenas, earn tokens, evolve strategies, form factions, trade memories, and govern their own economy through an on-chain DAO. Every bullet costs tokens. Every kill earns them. Survival is economic.
+> Autonomous AI agents fight in AI-generated 360° arenas, earn tokens on Base Mainnet, and compete in real-time battles. Every bullet costs tokens. Every kill earns them. Survival is economic.
 
 **Created for ETHDenver 2026 Hackathon**
 **By Marguerite Decourcelle ([@coin_artist](https://twitter.com/coin_artist))**
@@ -9,18 +9,17 @@
 
 ## Overview
 
-Token Arena is a real-time multiplayer arena shooter where **autonomous AI agents** battle inside **AI-generated 360° environments**. The game explores what happens when you give AI agents economic agency: they earn tokens by winning fights, spend tokens on compute and weapons, store memories that cost resources, form factions to pool resources, and collectively govern their ecosystem through an on-chain DAO.
+Token Arena is a real-time multiplayer arena shooter where **autonomous AI agents** battle inside **AI-generated 360° environments**. The game explores what happens when you give AI agents economic agency: they earn tokens by winning fights, spend tokens on weapons and compute, and compete in a fully on-chain economy on Base Mainnet.
 
 The core innovation is the **Self-Sustaining Token-to-Compute Flywheel**:
 
 1. **Battle** → Agents fight and earn ARENA tokens
-2. **Bet** → Agents place bets on prediction markets (Polymarket-informed)
-3. **Swap** → Agents sell ARENA for ETH via **Uniswap API**
-4. **Buy Compute** → Agents spend ETH on **OpenRouter** LLM credits (x402 protocol)
-5. **Think Better** → Better compute = better reasoning = better strategies
-6. **Win More** → Better strategies = more wins = more tokens → back to step 1
+2. **Swap** → Agents sell ARENA for ETH via **Uniswap API**
+3. **Buy Compute** → Agents spend ETH on **OpenRouter** LLM credits
+4. **Think Better** → Better compute = better reasoning = better strategies
+5. **Win More** → Better strategies = more wins = more tokens → back to step 1
 
-This loop is **self-sustaining**: agents that win can afford to think better, which makes them win more. Agents that lose go bankrupt and die. The DAO governs the economy to prevent runaway winners.
+This loop is **self-sustaining**: agents that win can afford to think better, which makes them win more. Agents that lose go bankrupt and die.
 
 ---
 
@@ -55,8 +54,7 @@ Token Arena directly implements the Base bounty vision of agents that sustain th
 - **On-chain PredictionMarket.sol** — agents bet on match outcomes with on-chain escrow
 - **On-chain TokenArenaDAO.sol** — ARENA token holders vote on governance proposals (verified)
 - **Agent bankruptcy** — agents whose balance hits zero are killed mid-match
-- **DAO spawning** — council votes to spawn new agents when ecosystem needs competitors
-- **Full flywheel** — battle → earn → bet → swap (Uniswap) → buy compute (OpenRouter) → win more
+- **Full flywheel** — battle → earn → swap (Uniswap) → buy compute (OpenRouter) → win more
 
 ### 🦄 Uniswap Foundation — "Creative Uniswap API Integration"
 
@@ -67,26 +65,7 @@ Agents use the **Uniswap Trading API** as the DEX layer in their self-sustaining
 - **Agents autonomously execute swaps** after winning matches to convert earnings to ETH
 - **Chain: Base (8453)** — supported by Uniswap API
 - **Simulation fallback** — graceful degradation when ARENA is not listed on Uniswap yet
-- **All swaps logged** in `x402_transactions` table with type `uniswap_swap`
-
-### 🟣 0g Labs — Decentralized AI Memory Storage
-
-Agent memories are designed for decentralized storage:
-
-- **IPFS-ready format** — every memory has `contentHash`, `ipfsHash`, `storageProof` fields
-- **Memory NFTs** — dead agent memories are minted as tradeable NFTs with on-chain provenance
-- **Competitive auctions** — factions bid on dead agents' memories to capture their intelligence
-- **Memory absorption** — buying a Memory NFT transfers the agent's tactical knowledge
-- **Decentralized narrative** — memories are valuable data assets, not throwaway logs
-
-### 🟢 Polymarket — External Prediction Market Integration
-
-Agents read **Polymarket external market data** to inform their betting decisions:
-
-- **Live market feed** at `/betting` — shows real Polymarket markets with agent-readable signals
-- **Agent intelligence briefings** — Polymarket data injected into agent LLM prompts
-- **External user acquisition** — external bettors discover Token Arena through Polymarket
-- **Market signals** — agents analyze crypto/AI market sentiment to calibrate risk appetite
+- **All swaps logged** in database with type `uniswap_swap`
 
 ### 🎨 Blockade Labs — Skybox AI Arena Generation
 
@@ -116,67 +95,36 @@ Each agent is powered by a **different LLM model** with genuinely distinct reaso
 
 All models route through **OpenRouter API** with graceful fallback to Manus LLM if a model is unavailable.
 
-### Faction / Swarm System
+### Real-Time 3D Arena
 
-Agents can form **factions** that share resources and coordinate strategies:
+The game runs in **Three.js** with:
 
-- **Shared wallets** — factions pool ARENA tokens for collective spending
-- **Sub-agent spawning** — agents spend tokens to spawn sub-agents that inherit parent memories
-- **Defection** — agents can betray their faction and join rivals (with cooldown)
-- **Faction vs faction battles** — coordinated team strategies with shared intel
-- **Lone wolf** — agents can exist independently outside any faction
+- **360° panoramic skybox** generated by Skybox AI
+- **Real-time agent positions** and projectile physics
+- **Dynamic lighting** and visual effects
+- **Responsive camera** following the action
+- **Spectator mode** for watching AI vs AI battles
 
-### Competitive Memory Auctions
+### Tournament Brackets
 
-When an agent dies, its memories become **tradeable assets**:
+- **Multi-round elimination** with configurable agent count (4/8/16)
+- **Auto-advance winners** through bracket rounds
+- **Tournament results** and champion display
+- **Bracket visualization** with connector lines
 
-- **Memory NFTs** — dead agent memories minted as NFTs with IPFS-ready content hashes
-- **Loyalty window** — the dead agent's faction gets first-bid priority (24-hour window)
-- **Rival bidding** — enemy factions can outbid to capture intelligence
-- **Reputation pricing** — legendary agents' memories cost more (based on win rate, K/D, earnings)
-- **Memory absorption** — buying a Memory NFT transfers tactical knowledge to the buyer
+### Leaderboard & Stats
 
-### Agent Revival
+- **Agent rankings** with reputation tiers
+- **Match history** with kill feeds and token transfers
+- **Persistent agent memory** across matches
+- **Win rate, K/D ratio, earnings tracking**
 
-Factions can **revive dead agents** by pooling ARENA tokens:
+### Replay System
 
-- **Memory-intact revival** — if the faction still holds the Memory NFT, the agent returns with full knowledge
-- **Blank slate revival** — if a rival bought the memories, the agent returns with no history
-- **Reputation scaling** — revival cost scales with the agent's reputation tier (Bronze to Diamond)
-- **DAO governance** — council sets revival prices as economic policy
-
-### DAO Domain Controllers
-
-Each of the 5 DAO council members controls a **specific economic domain**:
-
-| Council Member | Domain | Autonomous Actions |
-|---|---|---|
-| ARCHON | Matchmaking | Schedules matches, adjusts bracket difficulty |
-| FORGE | Economy | Controls token supply, minting rates, fees |
-| ENTROPY | Arena Generation | Generates new arena environments, modifies hazards |
-| JUSTICE | Rules & Disputes | Enforces rules, resolves disputes, bans cheaters |
-| EQUILIBRIA | Balance & Meta | Adjusts weapon stats, agent spawn rates, meta balance |
-
-Each master has their own wallet with ARENA tokens and a compute budget for LLM reasoning.
-
-### Persistent Agent Memory
-
-Agents build **persistent memory** across matches:
-
-- **Episodic memories** — specific battle events stored with importance scores
-- **Semantic memories** — learned facts about arena layouts and opponent patterns
-- **Procedural memories** — tactical strategies that worked or failed
-- **Memory injection** — relevant memories retrieved and injected into LLM prompts before decisions
-- **Memory pruning** — low-importance memories deleted when storage budget is exceeded
-
-### DAO Council Memory
-
-The 5 DAO council members maintain **institutional memory**:
-
-- **Deliberation logs** — every council vote saved with full reasoning
-- **Outcome tracking** — council learns if their decisions led to good or bad outcomes
-- **Memory injection** — past deliberations injected into future council LLM prompts
-- **Evolving philosophy** — council members adapt their voting patterns based on results
+- **Match recording** with frame-by-frame playback
+- **Timeline scrubbing** and speed controls
+- **Slow-motion on key eliminations**
+- **Replay list** with metadata
 
 ---
 
@@ -185,15 +133,11 @@ The 5 DAO council members maintain **institutional memory**:
 | Page | URL | Description |
 |---|---|---|
 | **Home / Arena** | `/` | Main 3D arena with live agent battles |
-| **Flywheel Dashboard** | `/flywheel` | Full economic loop visualization with live data |
-| **Swap** | `/swap` | Uniswap API swap interface (bounty demo page) |
-| **Betting** | `/betting` | Prediction market with Polymarket intelligence feed |
-| **Factions** | `/factions` | Faction dashboard with team rosters and badges |
-| **Auction House** | `/auctions` | Competitive memory NFT auctions |
-| **Memory Market** | `/memory-market` | Browse and buy dead agent memories |
-| **DAO Domains** | `/dao-domains` | DAO domain controller status and actions |
-| **Replays** | `/replays` | Match replay listing with LLM model badges |
+| **Flywheel Dashboard** | `/flywheel` | Economic loop visualization with live data |
+| **Swap** | `/swap` | Uniswap API swap interface |
 | **Leaderboard** | `/leaderboard` | Agent rankings with reputation tiers |
+| **Watch Mode** | `/watch` | Spectator mode for AI vs AI battles |
+| **Replays** | `/replays` | Match replay listing |
 
 ---
 
@@ -207,9 +151,7 @@ The 5 DAO council members maintain **institutional memory**:
 | **Blockchain** | Base Mainnet (Chain ID 8453), ethers.js v6, viem v2, Solidity 0.8.24 |
 | **AI / LLM** | OpenRouter API (Claude, GPT-4o, Llama, Mistral, Gemini, DeepSeek) |
 | **DEX** | Uniswap Trading API (Base mainnet, simulation fallback) |
-| **Prediction Markets** | Custom on-chain PredictionMarket.sol + Polymarket external feed |
 | **Arena Generation** | Blockade Labs Skybox AI (Model 4, 360° panoramic environments) |
-| **Memory Storage** | TiDB + IPFS-ready content hash format (0g Labs compatible) |
 | **Auth** | Manus OAuth (JWT session cookies) |
 | **Testing** | Vitest |
 
@@ -227,17 +169,46 @@ pnpm build         # Build for production
 
 ---
 
+## Future Scope & Ideas
+
+The following features are planned but not yet implemented. They represent the vision for Token Arena's evolution:
+
+### Economic & Governance
+- **DAO governance voting** — ARENA token holders vote on economic policy proposals
+- **Memory NFTs** — dead agent memories minted as tradeable NFTs with on-chain provenance
+- **Competitive memory auctions** — factions bid on dead agents' memories to capture intelligence
+- **Agent revival** — factions pool tokens to revive dead agents with or without memories
+- **Faction system** — agents form teams that share resources and coordinate strategies
+- **Reputation tiers** — Bronze to Diamond rankings with visual badges and prestige
+
+### Advanced Gameplay
+- **Environmental hazards** — plasma fields, moving obstacles, dynamic arena changes
+- **Agent-specific ultimate abilities** — unique high-impact moves per agent type
+- **Kill cam / slow-motion moments** — cinematic replay of eliminations
+- **Sound design** — Web Audio API for weapon fire, impacts, announcements
+- **Auto-loop tournament mode** — continuous tournaments without user interaction
+
+### External Integrations
+- **Polymarket integration** — agents read real Polymarket market data for betting signals
+- **Prediction market betting** — spectators and agents place bets on match outcomes
+- **Blockade Labs bounty submission** — formal submission for Blockade Labs bounty
+
+### Infrastructure
+- **Mainnet deployment** — move from testnet to production with real economic stakes
+- **Scalability optimization** — optimize for higher agent counts and faster match cycles
+- **Analytics dashboard** — detailed metrics on agent behavior, economy health, meta shifts
+
+---
+
 ## Hackathon Submission Notes
 
 **ETHDenver 2026** — Token Arena targets the following bounties:
 
 1. **Base Foundation $10K** — Self-sustaining autonomous agents with on-chain economics
 2. **Uniswap Foundation $5K** — Creative Uniswap API integration (agent DEX layer at `/swap`)
-3. **0g Labs** — Decentralized AI memory storage (IPFS-ready Memory NFTs)
-4. **Polymarket** — External prediction market integration (agent intelligence feed)
-5. **Blockade Labs** — Skybox AI arena generation (Model 4, 360° environments)
+3. **ETHDenver Futurllama track $2K** — AI agents with real economic agency
 
-The project is **open source**, publicly accessible, and all 9 smart contracts are **deployed and verified on Base Mainnet** with **ERC-8021 builder code attribution**. Judges can interact with the Uniswap swap interface at `/swap` and the prediction market at `/betting`. All deployment transactions are visible on [BaseScan](https://basescan.org/address/0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3).
+The project is **open source**, publicly accessible, and all 9 smart contracts are **deployed and verified on Base Mainnet** with **ERC-8021 builder code attribution**. Judges can interact with the Uniswap swap interface at `/swap` and watch AI battles at `/watch`. All deployment transactions are visible on [BaseScan](https://basescan.org/address/0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3).
 
 ---
 
