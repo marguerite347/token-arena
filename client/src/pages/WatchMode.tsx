@@ -999,7 +999,7 @@ export default function WatchMode() {
     onSuccess: (data: any) => {
       pendingApiResultRef.current = data;
       const elapsed = Date.now() - combatStartTimeRef.current;
-      const MIN_COMBAT_MS = 18000;
+      const MIN_COMBAT_MS = 120000; // 2 minutes
       const remaining = Math.max(0, MIN_COMBAT_MS - elapsed);
       if (remaining <= 0) {
         finishCombat(data);
