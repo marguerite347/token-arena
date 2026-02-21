@@ -185,9 +185,9 @@ export default function AgentDemo() {
             bountyAmount="$10,000"
             sponsor="Base (Coinbase L2)"
             description="Autonomous AI agents that earn, trade, and pay for their own compute"
-            techDetails={["Base Sepolia", "ARENA ERC-20", "x402 Protocol", "Multi-LLM"]}
-            contractAddress="0x9DB281D2243ea30577783ab3364873E3F0a02610"
-            contractNetwork="Base Sepolia"
+            techDetails={["Base Mainnet", "ARENA ERC-20", "x402 Protocol", "Multi-LLM"]}
+            contractAddress="0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b"
+            contractNetwork="Base Mainnet"
             color="#0052FF"
           />
           <BountyBanner
@@ -291,19 +291,19 @@ export default function AgentDemo() {
                 <div className="space-y-1 text-[9px] font-mono">
                   <div className="flex justify-between">
                     <span className="text-zinc-500">ARENA Token</span>
-                    <a href="https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610" target="_blank" className="text-neon-cyan hover:underline">
+                    <a href="https://basescan.org/address/0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b" target="_blank" className="text-neon-cyan hover:underline">
                       0x9DB2...0610 ↗
                     </a>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-500">DAO Contract</span>
-                    <a href="https://sepolia.basescan.org/address/0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d" target="_blank" className="text-neon-cyan hover:underline">
+                    <a href="https://basescan.org/address/0x0cb7b046b5a1ba636b1cfe9596dbdb356936d99d" target="_blank" className="text-neon-cyan hover:underline">
                       0x0Cb7...d99d ↗
                     </a>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-500">Network</span>
-                    <span className="text-zinc-400">Base Sepolia (84532)</span>
+                    <span className="text-zinc-400">Base Mainnet (8453)</span>
                   </div>
                 </div>
               </div>

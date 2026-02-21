@@ -1,5 +1,5 @@
 /**
- * WalletButton — Connect/disconnect wallet with Base Sepolia
+ * WalletButton — Connect/disconnect wallet with Base Mainnet
  * Shows connected address, ARENA balance, and chain status
  */
 import { ConnectButton } from "@rainbow-me/rainbowkit";

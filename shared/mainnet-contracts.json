@@ -1,0 +1,44 @@
+{
+  "network": "base-mainnet",
+  "chainId": 8453,
+  "deployer": "0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3",
+  "builderCode": "tokenarena",
+  "erc8021Suffix": "0x14746f6b656e6172656e610080218021802180218021802180218021",
+  "deployedAt": "2026-02-21T05:18:50.033Z",
+  "contracts": {
+    "ARENA": "0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b",
+    "PLAS": "0x0cb7b046b5a1ba636b1cfe9596dbdb356936d99d",
+    "RAIL": "0xcf84590c752de7fd648cf28447a4a4a68a87791c",
+    "SCAT": "0x418355cdec41f5b7aefc34c4b7368a43f59f43d5",
+    "RCKT": "0x085c234387bad266875b1dfdbd7df2132ec52263",
+    "BEAM": "0x76821c1b2c69545ce9c105c41734ea16ea386d94",
+    "VOID": "0x4afb5bbe53dad291da351ae6ab66230af882f912",
+    "PredictionMarket": "0xc9315768e9bb10d396f0c0c37dbabfbef5a257b4",
+    "TokenArenaDAO": "0x989362a1098f9193487ef2a136f5e680e5c3b438"
+  },
+  "txHashes": {
+    "ARENA": "0xaac3b3394afe6f574ec88701730fd9e6c5517f9e376d6effc60122f4170f338b",
+    "PLAS": "0x127d2cd407db65ad4e8e2dd920491b3f504c067106bcf5fcfd211766a213d927",
+    "RAIL": "0xcb524d02cabdb8adb0ba37496662e1ced16c2f1bd5cb334770d09126ca6ecaa1",
+    "SCAT": "0x2cce7c1f0e3c457aef88eecc368993f6ac2a4b2f1f3dc46e56e97fd55fa425b0",
+    "RCKT": "0x331a26495090f4d11fbeb06197eb8cd43b4657a436db24e25a588135ab78f1a7",
+    "BEAM": "0x3927590f093f0a8ffd1d97d2a1ea8a61819da5acaee7a43956df61ae25720df8",
+    "VOID": "0xd312548dddfd4d44b99739ff94318e22b8f41973d90d6de2541feabbdd831d01",
+    "PredictionMarket": "0xa2bc95e5fcaf975b37c8f163a9ab48d70e096b48deedbb4c7a4dff0cace1162c",
+    "TokenArenaDAO": "0x57385ce25c4a3e408229342737143cf07e94d10f134760b8030fb6f82d217610"
+  },
+  "agentWallets": {
+    "agent-1": "0xa4300a23001C0bDe4f250ff2B4f45df1F7CeaB05",
+    "agent-2": "0x8631Fde1ca5ba165E64025e0E7E3F1A67ce35048",
+    "agent-3": "0xeb88792E10466FFec022f61E944a4639474efb2d",
+    "agent-4": "0xE718D574582F71cfeCb7F49ac06E6e59EB9cceA3",
+    "agent-5": "0x7b90c2978C7dE6648216ffDc2e540bE7f09a0a6E",
+    "agent-6": "0xCd2dfb4E63F54D19DB22A8C05F91ca53354cE85F",
+    "agent-7": "0x973822517F4fC247ab282FD6e28a54960B013216",
+    "agent-8": "0x3694E806321aE093A72BfFA82554A98Aa6ED1E35"
+  },
+  "verification": {
+    "basescan": "https://basescan.org/address/0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b",
+    "note": "All 9 contracts deployed with ERC-8021 builder code attribution (tokenarena)"
+  }
+}

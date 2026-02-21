@@ -72,12 +72,12 @@ export default function ArenaResults({
 
           {/* On-chain receipt */}
           <div className="bg-background/50 clip-brutal-sm p-3 mb-4 text-left">
-            <div className="text-[9px] font-mono text-neon-cyan/70 mb-1">ON-CHAIN SETTLEMENT (Base Sepolia L2)</div>
+            <div className="text-[9px] font-mono text-neon-cyan/70 mb-1">ON-CHAIN SETTLEMENT (Base Mainnet L2)</div>
             <div className="text-[9px] font-mono text-muted-foreground space-y-0.5">
               <div>wallet: {wallet.address ? `${wallet.address.slice(0, 10)}...${wallet.address.slice(-6)}` : "simulated (no wallet connected)"}</div>
               <div>tokens_in: {state.tokensEarned} TKN · tokens_out: {state.tokensSpent} TKN</div>
               <div>net: {state.tokensEarned - state.tokensSpent > 0 ? "+" : ""}{state.tokensEarned - state.tokensSpent} TKN</div>
-              <div>x402_txns: {wallet.completedPayments.length} · protocol: x402 · chain: base-sepolia</div>
+              <div>x402_txns: {wallet.completedPayments.length} · protocol: x402 · chain: base-mainnet</div>
               <div>agent_id: {state.player.erc8004Id} (ERC-8004)</div>
             </div>
           </div>

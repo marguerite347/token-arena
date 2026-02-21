@@ -373,6 +373,95 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Judge's Guide Section */}
+        <section className="py-20 border-t border-border/20" id="judges-guide">
+          <div className="container">
+            <div className="text-center mb-12">
+              <div className="inline-block hud-panel clip-brutal px-4 py-1 mb-4">
+                <span className="text-[10px] font-mono text-neon-amber uppercase tracking-[0.3em]">ETHDenver 2026 Judges</span>
+              </div>
+              <h2 className="font-display text-4xl font-bold text-foreground tracking-wider mb-4">JUDGE'S GUIDE</h2>
+              <p className="text-sm font-mono text-muted-foreground max-w-2xl mx-auto">
+                Token Arena targets 5 bounties. Each demo below is live and interactive. Start here for the fastest path to evaluating each integration.
+              </p>
+            </div>
+
+            {/* Battle Recap Videos */}
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1 h-6 bg-neon-cyan" />
+                <h3 className="font-display text-xl font-bold text-neon-cyan tracking-wider">CINEMATIC BATTLE RECAPS</h3>
+                <span className="text-[9px] font-mono px-2 py-0.5 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20">3 VIDEOS</span>
+              </div>
+              <p className="text-xs font-mono text-muted-foreground mb-6">
+                Auto-generated MP4 recaps from real match replay data showing agent positions, LLM reasoning, kill events, and token economics.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/tGuHnJFZHrcBLgGF.mp4", title: "PHANTOM vs NEXUS-7", subtitle: "GPT-4o vs Claude 3.5", badge: "GPT-4o WINS", color: "#ff3366", kills: 3 },
+                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/lleHkBUeYgoCgHGH.mp4", title: "PHANTOM vs NEXUS-7", subtitle: "GPT-4o vs Claude 3.5", badge: "REMATCH", color: "#00f0ff", kills: 3 },
+                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/SuNsKWuevUYgoDRn.mp4", title: "TITAN vs PHANTOM", subtitle: "Llama 3.1 70B vs GPT-4o", badge: "LLAMA WINS", color: "#ff9900", kills: 3 },
+                ].map((video, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="hud-panel clip-brutal overflow-hidden">
+                    <div className="relative">
+                      <video src={video.url} autoPlay muted loop playsInline className="w-full aspect-video object-cover" style={{ display: 'block' }} />
+                      <div className="absolute top-2 left-2">
+                        <span className="text-[9px] font-mono px-2 py-0.5 font-bold" style={{ backgroundColor: `${video.color}30`, color: video.color, border: `1px solid ${video.color}60` }}>{video.badge}</span>
+                      </div>
+                      <div className="absolute bottom-2 right-2">
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 bg-black/60 text-neon-green">{video.kills} KILLS</span>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <div className="font-mono text-xs text-foreground font-bold">{video.title}</div>
+                      <div className="font-mono text-[10px] text-muted-foreground">{video.subtitle}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bounty Links */}
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1 h-6 bg-neon-magenta" />
+                <h3 className="font-display text-xl font-bold text-neon-magenta tracking-wider">BOUNTY DEMOS</h3>
+                <span className="text-[9px] font-mono px-2 py-0.5 bg-neon-magenta/10 text-neon-magenta border border-neon-magenta/20">5 TARGETS</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { sponsor: "Blockade Labs", bounty: "Skybox AI Integration", prize: "Prize Pool", color: "#ff6b35", path: "/arena", label: "VIEW SKYBOX ARENA", description: "360\u00b0 Skybox AI environments generated per match. Model 4 cyberpunk, sci-fi, and neon styles. Scene graph analysis feeds agent reasoning.", contracts: [], icon: "\ud83c\udf10" },
+                  { sponsor: "Base / Coinbase", bounty: "Self-Sustaining Autonomous Agents", prize: "$10,000", color: "#0052ff", path: "/flywheel", label: "VIEW FLYWHEEL", description: "7 ERC-20 contracts on Base Mainnet. Agents earn, spend, and trade tokens autonomously. Full flywheel: battle \u2192 earn \u2192 compute \u2192 smarter \u2192 win.", contracts: ["ARENA: 0x9DB281D2", "DAO: 0x0Cb7B046"], icon: "\ud83d\udd35" },
+                  { sponsor: "Uniswap Foundation", bounty: "Best Use of Uniswap", prize: "$5,000", color: "#FF007A", path: "/swap", label: "TRY SWAP UI", description: "Agents autonomously swap ARENA\u2192ETH via Uniswap API when they need liquidity. Standalone swap UI with live quotes.", contracts: [], icon: "\ud83e\udd84" },
+                  { sponsor: "Kite AI", bounty: "x402 Agent Payments", prize: "Prize Pool", color: "#00ff88", path: "/agent-demo", label: "VIEW AGENT DEMO", description: "ClawSwarm agents pay for compute via x402 micropayments. Each LLM call costs tokens. Agents manage their own budgets.", contracts: [], icon: "\u26a1" },
+                  { sponsor: "0g Labs", bounty: "Decentralized Storage", prize: "Prize Pool", color: "#a855f7", path: "/memory-market", label: "VIEW MEMORY MARKET", description: "Agent memories stored as NFTs with IPFS-ready structure. Dead agents' memories auctioned on the Memory Marketplace.", contracts: [], icon: "\ud83e\udde0" },
+                  { sponsor: "Prediction Markets", bounty: "On-Chain Betting", prize: "Live Demo", color: "#fbbf24", path: "/betting", label: "VIEW BETTING", description: "Agents auto-bet on each other before every match. Polymarket data feeds external signals. 48+ markets, 23+ bets resolved.", contracts: ["PredictionMarket: 0x50ED7aEB"], icon: "\ud83c\udfb0" },
+                ].map((item, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} onClick={() => navigate(item.path)} className="hud-panel clip-brutal p-5 cursor-pointer group transition-all hover:scale-[1.02]" style={{ borderColor: `${item.color}30` }}>
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="text-xl mb-1">{item.icon}</div>
+                        <div className="text-[9px] font-mono uppercase tracking-[0.2em] mb-1" style={{ color: item.color }}>{item.sponsor}</div>
+                        <div className="font-display text-sm font-bold text-foreground">{item.bounty}</div>
+                      </div>
+                      <div className="text-[10px] font-mono px-2 py-0.5 font-bold" style={{ backgroundColor: `${item.color}15`, color: item.color, border: `1px solid ${item.color}40` }}>{item.prize}</div>
+                    </div>
+                    <p className="text-[10px] font-mono text-muted-foreground mb-4 leading-relaxed">{item.description}</p>
+                    {item.contracts.length > 0 && (
+                      <div className="mb-3 space-y-1">
+                        {item.contracts.map((c, ci) => (
+                          <div key={ci} className="text-[9px] font-mono text-neon-green/70 bg-neon-green/5 px-2 py-0.5 border border-neon-green/20">\u2713 {c}\u2026</div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="text-[9px] font-mono font-bold group-hover:opacity-80 transition-opacity" style={{ color: item.color }}>{item.label} \u2192</div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Footer */}
         <footer className="py-8 border-t border-border/20">
           <div className="container">

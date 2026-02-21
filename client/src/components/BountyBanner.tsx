@@ -67,7 +67,7 @@ export function BountyBanner({
           <div className="text-right">
             <div className="text-xs text-zinc-500 mb-1">{contractNetwork}</div>
             <a
-              href={`https://sepolia.basescan.org/address/${contractAddress}`}
+              href={`https://basescan.org/address/${contractAddress}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs font-mono hover:underline"

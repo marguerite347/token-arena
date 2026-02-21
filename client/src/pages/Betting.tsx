@@ -5,8 +5,8 @@
  * 5% house rake → DAO treasury → funds agent compute costs.
  * This closes the flywheel: tokens as ammo + tokens as betting stakes.
  * 
- * On-chain contract: PredictionMarket.sol (Base Sepolia)
- * Contract: 0x50ED7aEBBcFDAE85cEa0d5860109EF98B2225A6b
+ * On-chain contract: PredictionMarket.sol (Base Mainnet)
+ * Contract: 0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b
  */
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -478,7 +478,7 @@ export default function Betting() {
             {showCreateForm ? "CANCEL" : "+ CREATE MARKETS (DAO ORACLE)"}
           </button>
           <span className="text-[9px] font-mono text-gray-600">
-            Contract: <a href="https://sepolia.basescan.org/address/0x50ED7aEBBcFDAE85cEa0d5860109EF98B2225A6b" target="_blank" rel="noopener noreferrer" className="text-neon-cyan hover:underline">0x50ED...A6b ↗</a>
+            Contract: <a href="https://basescan.org/address/0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b" target="_blank" rel="noopener noreferrer" className="text-neon-cyan hover:underline">0x50ED...A6b ↗</a>
           </span>
         </div>
 
@@ -580,7 +580,7 @@ export default function Betting() {
         <div className="px-6 py-4 border-t border-border/20">
           <div className="flex items-center justify-between">
             <span className="text-[9px] font-mono text-gray-600">
-              On-chain escrow · 5% rake to DAO treasury · Base Sepolia testnet
+              On-chain escrow · 5% rake to DAO treasury · Base Mainnet testnet
             </span>
             <div className="flex items-center gap-2">
               <span className="text-[8px] font-mono px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded">

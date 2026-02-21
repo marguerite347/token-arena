@@ -774,3 +774,36 @@
 - [ ] Integrate ClawSwarm autonomous agent demo files
 - [x] Update flywheel diagram with ALL economic loops
 - [ ] Final checkpoint before submission
+
+## v29 — Watchable Replays & Prediction Market Activity
+
+- [ ] Build ReplayViewer component with animated position frames
+- [ ] Show combat log scrolling in real-time during playback
+- [ ] Display LLM decision reasoning per agent
+- [ ] Show kill events and highlights with timestamps
+- [ ] Wire agent auto-betting into playtest loop
+- [ ] Seed prediction market with betting data from tournament
+- [ ] Update Replays listing page to link to viewer
+- [ ] Run new tournament with betting active
+
+## v30 — Cinematic Battle Recaps & Judge's Guide
+- [x] Generate cinematic battle recap MP4 videos from replay data (Python + ffmpeg)
+- [x] Upload videos to CDN (3 videos: PHANTOM x2, TITAN)
+- [x] Add Judge's Guide section to Home page with video player (autoplay, muted, loop)
+- [x] Add Bounty Demo cards to Judge's Guide (6 bounties with links)
+- [x] Wire agent auto-betting into aiPlaytest session loop (create market + place bets + resolve)
+- [ ] Checkpoint and deploy
+
+## v31 — Base Mainnet Deployment & ERC-8021 Builder Codes ($10K Bounty)
+- [ ] Research ERC-8021 builder codes on base.dev
+- [ ] Prepare deployment scripts for Base mainnet (chain ID 8453)
+- [ ] Deploy ARENA token to Base mainnet
+- [ ] Deploy 6 weapon tokens (PLAS, RAIL, SCAT, RCKT, BEAM, VOID) to Base mainnet
+- [ ] Deploy PredictionMarket contract to Base mainnet
+- [ ] Deploy TokenArenaDAO contract to Base mainnet
+- [ ] Verify all 9 contracts on basescan.org
+- [x] Integrate ERC-8021 builder codes into transaction flows
+- [ ] Update app to support both testnet and mainnet
+- [ ] Update shared/web3.ts with mainnet contract addresses
+- [x] Update README with mainnet contract addresses
+- [ ] Run tests and checkpoint

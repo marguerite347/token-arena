@@ -16,6 +16,7 @@ import { recordComputeSpend, recordFee } from "./daoCouncil";
 import { ARENA_PROMPTS } from "../shared/arenaPrompts";
 import { WEAPON_TOKENS } from "../shared/web3";
 import { matchReplays } from "../drizzle/schema";
+import { createPredictionMarket, placeBet, resolveMarket } from "./predictionMarket";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -687,7 +688,38 @@ export async function runPlaytestSession(
     const a1 = shuffled[0];
     const a2 = shuffled[1];
 
-    console.log(`[AIPlaytest] Match ${i + 1}/${matchCount}: ${a1.name} vs ${a2.name}`);
+     console.log(`[AIPlaytest] Match ${i + 1}/${matchCount}: ${a1.name} vs ${a2.name}`);
+
+    // ── Auto-betting: Create a pre-match prediction market and have agents bet ──
+    let autoBetMarketId: number | null = null;
+    try {
+      const { marketId } = await createPredictionMarket({
+        councilMemberId: 1,
+        marketType: "match_winner",
+        title: `Who wins: ${a1.name} vs ${a2.name}?`,
+        description: `AI agents ${a1.name} (${getAgentModelKey(a1.agentId)}) vs ${a2.name} (${getAgentModelKey(a2.agentId)}) battle in the arena. Which LLM-powered agent will prevail?`,
+        options: [
+          { id: 1, label: a1.name, odds: parseFloat((1.6 + Math.random() * 0.8).toFixed(2)) },
+          { id: 2, label: a2.name, odds: parseFloat((1.6 + Math.random() * 0.8).toFixed(2)) },
+        ],
+      });
+      autoBetMarketId = marketId;
+
+      // Each agent bets on themselves (confidence in their own LLM)
+      const betAmount1 = Math.max(5, Math.floor(Math.random() * 30) + 10);
+      const betAmount2 = Math.max(5, Math.floor(Math.random() * 30) + 10);
+      await placeBet({ marketId, bettorType: "agent", bettorId: `agent-${a1.agentId}`, bettorName: a1.name, optionId: 1, amount: betAmount1 });
+      await placeBet({ marketId, bettorType: "agent", bettorId: `agent-${a2.agentId}`, bettorName: a2.name, optionId: 2, amount: betAmount2 });
+
+      // Spectator bets on a random favourite
+      const spectatorFavourite = Math.random() > 0.5 ? 1 : 2;
+      const spectatorBet = Math.max(5, Math.floor(Math.random() * 50) + 5);
+      await placeBet({ marketId, bettorType: "spectator", bettorId: `spectator-${Date.now()}`, bettorName: "Arena Spectator", optionId: spectatorFavourite, amount: spectatorBet });
+
+      console.log(`[AIPlaytest] 🎰 Prediction market #${marketId} created: ${a1.name} vs ${a2.name} (3 bets placed)`);
+    } catch (betErr) {
+      console.warn(`[AIPlaytest] Auto-bet failed (non-fatal):`, betErr instanceof Error ? betErr.message : betErr);
+    }
 
     const result = await runPlaytestMatch(
       {
@@ -714,6 +746,18 @@ export async function runPlaytestSession(
     );
 
     results.push(result);
+
+    // ── Resolve prediction market based on match winner ──
+    if (autoBetMarketId !== null) {
+      try {
+        // Determine winning option (1 = a1, 2 = a2)
+        const winnerIsA1 = result.winner === a1.name;
+        await resolveMarket({ marketId: autoBetMarketId, winningOptionId: winnerIsA1 ? 1 : 2 });
+        console.log(`[AIPlaytest] ✅ Market #${autoBetMarketId} resolved: ${result.winner} wins`);
+      } catch (resolveErr) {
+        console.warn(`[AIPlaytest] Market resolution failed (non-fatal):`, resolveErr instanceof Error ? resolveErr.message : resolveErr);
+      }
+    }
 
     // Aggregate stats
     for (const agent of result.agents) {

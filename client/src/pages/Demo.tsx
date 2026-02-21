@@ -83,7 +83,7 @@ const BOUNTIES: BountySection[] = [
       "ERC-4337 account abstraction for agent wallets",
     ],
     howWeMeetIt: [
-      "7 ERC-20 tokens deployed on Base Sepolia (ARENA + 6 weapon tokens)",
+      "7 ERC-20 tokens deployed on Base Mainnet (ARENA + 6 weapon tokens)",
       "Shooting costs tokens (spend ammo), getting hit collects tokens (receive ammo)",
       "Each AI agent has an ERC-4337 smart contract wallet — no human intermediary",
       "Agents autonomously decide what to buy using LLM reasoning about their performance",
@@ -92,7 +92,7 @@ const BOUNTIES: BountySection[] = [
       "Self-sustaining: agents that play well earn enough to fund their own compute and ammo",
       "DAO treasury funded by match fees, crafting taxes, shop fees, death taxes — ecosystem sustains itself",
     ],
-    techStack: ["wagmi v3 + viem v2", "RainbowKit", "Base Sepolia (Chain ID 84532)", "ERC-20 token contracts", "ERC-4337 account abstraction", "DAO treasury with fee structure"],
+    techStack: ["wagmi v3 + viem v2", "RainbowKit", "Base Mainnet (Chain ID 8453)", "ERC-20 token contracts", "ERC-4337 account abstraction", "DAO treasury with fee structure"],
     architectureDiagram: `┌─────────────────────────────────────────────────┐
 │              TOKEN ECONOMY FLOW                  │
 │                                                  │

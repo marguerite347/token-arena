@@ -1,0 +1,20 @@
+[
+  {
+    "file": "battle_recap_1_phantom.mp4",
+    "matchId": 210002,
+    "mvpName": "PHANTOM",
+    "totalKills": 3
+  },
+  {
+    "file": "battle_recap_2_phantom.mp4",
+    "matchId": 210003,
+    "mvpName": "PHANTOM",
+    "totalKills": 3
+  },
+  {
+    "file": "battle_recap_3_titan.mp4",
+    "matchId": 210001,
+    "mvpName": "TITAN",
+    "totalKills": 3
+  }
+]

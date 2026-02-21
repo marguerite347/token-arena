@@ -947,7 +947,7 @@ export const appRouter = router({
           UNISWAP_CONFIG.tokens.WETH,
           amountWei,
           walletAddress,
-          UNISWAP_CONFIG.baseSepoliaChainId,
+          UNISWAP_CONFIG.baseChainId,
         );
         return {
           ...quote,

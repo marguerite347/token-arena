@@ -1,5 +1,5 @@
 /**
- * WalletContext — wagmi + RainbowKit provider for Base Sepolia
+ * WalletContext — wagmi + RainbowKit provider for Base Mainnet
  * Provides wallet connection, token balances, and x402 payment signing
  */
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
@@ -14,7 +14,7 @@ import {
   type X402PaymentSignature,
   type X402PaymentResponse,
   type TokenDef,
-  BASE_SEPOLIA_CHAIN_ID,
+  ACTIVE_CHAIN_ID,
 } from "@shared/web3";
 
 import "@rainbow-me/rainbowkit/styles.css";

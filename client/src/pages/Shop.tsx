@@ -324,7 +324,7 @@ export default function Shop() {
                   {/* On-chain info */}
                   <div className="mt-4 pt-3 border-t border-border/20">
                     <div className="text-[8px] font-mono text-muted-foreground/50 space-y-0.5">
-                      <div>chain: Base Sepolia L2</div>
+                      <div>chain: Base Mainnet L2</div>
                       <div>payment: x402 protocol</div>
                       <div>identity: ERC-8004</div>
                       <div>wallet: {wallet.address ? `${wallet.address.slice(0, 8)}...` : "not connected"}</div>

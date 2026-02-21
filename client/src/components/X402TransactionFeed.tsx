@@ -123,7 +123,7 @@ export default function X402TransactionFeed({ maxItems = 8, compact = false }: P
           {completedPayments.length} total txns
         </span>
         <span className="font-mono text-[8px] text-muted-foreground/50">
-          Base Sepolia · x402 Protocol
+          Base Mainnet · x402 Protocol
         </span>
       </div>
     </div>

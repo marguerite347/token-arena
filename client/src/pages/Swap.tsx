@@ -12,7 +12,7 @@ import { trpc } from "@/lib/trpc";
 import { motion, AnimatePresence } from "framer-motion";
 import { BountyBanner } from "@/components/BountyBanner";
 
-const ARENA_TOKEN = "0x9DB281D2243ea30577783ab3364873E3F0a02610";
+const ARENA_TOKEN = "0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b";
 const WETH_TOKEN = "0x4200000000000000000000000000000000000006";
 
 const TOKEN_INFO: Record<string, { symbol: string; name: string; icon: string; color: string }> = {
@@ -104,8 +104,8 @@ export default function Swap() {
           sponsor="Uniswap Foundation"
           description="Integrate Uniswap API for autonomous agent token swaps in a self-sustaining AI economy"
           techDetails={["Uniswap Swap API", "ARENA→ETH Quotes", "Base Chain (8453)", "Autonomous Agent Swaps", "x402 Compute Purchasing"]}
-          contractAddress="0x9DB281D2243ea30577783ab3364873E3F0a02610"
-          contractNetwork="Base Sepolia — ARENA Token"
+          contractAddress="0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b"
+          contractNetwork="Base Mainnet — ARENA Token"
           color="#FF007A"
         />
 
@@ -180,12 +180,12 @@ export default function Swap() {
                     <div>
                       <h2 className="font-display text-lg font-bold text-[#FF007A]">SWAP VIA UNISWAP</h2>
                       <p className="text-[9px] font-mono text-gray-500">
-                        {config?.status === "live" ? "🟢 Live Uniswap API" : "🟡 Simulation Mode"} — Base Chain ({config?.baseSepoliaChainId || 84532})
+                        {config?.status === "live" ? "🟢 Live Uniswap API" : "🟡 Simulation Mode"} — Base Chain ({config?.baseChainId || 8453})
                       </p>
                     </div>
                   </div>
                   <a
-                    href="https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610"
+                    href="https://basescan.org/address/0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[9px] font-mono text-neon-cyan hover:underline"
@@ -402,7 +402,7 @@ export default function Swap() {
                   </div>
                   <div>
                     <div className="text-[9px] font-mono text-gray-500 uppercase mb-1">Chain</div>
-                    <div className="text-[10px] font-mono text-white">Base Sepolia (Chain ID: 84532)</div>
+                    <div className="text-[10px] font-mono text-white">Base Mainnet (Chain ID: 8453)</div>
                     <div className="text-[9px] font-mono text-gray-500">Production: Base Mainnet (8453)</div>
                   </div>
                   <div>
@@ -415,7 +415,7 @@ export default function Swap() {
                   <div>
                     <div className="text-[9px] font-mono text-gray-500 uppercase mb-1">ARENA Token</div>
                     <a
-                      href={`https://sepolia.basescan.org/address/${ARENA_TOKEN}`}
+                      href={`https://basescan.org/address/${ARENA_TOKEN}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[10px] font-mono text-neon-cyan hover:underline break-all"
@@ -426,23 +426,23 @@ export default function Swap() {
                   <div>
                     <div className="text-[9px] font-mono text-gray-500 uppercase mb-1">DAO Contract</div>
                     <a
-                      href="https://sepolia.basescan.org/address/0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d"
+                      href="https://basescan.org/address/0x0cb7b046b5a1ba636b1cfe9596dbdb356936d99d"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[10px] font-mono text-neon-cyan hover:underline break-all"
                     >
-                      0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d
+                      0x0cb7b046b5a1ba636b1cfe9596dbdb356936d99d
                     </a>
                   </div>
                   <div>
                     <div className="text-[9px] font-mono text-gray-500 uppercase mb-1">Prediction Market</div>
                     <a
-                      href="https://sepolia.basescan.org/address/0x50ED7aEBBcFDAE85cEa0d5860109EF98B2225A6b"
+                      href="https://basescan.org/address/0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[10px] font-mono text-neon-cyan hover:underline break-all"
                     >
-                      0x50ED7aEBBcFDAE85cEa0d5860109EF98B2225A6b
+                      0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b
                     </a>
                   </div>
                 </div>
@@ -468,7 +468,7 @@ export default function Swap() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono text-gray-500">Network</span>
-                  <span className="text-[10px] font-mono text-white">Base Sepolia</span>
+                  <span className="text-[10px] font-mono text-white">Base Mainnet</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono text-gray-500">ARENA/ETH Rate</span>
@@ -559,7 +559,7 @@ export default function Swap() {
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-neon-green">✓</span>
-                  <span className="text-gray-300">Functional on Base Sepolia testnet</span>
+                  <span className="text-gray-300">Functional on Base Mainnet testnet</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-neon-green">✓</span>

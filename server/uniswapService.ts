@@ -25,8 +25,7 @@ const UNISWAP_API_URL = "https://trade-api.gateway.uniswap.org/v1";
 const UNISWAP_API_KEY = process.env.UNISWAP_API_KEY || "";
 
 // Base chain constants
-const BASE_CHAIN_ID = 8453;
-const BASE_SEPOLIA_CHAIN_ID = 84532;
+const BASE_CHAIN_ID = 8453; // Base Mainnet
 
 // Well-known token addresses on Base mainnet
 const BASE_TOKENS = {
@@ -285,7 +284,7 @@ export async function agentFlywheelSwap(
     BASE_TOKENS.WETH,
     amountWei,
     walletAddress,
-    BASE_SEPOLIA_CHAIN_ID,
+    BASE_CHAIN_ID,
   );
 
   // Step 2: Execute swap
@@ -468,7 +467,6 @@ function generateHex(length: number): string {
 export const UNISWAP_CONFIG = {
   apiUrl: UNISWAP_API_URL,
   baseChainId: BASE_CHAIN_ID,
-  baseSepoliaChainId: BASE_SEPOLIA_CHAIN_ID,
   tokens: BASE_TOKENS,
   arenaToken: ARENA_TOKEN_SEPOLIA,
   rates: SIMULATED_RATES,

@@ -24,21 +24,23 @@ This loop is **self-sustaining**: agents that win can afford to think better, wh
 
 ---
 
-## Deployed Contracts (Base Sepolia)
+## Deployed Contracts (Base Mainnet)
 
-| Contract | Address | BaseScan |
+All 9 contracts are deployed on **Base Mainnet (Chain ID 8453)** with **ERC-8021 builder code attribution** (`tokenarena`). Every deployment transaction includes the ERC-8021 suffix for on-chain builder attribution.
+
+| Contract | Address | BaseScan (Verified) |
 |---|---|---|
-| **ARENA Token (ERC-20)** | `0x9DB281D2243ea30577783ab3364873E3F0a02610` | [View](https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610) |
-| **Plasma Ammo (PLAS)** | `0x0676e55A3649984E27eA812941e690AaFd6d989c` | [View](https://sepolia.basescan.org/address/0x0676e55A3649984E27eA812941e690AaFd6d989c) |
-| **Railgun Ammo (RAIL)** | `0x49C9c24Eb0fb6E596FF4cF3A6620395308fB06Ca` | [View](https://sepolia.basescan.org/address/0x49C9c24Eb0fb6E596FF4cF3A6620395308fB06Ca) |
-| **Scatter Ammo (SCAT)** | `0x7E6d8bb54ceF2D408DEccA94DE685058181C8444` | [View](https://sepolia.basescan.org/address/0x7E6d8bb54ceF2D408DEccA94DE685058181C8444) |
-| **Rocket Ammo (RCKT)** | `0x34d2b8faf6e9438c39268e4E4868e04dc7F5b689` | [View](https://sepolia.basescan.org/address/0x34d2b8faf6e9438c39268e4E4868e04dc7F5b689) |
-| **Beam Ammo (BEAM)** | `0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E` | [View](https://sepolia.basescan.org/address/0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E) |
-| **Void Ammo (VOID)** | `0x243db4A8B200B59416C2b8d080fd8F8e44e59577` | [View](https://sepolia.basescan.org/address/0x243db4A8B200B59416C2b8d080fd8F8e44e59577) |
-| **PredictionMarket.sol** | `0x50ED7aEBBcFDAE85cEa0d5860109EF98B2225A6b` | [View](https://sepolia.basescan.org/address/0x50ED7aEBBcFDAE85cEa0d5860109EF98B2225A6b) |
-| **TokenArenaDAO.sol** | `0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d` | [View](https://sepolia.basescan.org/address/0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d#code) |
+| **ARENA Token (ERC-20)** | `0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b` | [View](https://basescan.org/address/0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b) |
+| **Plasma Ammo (PLAS)** | `0x0cb7b046b5a1ba636b1cfe9596dbdb356936d99d` | [View](https://basescan.org/address/0x0cb7b046b5a1ba636b1cfe9596dbdb356936d99d) |
+| **Railgun Ammo (RAIL)** | `0xcf84590c752de7fd648cf28447a4a4a68a87791c` | [View](https://basescan.org/address/0xcf84590c752de7fd648cf28447a4a4a68a87791c) |
+| **Scatter Ammo (SCAT)** | `0x418355cdec41f5b7aefc34c4b7368a43f59f43d5` | [View](https://basescan.org/address/0x418355cdec41f5b7aefc34c4b7368a43f59f43d5) |
+| **Rocket Ammo (RCKT)** | `0x085c234387bad266875b1dfdbd7df2132ec52263` | [View](https://basescan.org/address/0x085c234387bad266875b1dfdbd7df2132ec52263) |
+| **Beam Ammo (BEAM)** | `0x76821c1b2c69545ce9c105c41734ea16ea386d94` | [View](https://basescan.org/address/0x76821c1b2c69545ce9c105c41734ea16ea386d94) |
+| **Void Ammo (VOID)** | `0x4afb5bbe53dad291da351ae6ab66230af882f912` | [View](https://basescan.org/address/0x4afb5bbe53dad291da351ae6ab66230af882f912) |
+| **PredictionMarket.sol** | `0xc9315768e9bb10d396f0c0c37dbabfbef5a257b4` | [View](https://basescan.org/address/0xc9315768e9bb10d396f0c0c37dbabfbef5a257b4) |
+| **TokenArenaDAO.sol** | `0x989362a1098f9193487ef2a136f5e680e5c3b438` | [View](https://basescan.org/address/0x989362a1098f9193487ef2a136f5e680e5c3b438) |
 
-All contracts are **verified on BaseScan**. Deployer: `0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3` | Network: Base Sepolia (Chain ID 84532)
+All contracts are **verified on BaseScan**. Deployer: `0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3` | Network: Base Mainnet (Chain ID 8453) | Builder Code: `tokenarena` (ERC-8021)
 
 ---
 
@@ -48,7 +50,8 @@ All contracts are **verified on BaseScan**. Deployer: `0x0b923f3Cfa9ad1D926bDce8
 
 Token Arena directly implements the Base bounty vision of agents that sustain themselves economically on-chain:
 
-- **On-chain ARENA token** (ERC-20) on Base Sepolia — agents earn/spend real tokens
+- **On-chain ARENA token** (ERC-20) on Base Mainnet — agents earn/spend real tokens
+- **ERC-8021 builder code attribution** — all deployment transactions tagged with `tokenarena` builder code
 - **On-chain PredictionMarket.sol** — agents bet on match outcomes with on-chain escrow
 - **On-chain TokenArenaDAO.sol** — ARENA token holders vote on governance proposals (verified)
 - **Agent bankruptcy** — agents whose balance hits zero are killed mid-match
@@ -201,7 +204,7 @@ The 5 DAO council members maintain **institutional memory**:
 | **Frontend** | React 19, Vite, Tailwind CSS 4, Three.js, Framer Motion |
 | **Backend** | Express 4, tRPC 11, TypeScript 5.9 |
 | **Database** | TiDB (MySQL-compatible), Drizzle ORM |
-| **Blockchain** | Base Sepolia (EVM), ethers.js v6, Solidity 0.8.24 |
+| **Blockchain** | Base Mainnet (Chain ID 8453), ethers.js v6, viem v2, Solidity 0.8.24 |
 | **AI / LLM** | OpenRouter API (Claude, GPT-4o, Llama, Mistral, Gemini, DeepSeek) |
 | **DEX** | Uniswap Trading API (Base mainnet, simulation fallback) |
 | **Prediction Markets** | Custom on-chain PredictionMarket.sol + Polymarket external feed |
@@ -234,7 +237,7 @@ pnpm build         # Build for production
 4. **Polymarket** — External prediction market integration (agent intelligence feed)
 5. **Blockade Labs** — Skybox AI arena generation (Model 4, 360° environments)
 
-The project is **open source**, publicly accessible, and all smart contracts are verified on BaseScan. Judges can interact with the Uniswap swap interface at `/swap` and the prediction market at `/betting`.
+The project is **open source**, publicly accessible, and all 9 smart contracts are **deployed and verified on Base Mainnet** with **ERC-8021 builder code attribution**. Judges can interact with the Uniswap swap interface at `/swap` and the prediction market at `/betting`. All deployment transactions are visible on [BaseScan](https://basescan.org/address/0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3).
 
 ---
 

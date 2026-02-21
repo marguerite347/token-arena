@@ -24,7 +24,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   balance: "#00FF88",
 };
 
-const DAO_CONTRACT = "0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d";
+const DAO_CONTRACT = "0x0cb7b046b5a1ba636b1cfe9596dbdb356936d99d";
 
 export default function DAODomains() {
   const { data: wallets, isLoading, refetch } = trpc.daoDomains.wallets.useQuery();
@@ -77,7 +77,7 @@ export default function DAODomains() {
                 </Button>
               )}
               <a
-                href={`https://sepolia.basescan.org/address/${DAO_CONTRACT}`}
+                href={`https://basescan.org/address/${DAO_CONTRACT}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-emerald-400/60 hover:text-emerald-400 flex items-center gap-1"

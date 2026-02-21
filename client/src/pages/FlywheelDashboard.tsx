@@ -230,9 +230,9 @@ export default function FlywheelDashboard() {
             bountyAmount="$10,000"
             sponsor="Base (Coinbase L2)"
             description="AI agents that earn, trade, and pay for their own compute — a fully autonomous economy on Base"
-            techDetails={["Base Sepolia", "ARENA ERC-20", "Uniswap Swaps", "x402 Compute", "OpenRouter Multi-LLM", "DAO Governance"]}
-            contractAddress="0x9DB281D2243ea30577783ab3364873E3F0a02610"
-            contractNetwork="Base Sepolia — ARENA Token"
+            techDetails={["Base Mainnet", "ARENA ERC-20", "Uniswap Swaps", "x402 Compute", "OpenRouter Multi-LLM", "DAO Governance"]}
+            contractAddress="0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b"
+            contractNetwork="Base Mainnet — ARENA Token"
             color="#0052FF"
           />
         </div>
@@ -457,7 +457,7 @@ export default function FlywheelDashboard() {
                 BASE L2 · Self-Sustaining Autonomous Agents · ERC-20 Token Economy
               </span>
               <a
-                href="https://sepolia.basescan.org/address/0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d#code"
+                href="https://basescan.org/address/0x0cb7b046b5a1ba636b1cfe9596dbdb356936d99d#code"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[9px] font-mono text-neon-cyan/60 hover:text-neon-cyan transition-colors"

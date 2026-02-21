@@ -2,21 +2,39 @@
  * Web3 Constants, Contract ABIs, and Token Definitions
  * Token Arena — Base L2 Integration
  * 
- * ERC-20 tokens deployed on Base Sepolia testnet.
+ * ERC-20 tokens deployed on Base Mainnet + Base Sepolia testnet.
  * ERC-4337 smart wallets for autonomous AI agents.
  * ERC-8004 on-chain agent identity.
+ * ERC-8021 builder code attribution (tokenarena).
  * x402 payment protocol for machine-native HTTP payments.
  */
 
 import deployedContracts from "./deployed-contracts.json";
+import mainnetContracts from "./mainnet-contracts.json";
 
-// ─── Base Sepolia Network Config ────────────────────────────────────────────
+// ─── Base Mainnet Network Config (PRIMARY) ──────────────────────────────────
+export const BASE_MAINNET_CHAIN_ID = 8453;
+export const BASE_MAINNET_RPC = "https://mainnet.base.org";
+export const BASE_MAINNET_EXPLORER = "https://basescan.org";
+
+// ─── Base Sepolia Network Config (TESTNET) ──────────────────────────────────
 export const BASE_SEPOLIA_CHAIN_ID = 84532;
 export const BASE_SEPOLIA_RPC = "https://sepolia.base.org";
 export const BASE_SEPOLIA_EXPLORER = "https://sepolia.basescan.org";
 
+// ─── ERC-8021 Builder Code Attribution ──────────────────────────────────────
+export const BUILDER_CODE = "tokenarena";
+export const ERC8021_SUFFIX = "0x14746f6b656e6172656e610080218021802180218021802180218021";
+
+// ─── Active Network (default: mainnet) ──────────────────────────────────────
+export const ACTIVE_CHAIN_ID = BASE_MAINNET_CHAIN_ID;
+export const ACTIVE_RPC = BASE_MAINNET_RPC;
+export const ACTIVE_EXPLORER = BASE_MAINNET_EXPLORER;
+
 // ─── Deployed Contract Addresses ──────────────────────────────────────────
-export const DEPLOYED = deployedContracts;
+export const DEPLOYED_TESTNET = deployedContracts;
+export const DEPLOYED_MAINNET = mainnetContracts;
+export const DEPLOYED = mainnetContracts; // Primary: mainnet
 
 // ─── Token Definitions ─────────────────────────────────────────────────────
 export interface TokenDef {
@@ -295,7 +313,7 @@ export const DEFAULT_AI_AGENTS: Omit<AgentIdentity, "stats">[] = [
     description: "Precision-focused combat agent specializing in railgun tactics. Known for calculated, high-damage strikes. ERC-4337 autonomous wallet enables self-directed token management.",
     image: "",
     owner: AGENT_SMART_WALLETS[0].walletAddress,
-    agentRegistry: `eip155:${BASE_SEPOLIA_CHAIN_ID}:${AGENT_REGISTRY}`,
+    agentRegistry: `eip155:${ACTIVE_CHAIN_ID}:${AGENT_REGISTRY}`,
     reputation: 4.2,
     x402Support: true,
     active: true,
@@ -309,7 +327,7 @@ export const DEFAULT_AI_AGENTS: Omit<AgentIdentity, "stats">[] = [
     description: "Stealth-oriented agent that favors beam weapons for sustained pressure. Evasive and unpredictable. Self-sustaining through efficient token management.",
     image: "",
     owner: AGENT_SMART_WALLETS[1].walletAddress,
-    agentRegistry: `eip155:${BASE_SEPOLIA_CHAIN_ID}:${AGENT_REGISTRY}`,
+    agentRegistry: `eip155:${ACTIVE_CHAIN_ID}:${AGENT_REGISTRY}`,
     reputation: 3.8,
     x402Support: true,
     active: true,
@@ -323,7 +341,7 @@ export const DEFAULT_AI_AGENTS: Omit<AgentIdentity, "stats">[] = [
     description: "Heavy combat agent built for endurance. Uses rockets and scatter for area denial. Tank build with maximum armor. Invests heavily in defensive upgrades.",
     image: "",
     owner: AGENT_SMART_WALLETS[2].walletAddress,
-    agentRegistry: `eip155:${BASE_SEPOLIA_CHAIN_ID}:${AGENT_REGISTRY}`,
+    agentRegistry: `eip155:${ACTIVE_CHAIN_ID}:${AGENT_REGISTRY}`,
     reputation: 4.5,
     x402Support: true,
     active: true,
@@ -337,7 +355,7 @@ export const DEFAULT_AI_AGENTS: Omit<AgentIdentity, "stats">[] = [
     description: "Exotic weapons specialist wielding void energy. Unpredictable attack patterns with high burst damage. Risk-tolerant spending strategy.",
     image: "",
     owner: AGENT_SMART_WALLETS[3].walletAddress,
-    agentRegistry: `eip155:${BASE_SEPOLIA_CHAIN_ID}:${AGENT_REGISTRY}`,
+    agentRegistry: `eip155:${ACTIVE_CHAIN_ID}:${AGENT_REGISTRY}`,
     reputation: 3.5,
     x402Support: true,
     active: true,
@@ -351,7 +369,7 @@ export const DEFAULT_AI_AGENTS: Omit<AgentIdentity, "stats">[] = [
     description: "Balanced combat agent with adaptive strategy. Switches weapons based on opponent behavior and token economy. Most likely to achieve self-sustainability.",
     image: "",
     owner: AGENT_SMART_WALLETS[4].walletAddress,
-    agentRegistry: `eip155:${BASE_SEPOLIA_CHAIN_ID}:${AGENT_REGISTRY}`,
+    agentRegistry: `eip155:${ACTIVE_CHAIN_ID}:${AGENT_REGISTRY}`,
     reputation: 4.0,
     x402Support: true,
     active: true,
@@ -365,7 +383,7 @@ export const DEFAULT_AI_AGENTS: Omit<AgentIdentity, "stats">[] = [
     description: "Speed-focused agent that relies on rapid plasma fire and evasion. Low armor, high mobility, token-efficient. Optimizes for maximum token-per-kill ratio.",
     image: "",
     owner: AGENT_SMART_WALLETS[5].walletAddress,
-    agentRegistry: `eip155:${BASE_SEPOLIA_CHAIN_ID}:${AGENT_REGISTRY}`,
+    agentRegistry: `eip155:${ACTIVE_CHAIN_ID}:${AGENT_REGISTRY}`,
     reputation: 3.9,
     x402Support: true,
     active: true,

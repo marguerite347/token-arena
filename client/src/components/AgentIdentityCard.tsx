@@ -2,7 +2,7 @@
  * AgentIdentityCard — ERC-8004 Agent Identity Display
  * Shows agent name, stats, reputation, loadout, and on-chain identity info
  */
-import { type AgentIdentity, WEAPON_TOKENS, AGENT_REGISTRY, BASE_SEPOLIA_CHAIN_ID, BASE_SEPOLIA_EXPLORER } from "@shared/web3";
+import { type AgentIdentity, WEAPON_TOKENS, AGENT_REGISTRY, ACTIVE_CHAIN_ID, ACTIVE_EXPLORER } from "@shared/web3";
 
 interface Props {
   agent: AgentIdentity;
