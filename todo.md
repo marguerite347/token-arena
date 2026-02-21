@@ -1300,3 +1300,11 @@
   - [x] Fix: Agent mesh geometry/material disposal on elimination
   - [x] Fix: Dust particle count reduced 300→150, update every 3rd frame
 - [x] Test all features end-to-end (140/143 pass, 3 pre-existing external API failures)
+
+## v45 — Upload M4 Skyboxes to S3
+
+- [x] Download all 7 completed M4 skybox images from staging API
+- [x] Upload skybox images to S3 via manus-upload-file (all 7 success)
+- [x] Update COMPLETED_M4_SKYBOXES in WatchMode.tsx with permanent S3/CDN URLs
+- [x] Test skybox loading with new URLs (all 7 HTTP 200)
+- [x] Checkpoint

@@ -39,13 +39,13 @@ import { AGENT_SMART_WALLETS, ACTIVE_EXPLORER } from "@shared/web3";
 // ─── Completed Skybox AI Model 4 panoramas (high-quality, pre-generated) ────
 // These were successfully generated via the staging API and are ready to use
 const COMPLETED_M4_SKYBOXES = [
-  { name: "Quantum Computing Lab", style: "M4 Scifi Render A", url: "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirectangular-jpg_A_cutting-edge_quantum_computing_6130609312_461357.jpg?ver=1" },
-  { name: "Dark Citadel Arena", style: "M4 Dark Fantasy", url: "https://images-staging.blockadelabs.com/images/imagine/M4_Dark_Fantasy_equirectangular-jpg_An_eerie_citadel_arena_7358102105_461358.jpg?ver=1" },
-  { name: "Digital Void Chamber", style: "M4 UE Render", url: "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_In_a_vast_digital_7075909002_461359.jpg?ver=1" },
-  { name: "Cyber Void Arena", style: "M4 UE Render", url: "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_A_boundless_digital_void_5393528908_461360.jpg?ver=1" },
-  { name: "Post-Apocalyptic Pit", style: "M4 Scifi Render B", url: "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirectangular-jpg_A_post-apocalyptic_fighting_pit_1789812811_461361.jpg?ver=1" },
-  { name: "Void Space Arena", style: "M4 UE Render", url: "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_A_virtual_void_space_7555209468_461362.jpg?ver=1" },
-  { name: "Dark Fantasy Citadel", style: "M4 Dark Fantasy", url: "https://images-staging.blockadelabs.com/images/imagine/M4_Dark_Fantasy_equirectangular-jpg_In_a_dark_fantasy_7479000801_461363.jpg?ver=1" },
+  { name: "Quantum Computing Lab", style: "M4 Scifi Render A", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gqKCKZfzZwQkVTLk.jpg" },
+  { name: "Dark Citadel Arena", style: "M4 Dark Fantasy", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/FpWdOaRWQbLrlpOk.jpg" },
+  { name: "Digital Void Chamber", style: "M4 UE Render", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/ZKYjtULxRbKctHFh.jpg" },
+  { name: "Cyber Void Arena", style: "M4 UE Render", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/DRHxtlvwfRpwnNgg.jpg" },
+  { name: "Post-Apocalyptic Pit", style: "M4 Scifi Render B", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/uRIDteJKcvkSurxb.jpg" },
+  { name: "Void Space Arena", style: "M4 UE Render", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/qryzPOHnxfcHcJcf.jpg" },
+  { name: "Dark Fantasy Citadel", style: "M4 Dark Fantasy", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/DxBjpLknoJhIaNHR.jpg" },
 ];
 
 // Fallback Model 3 panoramas (used only if M4 staging images are inaccessible)
