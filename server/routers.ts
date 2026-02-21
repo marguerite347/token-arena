@@ -47,9 +47,9 @@ import {
 import { getCouncilMemoryStats, getRecentCouncilMemories } from "./daoCouncilMemory";
 
 
-// Blockade Labs Production API — Model 4 styles (IDs 172-188)
-const SKYBOX_API_BASE = "https://backend.blockadelabs.com/api/v1/skybox";
-const SKYBOX_IMAGINE_BASE = "https://backend.blockadelabs.com/api/v1/imagine";
+// Blockade Labs Staging API — Model 3/4 styles (staging is more reliable)
+const SKYBOX_API_BASE = "https://backend-staging.blockadelabs.com/api/v1/skybox";
+const SKYBOX_IMAGINE_BASE = "https://backend-staging.blockadelabs.com/api/v1/imagine";
 const SKYBOX_API_KEY = process.env.SKYBOX_API_KEY || "";
 
 export const appRouter = router({
