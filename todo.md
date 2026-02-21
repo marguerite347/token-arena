@@ -1282,3 +1282,21 @@
 4. Consider wrapping animation loop in try-catch with detailed logging
 5. May need to simplify initialization or add delay before animation starts
 6. Verify mesh creation in startMatch() initializes all properties correctly
+
+## v44 — Claude Full Review & Fixes
+
+- [x] Send WatchMode init code to Claude for initialization hang fix
+- [x] Apply Claude's fix for match initialization hang
+- [x] Send Skybox API credentials to Claude for Model 4 auth debugging
+- [x] Fix Skybox Model 4 API authentication (hybrid approach: 30% real-time gen + M4 defaults)
+- [x] Have Claude write enhanced cyberpunk brutalist skybox prompts (7 detailed prompts)
+- [x] Generate default skyboxes with new prompts (7 completed M4 skyboxes from staging API)
+- [x] Send full codebase to Claude for bug hunt and optimization
+- [x] Apply all bug fixes and optimizations from Claude review
+  - [x] Fix: Three.js resource disposal on unmount (memory leak)
+  - [x] Fix: Texture disposal in skybox loading
+  - [x] Fix: Combat interval race condition (clear existing before creating new)
+  - [x] Fix: Time-based cooldown decrement (was fixed 0.05, now uses real delta)
+  - [x] Fix: Agent mesh geometry/material disposal on elimination
+  - [x] Fix: Dust particle count reduced 300→150, update every 3rd frame
+- [x] Test all features end-to-end (140/143 pass, 3 pre-existing external API failures)

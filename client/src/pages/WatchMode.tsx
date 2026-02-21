@@ -36,9 +36,20 @@ import {
 import gsap from "gsap";
 import { AGENT_SMART_WALLETS, ACTIVE_EXPLORER } from "@shared/web3";
 
-// ─── CDN fallback panoramas (used when real-time generation unavailable) ────
-// High-quality Skybox AI Model 3 backups (used if production API generation fails)
-const FALLBACK_PANORAMAS = [
+// ─── Completed Skybox AI Model 4 panoramas (high-quality, pre-generated) ────
+// These were successfully generated via the staging API and are ready to use
+const COMPLETED_M4_SKYBOXES = [
+  { name: "Quantum Computing Lab", style: "M4 Scifi Render A", url: "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirectangular-jpg_A_cutting-edge_quantum_computing_6130609312_461357.jpg?ver=1" },
+  { name: "Dark Citadel Arena", style: "M4 Dark Fantasy", url: "https://images-staging.blockadelabs.com/images/imagine/M4_Dark_Fantasy_equirectangular-jpg_An_eerie_citadel_arena_7358102105_461358.jpg?ver=1" },
+  { name: "Digital Void Chamber", style: "M4 UE Render", url: "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_In_a_vast_digital_7075909002_461359.jpg?ver=1" },
+  { name: "Cyber Void Arena", style: "M4 UE Render", url: "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_A_boundless_digital_void_5393528908_461360.jpg?ver=1" },
+  { name: "Post-Apocalyptic Pit", style: "M4 Scifi Render B", url: "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirectangular-jpg_A_post-apocalyptic_fighting_pit_1789812811_461361.jpg?ver=1" },
+  { name: "Void Space Arena", style: "M4 UE Render", url: "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_A_virtual_void_space_7555209468_461362.jpg?ver=1" },
+  { name: "Dark Fantasy Citadel", style: "M4 Dark Fantasy", url: "https://images-staging.blockadelabs.com/images/imagine/M4_Dark_Fantasy_equirectangular-jpg_In_a_dark_fantasy_7479000801_461363.jpg?ver=1" },
+];
+
+// Fallback Model 3 panoramas (used only if M4 staging images are inaccessible)
+const FALLBACK_M3_PANORAMAS = [
   { name: "Cyberpunk Colosseum", url: "https://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg_A_colossal_cyberpunk_arena_8223941509_14997657.jpg" },
   { name: "Post-Apocalyptic Wasteland", url: "https://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangular-jpg_In_a_post-apocalyptic_desert_9623416410_14997659.jpg" },
   { name: "Digital Void Space", url: "https://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular-jpg_A_digital_void_space_9983137796_14997660.jpg" },
@@ -48,14 +59,13 @@ const FALLBACK_PANORAMAS = [
 
 // ─── Skybox Model 4 arena prompts for real-time generation ──────────────────
 const M4_ARENA_PROMPTS = [
-  { name: "Neon Colosseum", prompt: "Massive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture", styleId: 188 },
-  { name: "Void Nexus", prompt: "Abstract digital void space with floating geometric platforms, holographic grid floor extending to infinity, neon wireframe structures, data particles streaming upward, deep black space with cyan and magenta nebula, cinematic quality", styleId: 186 },
-  { name: "Mech Forge", prompt: "Industrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates, neon warning lights, steam and smoke, brutalist concrete and steel architecture", styleId: 185 },
-  { name: "Dark Citadel", prompt: "Dark fantasy citadel arena with obsidian towers, floating rune circles, purple lightning strikes, ancient stone platforms covered in glowing sigils, ominous sky with swirling dark clouds", styleId: 179 },
-  { name: "Quantum Lab", prompt: "Futuristic quantum computing laboratory arena, walls of holographic data streams, floating quantum processors, blue and white sterile lighting, glass floors revealing circuitry below, sci-fi render", styleId: 177 },
-  { name: "Wasteland Pit", prompt: "Post-apocalyptic fighting pit arena, rusted metal walls, toxic green pools, makeshift platforms from scrap metal, neon graffiti, dark stormy sky with digital aurora, dystopian render", styleId: 178 },
-  { name: "Crystal Cavern", prompt: "Underground crystal cavern arena, massive glowing crystals in purple and cyan, reflective water pools, bioluminescent fungi on cave walls, ethereal mist, fantasy render", styleId: 187 },
-  { name: "Orbital Station", prompt: "Space station combat arena orbiting a gas giant, transparent floor showing planet below, zero-gravity debris floating, holographic barriers, emergency red and blue lighting, sci-fi render", styleId: 177 },
+  { name: "Neon Data Cathedral", prompt: "Massive brutalist cathedral arena with towering concrete pillars wrapped in flowing neon data streams, holographic stained glass windows displaying real-time combat statistics, rain-slicked black marble floors reflecting cyan and magenta light, atmospheric fog with volumetric god rays piercing through geometric openings. The architecture combines raw concrete brutalism with high-tech cyberpunk elements, creating a sacred space for digital combat.", styleId: 188 },
+  { name: "Quantum Processing Colosseum", prompt: "Circular brutalist arena surrounded by massive quantum processing towers, each tower pulsing with blue quantum energy and covered in circuit board patterns etched into raw concrete. The arena floor is a giant holographic display showing real-time data flows, while floating geometric platforms provide elevated combat positions. Neon warning lights and steam vents create dramatic atmospheric effects throughout the industrial space.", styleId: 177 },
+  { name: "Molten Foundry Arena", prompt: "Underground industrial foundry converted into a combat arena, featuring massive concrete support beams with integrated neon lighting systems, molten metal flows channeled through brutalist concrete channels, sparking machinery and robotic arms suspended from the ceiling. The space combines the raw power of heavy industry with cyberpunk aesthetics, steam and sparks creating dynamic lighting effects.", styleId: 185 },
+  { name: "Digital Void Nexus", prompt: "Floating arena platform suspended in infinite digital void space, constructed from massive brutalist concrete blocks that fade into wireframe holographic extensions. Neon grid lines extend infinitely in all directions, while data particles stream upward like digital snow. The concrete structures are embedded with glowing circuit patterns and holographic displays showing combat data.", styleId: 186 },
+  { name: "Blockchain Mining Cathedral", prompt: "Vast underground mining facility repurposed as an arena, featuring towering concrete mining towers with integrated blockchain processing nodes glowing green and blue. Massive conveyor systems carry glowing data blocks overhead, while the arena floor is carved from raw concrete with neon mining cart tracks. Industrial lighting and steam create dramatic shadows and atmosphere.", styleId: 178 },
+  { name: "Neural Network Fortress", prompt: "Fortress-like arena built from interconnected concrete neural processing nodes, each node glowing with synaptic fire and connected by flowing neon neural pathways. The brutalist architecture forms organic brain-like patterns while maintaining harsh geometric edges. Holographic neural activity displays float throughout the space, creating an environment where digital consciousness meets physical brutalism.", styleId: 179 },
+  { name: "Crypto-Brutalist Sanctum", prompt: "Sacred arena space combining ancient brutalist temple architecture with cutting-edge cryptocurrency mining infrastructure, featuring massive concrete altars embedded with glowing mining rigs, neon cryptocurrency symbols projected onto raw concrete walls, and holographic trading displays floating in the misty air. The space feels both ancient and futuristic, where digital wealth is forged in concrete and light.", styleId: 184 },
 ];
 
 // ─── Agent definitions with full metadata ───────────────────────────────────
@@ -672,16 +682,80 @@ export default function WatchMode() {
     { enabled: false }
   );
 
-  const generateNextSkybox = useCallback(() => {
-    // Staging API generations stuck in pending status
-    // Use high-quality fallback images (real Skybox AI Model 3) instead
-    const fallback = randFrom(FALLBACK_PANORAMAS);
-    setNextSkyboxUrl(fallback.url);
-    nextSkyboxUrlRef.current = fallback.url;
-    setNextSkyboxName(fallback.name);
-    nextSkyboxNameRef.current = fallback.name;
-    pushTerminal("system", `[SKYBOX] Loading Skybox AI Model 3: "${fallback.name}"`);
-  }, [pushTerminal]);
+  const generateNextSkybox = useCallback(async () => {
+    // Hybrid approach: try real-time Model 4 generation, fall back to completed M4 skyboxes
+    const shouldTryGeneration = Math.random() < 0.3; // 30% chance to attempt fresh generation
+
+    if (shouldTryGeneration) {
+      try {
+        setSkyboxGenerating(true);
+        const arena = randFrom(M4_ARENA_PROMPTS);
+        pushTerminal("system", `[SKYBOX] Attempting Model 4 generation: "${arena.name}"...`);
+
+        const generation = await skyboxGenerate.mutateAsync({
+          prompt: arena.prompt,
+          styleId: arena.styleId,
+          enhancePrompt: true,
+        });
+
+        pushTerminal("system", `[SKYBOX] Generation queued (ID: ${generation.id}), polling...`);
+
+        // Poll with 90-second timeout, 3-second intervals
+        const startTime = Date.now();
+        const TIMEOUT_MS = 90000;
+        const POLL_INTERVAL = 3000;
+        let pollCount = 0;
+
+        while (Date.now() - startTime < TIMEOUT_MS) {
+          await new Promise(r => setTimeout(r, POLL_INTERVAL));
+          pollCount++;
+
+          try {
+            // Direct fetch to avoid tRPC query caching issues
+            const pollRes = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ id: generation.id }))}`);
+            const pollJson = await pollRes.json();
+            const result = pollJson?.result?.data;
+
+            if (result?.status === "complete" && result?.fileUrl) {
+              setNextSkyboxUrl(result.fileUrl);
+              nextSkyboxUrlRef.current = result.fileUrl;
+              setNextSkyboxName(`${arena.name} (Model 4)`);
+              nextSkyboxNameRef.current = `${arena.name} (Model 4)`;
+              setSkyboxGenerating(false);
+              pushTerminal("system", `[SKYBOX] \u2713 Model 4 generation complete! "${arena.name}"`);
+              return;
+            }
+
+            if (result?.status === "error") {
+              pushTerminal("system", `[SKYBOX] \u2717 Generation failed, using cached M4 skybox`);
+              break;
+            }
+
+            if (pollCount % 5 === 0) {
+              pushTerminal("system", `[SKYBOX] Still generating... (${Math.round((Date.now() - startTime) / 1000)}s, status: ${result?.status || "unknown"})`);
+            }
+          } catch {
+            // Poll error — continue trying
+          }
+        }
+
+        pushTerminal("system", `[SKYBOX] \u26A0 Generation timed out after 90s, using cached M4 skybox`);
+        setSkyboxGenerating(false);
+      } catch (err: any) {
+        console.error("[Skybox] Generation error:", err);
+        pushTerminal("system", `[SKYBOX] \u2717 Generation error: ${err.message || "unknown"}, using cached M4 skybox`);
+        setSkyboxGenerating(false);
+      }
+    }
+
+    // Use completed Model 4 skyboxes as high-quality defaults
+    const m4 = randFrom(COMPLETED_M4_SKYBOXES);
+    setNextSkyboxUrl(m4.url);
+    nextSkyboxUrlRef.current = m4.url;
+    setNextSkyboxName(`${m4.name} (${m4.style})`);
+    nextSkyboxNameRef.current = `${m4.name} (${m4.style})`;
+    pushTerminal("system", `[SKYBOX] Loaded Model 4: "${m4.name}" (${m4.style})`);
+  }, [pushTerminal, skyboxGenerate]);
 
   // ─── Load skybox (prefers real-time generated, falls back to CDN) ────
   const loadSkybox = useCallback((url?: string, name?: string) => {
@@ -704,11 +778,11 @@ export default function WatchMode() {
       setNextSkyboxUrl(null); // consume it
       pushTerminal("system", `[SKYBOX] Loading AI-generated arena: "${chosenName}"`);
     } else {
-      // Use high-quality fallback Skybox AI image
-      const fallback = randFrom(FALLBACK_PANORAMAS);
-      chosenUrl = fallback.url;
-      chosenName = fallback.name;
-      pushTerminal("system", `[SKYBOX] Using Skybox AI fallback: "${chosenName}"`);
+      // Use completed Model 4 skybox as high-quality fallback
+      const m4 = randFrom(COMPLETED_M4_SKYBOXES);
+      chosenUrl = m4.url;
+      chosenName = `${m4.name} (${m4.style})`;
+      pushTerminal("system", `[SKYBOX] Using Model 4 fallback: "${chosenName}"`);
     }
 
     setArenaName(chosenName);
@@ -1090,7 +1164,7 @@ export default function WatchMode() {
     platformsRef.current = createArenaPlatforms(scene);
 
     // Dust particles
-    const dustCount = 300;
+    const dustCount = 150; // Reduced from 300 for performance
     const dustGeo = new THREE.BufferGeometry();
     const dustPos = new Float32Array(dustCount * 3);
     for (let i = 0; i < dustCount; i++) {
@@ -1116,6 +1190,7 @@ export default function WatchMode() {
 
     // Animation loop with dynamic camera
     lastTimeRef.current = performance.now();
+    let dustFrameCounter = 0;
     const animate = () => {
       animFrameRef.current = requestAnimationFrame(animate);
       const now = performance.now();
@@ -1139,13 +1214,14 @@ export default function WatchMode() {
 
       controls.update();
 
-      // Animate dust
-      if (dustRef.current) {
+      // Animate dust (every 3rd frame for performance)
+      dustFrameCounter++;
+      if (dustFrameCounter % 3 === 0 && dustRef.current) {
         const positions = dustRef.current.geometry.attributes.position.array as Float32Array;
         for (let i = 0; i < dustCount; i++) {
-          positions[i * 3 + 1] += delta * 0.08;
+          positions[i * 3 + 1] += delta * 3 * 0.08; // Multiply by 3 to compensate for skipped frames
           if (positions[i * 3 + 1] > 12) positions[i * 3 + 1] = 0;
-          positions[i * 3] += Math.sin(elapsed + i) * delta * 0.02;
+          positions[i * 3] += Math.sin(elapsed + i) * delta * 3 * 0.02;
         }
         dustRef.current.geometry.attributes.position.needsUpdate = true;
       }
@@ -1187,8 +1263,27 @@ export default function WatchMode() {
     return () => {
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animFrameRef.current);
+
+      // Dispose all Three.js resources to prevent memory leaks
+      scene.traverse((object) => {
+        if (object instanceof THREE.Mesh) {
+          object.geometry?.dispose();
+          if (Array.isArray(object.material)) {
+            object.material.forEach(mat => {
+              if (mat.map) mat.map.dispose();
+              mat.dispose();
+            });
+          } else if (object.material) {
+            if ((object.material as any).map) (object.material as any).map.dispose();
+            object.material.dispose();
+          }
+        }
+      });
+      scene.clear();
+
       controls.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
       composer.dispose();
       if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
     };
@@ -1365,7 +1460,14 @@ export default function WatchMode() {
   }, []);
 
   // ─── Combat simulation ────────────────────────────────────────────────
+  const lastCombatTickRef = useRef(Date.now());
   const startCombat = useCallback(() => {
+    // Clear any existing interval to prevent duplicates
+    if (combatIntervalRef.current) {
+      clearInterval(combatIntervalRef.current);
+      combatIntervalRef.current = null;
+    }
+    lastCombatTickRef.current = Date.now();
     combatIntervalRef.current = setInterval(() => {
       if (!sceneRef.current) return;
       const currentStates = agentStatesRef.current;
@@ -1420,12 +1522,15 @@ export default function WatchMode() {
         }
       }
       
-      // Decrement cooldowns each tick
+      // Decrement cooldowns using real time delta (not fixed value)
+      const now = Date.now();
+      const tickDelta = (now - lastCombatTickRef.current) / 1000;
+      lastCombatTickRef.current = now;
       setAgentStates(prev => prev.map(a => ({
         ...a,
-        shieldCooldown: Math.max(0, a.shieldCooldown - 0.05),
-        dashCooldown: Math.max(0, a.dashCooldown - 0.05),
-        weaponSwapCooldown: Math.max(0, a.weaponSwapCooldown - 0.05),
+        shieldCooldown: Math.max(0, a.shieldCooldown - tickDelta),
+        dashCooldown: Math.max(0, a.dashCooldown - tickDelta),
+        weaponSwapCooldown: Math.max(0, a.weaponSwapCooldown - tickDelta),
       })));
 
       const weapons = Object.keys(WEAPON_COLORS);
@@ -1530,7 +1635,10 @@ export default function WatchMode() {
               pushTx({ type: "transfer", from: "Arena Contract", to: attacker.id, amount: killReward, token: "ARENA", desc: `Kill reward: ${attacker.id} +${killReward} ARENA for eliminating ${defender.id}`, txHash: fakeTxHash() });
               const mesh = agentMeshesRef.current.get(defender.id);
               if (mesh && sceneRef.current) {
-                gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => { sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id); } });
+                gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => {
+                  mesh.traverse((child) => { if (child instanceof THREE.Mesh) { child.geometry?.dispose(); if (Array.isArray(child.material)) child.material.forEach(m => m.dispose()); else child.material?.dispose(); } });
+                  sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id);
+                } });
               }
             }
           }
@@ -1603,7 +1711,10 @@ export default function WatchMode() {
               pushTx({ type: "transfer", from: "Arena Contract", to: attacker.id, amount: killReward, token: "ARENA", desc: `Kill reward: ${attacker.id} +${killReward} ARENA`, txHash: fakeTxHash() });
               const mesh = agentMeshesRef.current.get(defender.id);
               if (mesh && sceneRef.current) {
-                gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => { sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id); } });
+                gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => {
+                  mesh.traverse((child) => { if (child instanceof THREE.Mesh) { child.geometry?.dispose(); if (Array.isArray(child.material)) child.material.forEach(m => m.dispose()); else child.material?.dispose(); } });
+                  sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id);
+                } });
               }
             }
           }
