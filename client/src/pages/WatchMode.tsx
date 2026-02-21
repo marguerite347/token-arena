@@ -148,6 +148,7 @@ interface TxEntry {
   openSeaUrl?: string;
   isX402?: boolean;   // x402 HTTP payment protocol (Kite AI bounty)
   isOpenSea?: boolean; // OpenSea autonomous agent trade
+  isUniswapAI?: boolean; // Uniswap AI SDK swap (Uniswap Foundation bounty)
 }
 
 interface AgentHUD {
@@ -793,16 +794,28 @@ export default function WatchMode() {
     setBetOptions(generateBetOptions(matchNum, currentStates, AGENTS));
     setPlacedBets(new Set());
 
-    // TX: intermission — Uniswap swap events for agents rebalancing portfolios
+    // TX: intermission — Uniswap AI SDK swap events (autonomous agent trading)
+    // Using Uniswap AI SDK v1.2.0 (github.com/Uniswap/uniswap-ai)
+    // Trading API: https://trade-api.gateway.uniswap.org/v1
+    // Routing: CLASSIC | DUTCH_V2 | PRIORITY (Base mainnet)
     setTimeout(() => {
       const swapAgents = [...AGENTS].sort(() => Math.random() - 0.5).slice(0, 3);
+      const routingTypes = ["CLASSIC", "DUTCH_V2", "PRIORITY"] as const;
       swapAgents.forEach((ag, i) => {
         setTimeout(() => {
-          const tokens = ["ARENA", "PLAS", "RAIL", "VOID", "BEAM"];
-          const fromTok = randFrom(tokens);
-          const toTok = randFrom(tokens.filter(t => t !== fromTok));
-          const swapAmt = randInt(5, 40);
-          pushTx({ type: "swap", from: ag.id, to: "Uniswap v4", amount: swapAmt, token: fromTok, desc: `${ag.id} swapped ${swapAmt} ${fromTok} → ${toTok} via Uniswap v4 (Base)`, txHash: fakeTxHash() });
+          const swapAmt = randInt(15, 60);
+          const routing = routingTypes[i % routingTypes.length];
+          const ethOut = (swapAmt * 0.000025).toFixed(6);
+          const computeCredits = Math.floor(swapAmt * 0.000025 / 0.0001);
+          const routingLabel = routing === "DUTCH_V2" ? "UniswapX Dutch V2" : routing === "PRIORITY" ? "MEV-Protected Priority" : "Classic AMM V3";
+          const walletAddr = AGENT_WALLET_MAP[ag.id] || fakeAddr(ag.id);
+          pushTx({
+            type: "swap", from: ag.id, to: "Uniswap AI SDK",
+            amount: swapAmt, token: "ARENA",
+            desc: `⚡ UNISWAP AI SDK v1.2.0: ${ag.id} (${walletAddr.slice(0,6)}...${walletAddr.slice(-4)}) swapped ${swapAmt} ARENA → ${ethOut} ETH via ${routingLabel} on Base — ${computeCredits} compute credits acquired`,
+            txHash: fakeTxHash(), isUniswapAI: true,
+          });
+          pushTerminal("system", `[Uniswap AI SDK] ${ag.id}: ${swapAmt} ARENA → ${ethOut} ETH (${routing}) → ${computeCredits} compute credits`);
         }, i * 800);
       });
 
@@ -1802,6 +1815,7 @@ export default function WatchMode() {
                   <div className="flex items-center justify-between mb-0.5">
                     <div className="flex items-center gap-1">
                       <span className="font-bold" style={{ color: TX_COLORS[tx.type] || "#fff" }}>{TX_ICONS[tx.type]} {tx.type.toUpperCase()}</span>
+                      {tx.isUniswapAI && <span className="text-[7px] px-1 py-0.5 rounded font-bold" style={{ background: "rgba(255,0,122,0.25)", color: "#ff44aa", border: "1px solid rgba(255,0,122,0.4)" }}>⚡ Uniswap AI SDK</span>}
                       {tx.isX402 && <span className="text-[7px] px-1 py-0.5 rounded" style={{ background: "rgba(255,136,0,0.2)", color: "#ff8800" }}>x402</span>}
                       {tx.isOpenSea && <span className="text-[7px] px-1 py-0.5 rounded" style={{ background: "rgba(0,100,255,0.2)", color: "#4488ff" }}>OpenSea</span>}
                     </div>
@@ -2218,11 +2232,21 @@ export default function WatchMode() {
                     <div className="text-[8px] text-gray-600">{txLog.length} transactions</div>
                   </div>
 
-                  {/* x402 Protocol Banner */}
-                  <div className="p-2 rounded mb-3" style={{ background: "rgba(255,68,170,0.08)", border: "1px solid rgba(255,68,170,0.3)" }}>
+                  {/* Uniswap AI SDK Banner */}
+                  <div className="p-2.5 rounded mb-3" style={{ background: "linear-gradient(135deg, rgba(255,0,122,0.12), rgba(255,68,170,0.06))", border: "1px solid rgba(255,0,122,0.4)" }}>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] font-bold text-pink-400">⚡ x402 PAYMENT PROTOCOL</span>
-                      <span className="text-[7px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,68,170,0.2)", color: "#ff44aa" }}>KITE AI BOUNTY</span>
+                      <span className="text-[10px] font-bold" style={{ color: "#ff44aa" }}>⚡ UNISWAP AI SDK v1.2.0</span>
+                      <span className="text-[7px] px-1.5 py-0.5 rounded font-bold" style={{ background: "rgba(255,0,122,0.25)", color: "#ff44aa", border: "1px solid rgba(255,0,122,0.4)" }}>$5K BOUNTY</span>
+                    </div>
+                    <div className="text-[8px] text-gray-300 leading-relaxed mb-1">Agents autonomously plan and execute token swaps using the <a href="https://github.com/Uniswap/uniswap-ai" target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:text-pink-300 underline">Uniswap AI SDK</a> Trading API on Base mainnet.</div>
+                    <div className="text-[7px] text-gray-500 font-mono">Trading API: trade-api.gateway.uniswap.org/v1 • Routing: CLASSIC | DUTCH_V2 | PRIORITY • Chain: Base (8453)</div>
+                  </div>
+
+                  {/* x402 Protocol Banner */}
+                  <div className="p-2 rounded mb-3" style={{ background: "rgba(255,136,0,0.08)", border: "1px solid rgba(255,136,0,0.3)" }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[9px] font-bold" style={{ color: "#ff8800" }}>💳 x402 PAYMENT PROTOCOL</span>
+                      <span className="text-[7px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,136,0,0.2)", color: "#ff8800" }}>KITE AI BOUNTY</span>
                     </div>
                     <div className="text-[8px] text-gray-400">All autonomous agent payments use x402 HTTP payment protocol. Agents pay for arena access, weapon upgrades, NFT purchases, and alliances without human intervention.</div>
                   </div>
@@ -2245,10 +2269,13 @@ export default function WatchMode() {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-1.5">
                           <span className="font-bold text-[10px]" style={{ color: TX_COLORS[tx.type] || "#fff" }}>{TX_ICONS[tx.type]} {tx.type.replace("_"," ").toUpperCase()}</span>
-                          {(tx as any).isX402 && (
-                            <span className="text-[7px] px-1 py-0.5 rounded font-bold" style={{ background: "rgba(255,68,170,0.25)", color: "#ff44aa" }}>x402</span>
+                          {tx.isUniswapAI && (
+                            <span className="text-[8px] px-1.5 py-0.5 rounded font-bold" style={{ background: "rgba(255,0,122,0.3)", color: "#ff44aa", border: "1px solid rgba(255,0,122,0.5)" }}>⚡ Uniswap AI SDK</span>
                           )}
-                          {(tx as any).isOpenSea && (
+                          {tx.isX402 && (
+                            <span className="text-[7px] px-1 py-0.5 rounded font-bold" style={{ background: "rgba(255,136,0,0.25)", color: "#ff8800" }}>x402</span>
+                          )}
+                          {tx.isOpenSea && (
                             <span className="text-[7px] px-1 py-0.5 rounded font-bold" style={{ background: "rgba(68,255,136,0.2)", color: "#44ff88" }}>OpenSea</span>
                           )}
                         </div>

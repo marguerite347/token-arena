@@ -1135,3 +1135,17 @@
 - [x] Agent wallet funding TX at match start
 - [x] Write vitest tests for agent wallets (9 tests passing)
 - [x] Checkpoint and deliver
+
+## v40.2 — Uniswap AI SDK Integration ($5K Bounty)
+
+### Uniswap AI SDK Setup
+- [x] Research SDK repo structure and API (swap-integration skill v1.2.0)
+- [x] Create uniswapAIAgent.ts using official SDK Trading API patterns
+- [x] Agent strategic decision engine (CLASSIC/DUTCH_V2/PRIORITY routing)
+- [x] Wire SDK into agent flywheel (ARENA → ETH swaps via Trading API)
+- [x] Show Uniswap AI SDK usage in WatchMode TX log with ⚡ badges
+- [x] Add "Uniswap AI SDK v1.2.0" banner to intermission txlog tab
+- [x] Add tRPC endpoint: uniswap.aiAgentSwap for server-side SDK usage
+- [x] Enhanced uniswap.config to show SDK version and routing types
+- [x] Write vitest tests for SDK integration (15 tests passing)
+- [x] Checkpoint and deliver

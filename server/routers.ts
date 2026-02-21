@@ -1040,20 +1040,55 @@ export const appRouter = router({
         return runFlywheelCycle(input.agentId, agent.name, input.arenaEarnings, walletAddress);
       }),
 
-    // Get Uniswap config and status
+    // Uniswap AI SDK autonomous agent swap
+    // Uses patterns from github.com/Uniswap/uniswap-ai (swap-integration skill v1.2.0)
+    aiAgentSwap: publicProcedure
+      .input(z.object({
+        agentId: z.string(),
+        agentName: z.string(),
+        walletAddress: z.string(),
+        arenaBalance: z.number(),
+        kills: z.number().default(0),
+        deaths: z.number().default(0),
+        matchNum: z.number().default(1),
+      }))
+      .mutation(async ({ input }) => {
+        const { runAgentSwapCycle, UNISWAP_AI_CONFIG } = await import("./uniswapAIAgent");
+        const result = await runAgentSwapCycle(
+          input.agentId, input.agentName, input.walletAddress,
+          input.arenaBalance, input.kills, input.deaths, input.matchNum,
+        );
+        return {
+          ...result,
+          sdkVersion: UNISWAP_AI_CONFIG.sdkVersion,
+          apiUrl: UNISWAP_AI_CONFIG.apiUrl,
+          hasApiKey: UNISWAP_AI_CONFIG.hasApiKey,
+        };
+      }),
+
+    // Get Uniswap AI SDK config and status
     config: publicProcedure.query(async () => {
       const { UNISWAP_CONFIG } = await import("./uniswapService");
+      const { UNISWAP_AI_CONFIG } = await import("./uniswapAIAgent");
       return {
         ...UNISWAP_CONFIG,
+        aiSdk: {
+          version: UNISWAP_AI_CONFIG.sdkVersion,
+          routingTypes: UNISWAP_AI_CONFIG.routingTypes,
+          repo: "https://github.com/Uniswap/uniswap-ai",
+          plugin: "uniswap-trading (swap-integration skill)",
+          devPortal: "https://developers.uniswap.org/",
+        },
         status: UNISWAP_CONFIG.hasApiKey ? "live" : "simulated",
-        description: "Uniswap V3 DEX integration on Base — agents swap ARENA→ETH to fund compute",
+        description: "Uniswap AI SDK v1.2.0 — autonomous agent swaps via Trading API on Base",
         flywheel: [
           "1. Agent battles → earns ARENA tokens",
           "2. Agent bets on prediction market → earns more ARENA",
-          "3. Agent swaps ARENA → ETH via Uniswap DEX",
-          "4. Agent uses ETH to buy compute credits via x402",
-          "5. Agent uses compute to think better → wins more → earns more",
-          "6. Self-sustaining cycle ♻️",
+          "3. Agent uses Uniswap AI SDK to plan optimal swap strategy",
+          "4. Agent swaps ARENA → ETH via Trading API (CLASSIC/DUTCH_V2/PRIORITY)",
+          "5. Agent uses ETH to buy compute credits via x402",
+          "6. Agent uses compute to think better → wins more → earns more",
+          "7. Self-sustaining cycle ♻️",
         ],
       };
     }),
