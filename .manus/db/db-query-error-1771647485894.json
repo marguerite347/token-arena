@@ -1,0 +1,8 @@
+{
+  "query": "SELECT agent_id, agent_name, totalMatches, totalKills, totalDeaths, totalTokensEarned, totalTokensSpent, llm_model FROM agent_identities ORDER BY agent_id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT agent_id, agent_name, totalMatches, totalKills, totalDeaths, totalTokensEarned, totalTokensSpent, llm_model FROM agent_identities ORDER BY agent_id;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'agent_id' in 'field list'"
+  ]
+}

@@ -21,6 +21,7 @@ import Factions from "./pages/Factions";
 import AuctionHouse from "./pages/AuctionHouse";
 import DAODomains from "./pages/DAODomains";
 import Swap from "./pages/Swap";
+import AgentDemo from "./pages/AgentDemo";
 import { GameProvider } from "./contexts/GameContext";
 
 function Router() {
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/auctions" component={AuctionHouse} />
       <Route path="/dao-domains" component={DAODomains} />
       <Route path="/swap" component={Swap} />
+      <Route path="/agent-demo" component={AgentDemo} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -1,0 +1,234 @@
+{
+  "query": "SHOW COLUMNS FROM agent_identities;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SHOW COLUMNS FROM agent_identities;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "agentId",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "UNI",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "name",
+      "Type": "varchar(64)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "description",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "owner",
+      "Type": "varchar(64)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "agentRegistry",
+      "Type": "varchar(128)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "reputation",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "300",
+      "Extra": ""
+    },
+    {
+      "Field": "primaryWeapon",
+      "Type": "varchar(32)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "plasma",
+      "Extra": ""
+    },
+    {
+      "Field": "secondaryWeapon",
+      "Type": "varchar(32)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "beam",
+      "Extra": ""
+    },
+    {
+      "Field": "armor",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "60",
+      "Extra": ""
+    },
+    {
+      "Field": "totalKills",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "totalDeaths",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "totalMatches",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "totalTokensEarned",
+      "Type": "bigint",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "totalTokensSpent",
+      "Type": "bigint",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "metadata",
+      "Type": "json",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "active",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "1",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Field": "computeBudget",
+      "Type": "bigint",
+      "Null": "NO",
+      "Key": "",
+      "Default": "1000",
+      "Extra": ""
+    },
+    {
+      "Field": "computeSpent",
+      "Type": "bigint",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "generation",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "1",
+      "Extra": ""
+    },
+    {
+      "Field": "alive",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "1",
+      "Extra": ""
+    },
+    {
+      "Field": "deathReason",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "spawnedBy",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "memorySize",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "memoryCostPerCycle",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "llmModel",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "gpt-4o",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nagentId\tint\tNO\tUNI\tNULL\t\nname\tvarchar(64)\tNO\t\tNULL\t\ndescription\ttext\tYES\t\tNULL\t\nowner\tvarchar(64)\tNO\t\tNULL\t\nagentRegistry\tvarchar(128)\tNO\t\tNULL\t\nreputation\tint\tNO\t\t300\t\nprimaryWeapon\tvarchar(32)\tNO\t\tplasma\t\nsecondaryWeapon\tvarchar(32)\tNO\t\tbeam\t\narmor\tint\tNO\t\t60\t\ntotalKills\tint\tNO\t\t0\t\ntotalDeaths\tint\tNO\t\t0\t\ntotalMatches\tint\tNO\t\t0\t\ntotalTokensEarned\tbigint\tNO\t\t0\t\ntotalTokensSpent\tbigint\tNO\t\t0\t\nmetadata\tjson\tYES\t\tNULL\t\nactive\tint\tNO\t\t1\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\ncomputeBudget\tbigint\tNO\t\t1000\t\ncomputeSpent\tbigint\tNO\t\t0\t\ngeneration\tint\tNO\t\t1\t\nalive\tint\tNO\t\t1\t\ndeathReason\tvarchar(64)\tYES\t\tNULL\t\nspawnedBy\tint\tYES\t\tNULL\t\nmemorySize\tint\tNO\t\t0\t\nmemoryCostPerCycle\tint\tNO\t\t0\t\nllmModel\tvarchar(64)\tYES\t\tgpt-4o\t\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

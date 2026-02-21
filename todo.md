@@ -543,7 +543,7 @@
 ### Tests
 - [ ] Replay storage and retrieval tests
 - [ ] Prediction market betting flow tests
-- [ ] All tests passing
+- [x] All tests passing (108/111, 3 Skybox API 403s)
 
 ## v20 — On-Chain Prediction Market + Flywheel Integration
 
@@ -766,3 +766,11 @@
 - [ ] Initialize DAO domain controllers via UI
 - [ ] Fix /dao route to redirect to /dao-domains
 - [ ] Fix agent names in Swap page agent selector
+
+## v28 — FINAL PUSH: Massive Tournament + ClawSwarm + Bounty Banners
+- [ ] Run massive multi-LLM tournament (10-15 matches)
+- [ ] Generate rich data: different reasoning styles, faction dynamics, memory accumulation
+- [x] Add bounty guide banners to /swap, /flywheel, /factions, /auctions pages
+- [ ] Integrate ClawSwarm autonomous agent demo files
+- [x] Update flywheel diagram with ALL economic loops
+- [ ] Final checkpoint before submission

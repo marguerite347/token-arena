@@ -1,0 +1,25 @@
+{
+  "query": "SELECT COUNT(*) as match_count FROM matches; SELECT COUNT(*) as memory_count FROM agent_memory; SELECT COUNT(*) as tx_count FROM x402_transactions;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT COUNT(*) as match_count FROM matches; SELECT COUNT(*) as memory_count FROM agent_memory; SELECT COUNT(*) as tx_count FROM x402_transactions;",
+  "rows": [
+    {
+      "match_count": "74"
+    },
+    {
+      "match_count": "memory_count"
+    },
+    {
+      "match_count": "106"
+    },
+    {
+      "match_count": "tx_count"
+    },
+    {
+      "match_count": "366"
+    }
+  ],
+  "messages": [],
+  "stdout": "match_count\n74\nmemory_count\n106\ntx_count\n366\n",
+  "stderr": "",
+  "execution_time_ms": 80
+}

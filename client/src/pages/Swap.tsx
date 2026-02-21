@@ -10,6 +10,7 @@ import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { motion, AnimatePresence } from "framer-motion";
+import { BountyBanner } from "@/components/BountyBanner";
 
 const ARENA_TOKEN = "0x9DB281D2243ea30577783ab3364873E3F0a02610";
 const WETH_TOKEN = "0x4200000000000000000000000000000000000006";
@@ -96,6 +97,18 @@ export default function Swap() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Bounty Banner */}
+        <BountyBanner
+          bountyName="Uniswap Foundation Bounty"
+          bountyAmount="$3,000 — $5,000"
+          sponsor="Uniswap Foundation"
+          description="Integrate Uniswap API for autonomous agent token swaps in a self-sustaining AI economy"
+          techDetails={["Uniswap Swap API", "ARENA→ETH Quotes", "Base Chain (8453)", "Autonomous Agent Swaps", "x402 Compute Purchasing"]}
+          contractAddress="0x9DB281D2243ea30577783ab3364873E3F0a02610"
+          contractNetwork="Base Sepolia — ARENA Token"
+          color="#FF007A"
+        />
+
         {/* Header */}
         <div className="text-center mb-8">
           <motion.div

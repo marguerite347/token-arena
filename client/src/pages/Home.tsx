@@ -67,6 +67,9 @@ export default function Home() {
             <button onClick={() => navigate("/swap")} className="text-xs font-mono text-[#FF007A] hover:text-[#FF007A]/80 transition-colors font-bold">
               🦄 SWAP
             </button>
+            <button onClick={() => navigate("/agent-demo")} className="text-xs font-mono text-neon-green hover:text-neon-green/80 transition-colors font-bold">
+              🤖 AGENTS
+            </button>
             <button onClick={() => navigate("/demo")} className="text-xs font-mono text-muted-foreground hover:text-neon-green transition-colors">
               BOUNTIES
             </button>

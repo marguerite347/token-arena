@@ -1,0 +1,30 @@
+{
+  "query": "SELECT 'matches' as type, COUNT(*) as cnt FROM matches UNION ALL SELECT 'memories', COUNT(*) FROM agent_memory UNION ALL SELECT 'transactions', COUNT(*) FROM x402_transactions UNION ALL SELECT 'factions', COUNT(*) FROM factions UNION ALL SELECT 'faction_members', COUNT(*) FROM faction_members",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT 'matches' as type, COUNT(*) as cnt FROM matches UNION ALL SELECT 'memories', COUNT(*) FROM agent_memory UNION ALL SELECT 'transactions', COUNT(*) FROM x402_transactions UNION ALL SELECT 'factions', COUNT(*) FROM factions UNION ALL SELECT 'faction_members', COUNT(*) FROM faction_members",
+  "rows": [
+    {
+      "type": "factions",
+      "cnt": "4"
+    },
+    {
+      "type": "faction_members",
+      "cnt": "7"
+    },
+    {
+      "type": "matches",
+      "cnt": "86"
+    },
+    {
+      "type": "transactions",
+      "cnt": "422"
+    },
+    {
+      "type": "memories",
+      "cnt": "130"
+    }
+  ],
+  "messages": [],
+  "stdout": "type\tcnt\nfactions\t4\nfaction_members\t7\nmatches\t86\ntransactions\t422\nmemories\t130\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

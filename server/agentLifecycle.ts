@@ -12,6 +12,21 @@ import { getDb } from "./db";
 import { agentIdentities, x402Transactions } from "../drizzle/schema";
 import { eq, and, gte, lt } from "drizzle-orm";
 
+// LLM model key → display label mapping
+const LLM_LABELS: Record<string, string> = {
+  "claude-3-5-sonnet": "Claude 3.5 🧠",
+  "gpt-4o": "GPT-4o ⚡",
+  "llama-3.1-70b": "Llama 70B 🦙",
+  "mistral-large": "Mistral 🌬️",
+  "gemini-flash": "Gemini ✨",
+  "deepseek-v3": "DeepSeek 🔮",
+};
+
+function getLLMLabel(modelKey?: string): string {
+  if (!modelKey) return "AI";
+  return LLM_LABELS[modelKey] || modelKey;
+}
+
 export interface AgentEconomics {
   agentId: number;
   agentName: string;
@@ -25,6 +40,12 @@ export interface AgentEconomics {
   monthlySpending: number;
   lastMatchEarnings: number;
   lastMatchSpending: number;
+  llmModel?: string;
+  llmLabel?: string;
+  wins?: number;
+  losses?: number;
+  totalKills?: number;
+  totalDeaths?: number;
 }
 
 export interface ComputeSpending {
@@ -165,6 +186,12 @@ export async function getAgentEconomics(agentId: number): Promise<AgentEconomics
     monthlySpending,
     lastMatchEarnings: 0, // Updated after match
     lastMatchSpending: 0, // Updated after match
+    llmModel: (a as any).llmModel ?? undefined,
+    llmLabel: getLLMLabel((a as any).llmModel),
+    wins: a.totalMatches ? Math.floor(a.totalMatches * ((a.totalKills ?? 0) / Math.max(1, (a.totalKills ?? 0) + (a.totalDeaths ?? 0)))) : 0,
+    losses: a.totalMatches ? a.totalMatches - Math.floor(a.totalMatches * ((a.totalKills ?? 0) / Math.max(1, (a.totalKills ?? 0) + (a.totalDeaths ?? 0)))) : 0,
+    totalKills: a.totalKills ?? 0,
+    totalDeaths: a.totalDeaths ?? 0,
   };
 }
 
@@ -244,6 +271,12 @@ export interface FlywheelData {
   availableForSkybox: number;
   efficiency: number; // earnings / spending ratio
   trajectory: "ascending" | "stable" | "declining" | "bankrupt";
+  llmModel?: string;
+  llmLabel?: string;
+  wins?: number;
+  losses?: number;
+  totalKills?: number;
+  totalDeaths?: number;
 }
 
 /**
@@ -279,6 +312,12 @@ export async function getFlywheelData(agentId: number): Promise<FlywheelData | n
     availableForSkybox,
     efficiency,
     trajectory,
+    llmModel: econ.llmModel,
+    llmLabel: econ.llmLabel,
+    wins: econ.wins,
+    losses: econ.losses,
+    totalKills: econ.totalKills,
+    totalDeaths: econ.totalDeaths,
   };
 }
 

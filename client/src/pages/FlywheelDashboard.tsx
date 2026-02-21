@@ -7,6 +7,7 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { BountyBanner } from "@/components/BountyBanner";
 
 const TRAJECTORY_COLORS: Record<string, string> = {
   ascending: "#39FF14",
@@ -84,7 +85,29 @@ function FlywheelDiagram() {
         )}
       </div>
       <div className="text-center mb-3">
-        <span className="text-[9px] font-mono text-gray-600">↻ Self-sustaining loop — powered by Uniswap API + OpenRouter multi-LLM</span>
+        <span className="text-[9px] font-mono text-gray-600">↻ Self-sustaining loop — powered by Uniswap API + OpenRouter multi-LLM
+        </span>
+      </div>
+
+      {/* Secondary economic loops */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+        {[
+          { label: "FACTION POOLING", icon: "🛡️", color: "#9D00FF", desc: "Factions share ARENA tokens & intel" },
+          { label: "MEMORY AUCTIONS", icon: "🧠", color: "#FF3366", desc: "Dead agent memories sold as NFTs" },
+          { label: "AGENT REVIVAL", icon: "🔄", color: "#39FF14", desc: "Factions pool tokens to revive agents" },
+          { label: "PREDICTION MARKET", icon: "🎲", color: "#FFB800", desc: "Bet on match outcomes + Polymarket" },
+        ].map((loop, i) => (
+          <div key={i} className="text-center px-2 py-2 rounded border" style={{ borderColor: `${loop.color}33`, background: `${loop.color}08` }}>
+            <div className="text-lg mb-0.5">{loop.icon}</div>
+            <div className="text-[9px] font-mono font-bold" style={{ color: loop.color }}>{loop.label}</div>
+            <div className="text-[8px] font-mono text-gray-500">{loop.desc}</div>
+          </div>
+        ))}
+      </div>
+      <div className="text-center mb-3">
+        <span className="text-[8px] font-mono text-gray-600">
+          🏛️ DAO Council (5 masters) governs economy • 📜 On-chain voting via TokenArenaDAO.sol • 💾 Memories stored IPFS-ready
+        </span>
       </div>
 
       {/* LLM Model badges */}
@@ -199,6 +222,20 @@ export default function FlywheelDashboard() {
             ⚔ {playtestResult}
           </div>
         )}
+
+        {/* Bounty Banners */}
+        <div className="px-6 mt-4">
+          <BountyBanner
+            bountyName="Base: Best Self-Sustaining Autonomous Agent"
+            bountyAmount="$10,000"
+            sponsor="Base (Coinbase L2)"
+            description="AI agents that earn, trade, and pay for their own compute — a fully autonomous economy on Base"
+            techDetails={["Base Sepolia", "ARENA ERC-20", "Uniswap Swaps", "x402 Compute", "OpenRouter Multi-LLM", "DAO Governance"]}
+            contractAddress="0x9DB281D2243ea30577783ab3364873E3F0a02610"
+            contractNetwork="Base Sepolia — ARENA Token"
+            color="#0052FF"
+          />
+        </div>
 
         {/* Flywheel Diagram */}
         <FlywheelDiagram />
@@ -315,16 +352,22 @@ export default function FlywheelDashboard() {
                   }`}
                   style={{ borderLeft: `3px solid ${TRAJECTORY_COLORS[agent.trajectory]}` }}
                 >
-                  {/* LLM badge for this agent */}
+                  {/* LLM badge + combat stats */}
                   {(() => {
-                    const llmIdx = ((agent.agentId - 1) % LLM_MODELS_UI.length);
-                    const llm = LLM_MODELS_UI[llmIdx]!;
+                    const llm = LLM_MODELS_UI.find(m => m.key === agent.llmModel) || LLM_MODELS_UI[(agent.agentId - 1) % LLM_MODELS_UI.length];
                     return (
-                      <div className="flex items-center gap-1 mb-2">
-                        <span className="text-sm">{llm.icon}</span>
-                        <span className="text-[8px] font-mono" style={{ color: llm.color }}>{llm.label}</span>
-                        <span className="text-[8px] font-mono text-gray-600">·</span>
-                        <span className="text-[8px] font-mono text-gray-500">{llm.style}</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">{llm.icon}</span>
+                          <span className="text-[8px] font-mono" style={{ color: llm.color }}>{agent.llmLabel || llm.label}</span>
+                          <span className="text-[8px] font-mono text-gray-600">·</span>
+                          <span className="text-[8px] font-mono text-gray-500">{llm.style}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[8px] font-mono">
+                          <span className="text-neon-green">{agent.wins ?? 0}W</span>
+                          <span className="text-neon-magenta">{agent.losses ?? 0}L</span>
+                          <span className="text-gray-500">{agent.totalKills ?? 0}K/{agent.totalDeaths ?? 0}D</span>
+                        </div>
                       </div>
                     );
                   })()}
