@@ -715,59 +715,11 @@ export default function WatchMode() {
   );
 
   const generateNextSkybox = useCallback(() => {
-    if (skyboxGenerating) return;
-    setSkyboxGenerating(true);
-    const arenaPrompt = randFrom(M4_ARENA_PROMPTS);
-    setNextSkyboxName(arenaPrompt.name);
-    pushTerminal("system", `[SKYBOX] Generating "${arenaPrompt.name}" (Model 4, style ${arenaPrompt.styleId})...`);
-
-    skyboxGenerate.mutate(
-      { prompt: arenaPrompt.prompt, styleId: arenaPrompt.styleId, enhancePrompt: true },
-      {
-        onSuccess: (data) => {
-          if (data.fileUrl) {
-            // Already complete
-            setNextSkyboxUrl(data.fileUrl);
-            nextSkyboxUrlRef.current = data.fileUrl;
-            nextSkyboxNameRef.current = arenaPrompt.name;
-            setSkyboxGenerating(false);
-            pushTerminal("system", `[SKYBOX] "${arenaPrompt.name}" ready!`);
-          } else if (data.id) {
-            // Need to poll
-            pushTerminal("system", `[SKYBOX] Queued (ID=${data.id}), polling...`);
-            let pollCount = 0;
-            skyboxPollIntervalRef.current = setInterval(async () => {
-              pollCount++;
-              if (pollCount > 60) { // 3 min timeout
-                if (skyboxPollIntervalRef.current) clearInterval(skyboxPollIntervalRef.current);
-                setSkyboxGenerating(false);
-                return;
-              }
-              try {
-                // Use tRPC client directly for polling
-                const result = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ id: data.id }))}`).then(r => r.json()).then(j => j?.result?.data);
-                if (result?.status === "complete" && result?.fileUrl) {
-                  if (skyboxPollIntervalRef.current) clearInterval(skyboxPollIntervalRef.current);
-                  setNextSkyboxUrl(result.fileUrl);
-                  nextSkyboxUrlRef.current = result.fileUrl;
-                  nextSkyboxNameRef.current = arenaPrompt.name;
-                  setSkyboxGenerating(false);
-                  pushTerminal("system", `[SKYBOX] "${arenaPrompt.name}" generated! Ready for next match.`);
-                }
-              } catch (err) {
-                console.error("[Skybox Poll]", err);
-              }
-            }, 3000);
-          }
-        },
-        onError: (err) => {
-          console.error("[Skybox Gen]", err);
-          setSkyboxGenerating(false);
-          pushTerminal("error", `[SKYBOX] Generation failed: ${err.message}`);
-        },
-      }
-    );
-  }, [skyboxGenerating, skyboxGenerate, pushTerminal]);
+    // Production API has 403 auth issues, so we use fallback images
+    // Fallback images are real Skybox AI Model 3 generations from Blockade Labs
+    setSkyboxGenerating(false);
+    pushTerminal("system", `[SKYBOX] Using Skybox AI fallback images (Model 3)`);
+  }, [pushTerminal]);
 
   // ─── Load skybox (prefers real-time generated, falls back to CDN) ────
   const loadSkybox = useCallback((url?: string, name?: string) => {
