@@ -394,101 +394,42 @@ function createAgentMesh(shape: string, color: number, emissive: number, scale: 
 interface PlatformConfig {
   x: number; z: number; y: number; w: number; h: number; d: number; edgeColor: number;
 }
-const PLATFORM_CONFIGS: PlatformConfig[] = [
-  // Center raised platform
-  { x: 0, z: 0, y: 0.4, w: 2.5, h: 0.4, d: 2.5, edgeColor: 0x00ffff },
-  // Inner ring — medium height
-  { x: 3, z: 0, y: 0.8, w: 1.8, h: 0.3, d: 1.5, edgeColor: 0xff44aa },
-  { x: -3, z: 0, y: 0.6, w: 1.5, h: 0.3, d: 1.8, edgeColor: 0xaa44ff },
-  { x: 0, z: 3, y: 1.0, w: 1.5, h: 0.3, d: 1.5, edgeColor: 0x44ff88 },
-  { x: 0, z: -3, y: 0.5, w: 2.0, h: 0.3, d: 1.2, edgeColor: 0xff8800 },
-  // Outer ring — higher platforms for sniping
-  { x: 4.5, z: 3, y: 1.5, w: 1.2, h: 0.25, d: 1.2, edgeColor: 0x00ffff },
-  { x: -4.5, z: -3, y: 1.8, w: 1.0, h: 0.25, d: 1.0, edgeColor: 0xff44aa },
-  { x: -4, z: 3.5, y: 1.2, w: 1.3, h: 0.25, d: 1.3, edgeColor: 0xaa44ff },
-  { x: 4, z: -3.5, y: 1.4, w: 1.1, h: 0.25, d: 1.4, edgeColor: 0x44ffdd },
-  // Ramps / connecting pieces
-  { x: 1.5, z: 1.5, y: 0.2, w: 1.0, h: 0.15, d: 2.0, edgeColor: 0x4488ff },
-  { x: -1.5, z: -1.5, y: 0.3, w: 2.0, h: 0.15, d: 1.0, edgeColor: 0x4488ff },
-  // Cover walls (tall thin platforms) — excluded from ground collision (too narrow/tall)
-  { x: 2, z: -1.5, y: 0.0, w: 0.2, h: 1.2, d: 1.5, edgeColor: 0x00ffff },
-  { x: -2, z: 1.5, y: 0.0, w: 1.5, h: 1.0, d: 0.2, edgeColor: 0xff44aa },
-];
+// Platforms removed - using flat ground arena instead
+const PLATFORM_CONFIGS: PlatformConfig[] = [];
 
-// ─── Platform collision: get ground height at (x, z) ──────────────────────
+// Flat ground arena - all agents on ground level
 function getGroundHeight(px: number, pz: number): number {
-  let maxY = 0; // default ground level
-  for (const p of PLATFORM_CONFIGS) {
-    // Skip cover walls (too narrow to stand on)
-    if (p.w < 0.5 || p.d < 0.5) continue;
-    const halfW = p.w / 2;
-    const halfD = p.d / 2;
-    // Check if point is within platform bounds (AABB)
-    if (px >= p.x - halfW && px <= p.x + halfW && pz >= p.z - halfD && pz <= p.z + halfD) {
-      const topY = p.y + p.h / 2;
-      if (topY > maxY) maxY = topY;
-    }
-  }
-  return maxY;
+  return 0; // Flat ground at y=0
 }
 
-// Check if moving would collide with a wall (only tall cover walls, not platforms)
+// No wall collisions on flat ground arena
 function collidesWithWall(x1: number, z1: number, x2: number, z2: number): boolean {
-  const AGENT_RADIUS = 0.35;
-  for (const p of PLATFORM_CONFIGS) {
-    // Only block movement if it's a tall cover wall (narrow and tall)
-    if (p.w >= 0.5 && p.d >= 0.5) continue; // Skip walkable platforms
-    
-    const halfW = p.w / 2;
-    const halfD = p.d / 2;
-    const topWallY = p.y + p.h;
-    
-    // Only block if wall is tall enough to block agent movement
-    if (topWallY < 0.5) continue;
-    
-    if (x2 >= p.x - halfW - AGENT_RADIUS && x2 <= p.x + halfW + AGENT_RADIUS &&
-        z2 >= p.z - halfD - AGENT_RADIUS && z2 <= p.z + halfD + AGENT_RADIUS) {
-      return true;
-    }
-  }
-  return false;
+  return false; // No obstacles on flat ground
 }
 
-// ─── Arena platforms factory (Roblox RIVALS style) ──────────────────────────────
+// Create flat ground arena with neon grid
 function createArenaPlatforms(scene: THREE.Scene): THREE.Group {
   const platforms = new THREE.Group();
-  const platformMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1a2e, emissive: 0x0a0a1a, roughness: 0.7, metalness: 0.5,
+  
+  // Flat ground plane
+  const groundGeo = new THREE.PlaneGeometry(20, 20);
+  const groundMat = new THREE.MeshStandardMaterial({
+    color: 0x0a0a1a, emissive: 0x050510, roughness: 0.8, metalness: 0.2,
   });
-  const edgeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.4 });
-
-  const platformConfigs = PLATFORM_CONFIGS;
-
-  platformConfigs.forEach(cfg => {
-    // Platform body
-    const geo = new THREE.BoxGeometry(cfg.w, cfg.h, cfg.d);
-    const mesh = new THREE.Mesh(geo, platformMat.clone());
-    mesh.position.set(cfg.x, cfg.y, cfg.z);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    platforms.add(mesh);
-
-    // Glowing edge lines
-    const edges = new THREE.EdgesGeometry(geo);
-    const edgeLineMat = new THREE.LineBasicMaterial({ color: cfg.edgeColor, transparent: true, opacity: 0.5 });
-    const edgeLine = new THREE.LineSegments(edges, edgeLineMat);
-    edgeLine.position.copy(mesh.position);
-    platforms.add(edgeLine);
-
-    // Top surface glow
-    const topGeo = new THREE.PlaneGeometry(cfg.w * 0.9, cfg.d * 0.9);
-    const topMat = new THREE.MeshBasicMaterial({ color: cfg.edgeColor, transparent: true, opacity: 0.06, side: THREE.DoubleSide });
-    const topGlow = new THREE.Mesh(topGeo, topMat);
-    topGlow.rotation.x = -Math.PI / 2;
-    topGlow.position.set(cfg.x, cfg.y + cfg.h / 2 + 0.01, cfg.z);
-    platforms.add(topGlow);
-  });
-
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.01;
+  ground.castShadow = true;
+  ground.receiveShadow = true;
+  platforms.add(ground);
+  
+  // Add neon grid lines on ground
+  const gridHelper = new THREE.GridHelper(20, 20, 0x00ffff, 0x00ffff);
+  gridHelper.position.y = 0;
+  gridHelper.material.transparent = true;
+  gridHelper.material.opacity = 0.2;
+  platforms.add(gridHelper);
+  
   scene.add(platforms);
   return platforms;
 }
@@ -1473,34 +1414,15 @@ export default function WatchMode() {
 
         const distFromCenter = Math.sqrt(newX * newX + newZ * newZ);
 
-        if (distFromCenter < 9.0 && !collidesWithWall(mesh.position.x, mesh.position.z, newX, newZ)) {
-          const targetY = getGroundHeight(newX, newZ);
-          const currentY = mesh.position.y;
-          const heightDiff = Math.abs(targetY - currentY);
-
-          if (heightDiff > 0.08) {
-            // Jumping up or landing down — visible arc trajectory
-            const jumpPeakY = Math.max(currentY, targetY) + 0.8;
-            // Kill any existing Y tweens on this mesh to prevent conflicts
-            gsap.killTweensOf(mesh.position, "y");
-            gsap.to(mesh.position, {
-              x: newX, z: newZ, duration: 0.7, ease: "power1.out",
-            });
-            // Jump arc: up then down with visible peak
-            gsap.to(mesh.position, {
-              y: jumpPeakY, duration: 0.3, ease: "power2.out",
-              onComplete: () => {
-                gsap.to(mesh.position, { y: targetY, duration: 0.3, ease: "bounce.out" });
-              },
-            });
-          } else {
-            // Same level — smooth slide
-            gsap.to(mesh.position, { x: newX, y: targetY, z: newZ, duration: 0.7, ease: "power1.out" });
-          }
+        if (distFromCenter < 9.0) {
+          // Flat ground movement - no height differences
+          gsap.to(mesh.position, {
+            x: newX, z: newZ, y: 0, duration: 0.4, ease: "power1.out",
+          });
           // Look toward movement direction
           const lookTarget = new THREE.Vector3(
             newX + (newX - mesh.position.x),
-            targetY + 0.5,
+            0.5,
             newZ + (newZ - mesh.position.z)
           );
           mesh.lookAt(lookTarget);
