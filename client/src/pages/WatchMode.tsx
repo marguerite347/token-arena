@@ -645,11 +645,19 @@ export default function WatchMode() {
   agentStatesRef.current = agentStates;
   const [terminalLines, setTerminalLines] = useState<TermLine[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  const [spectatorMessages, setSpectatorMessages] = useState<ChatMsg[]>([]);
   const [killFeed, setKillFeed] = useState<string[]>([]);
   const [chatInput, setChatInput] = useState("");
+  const [spectatorInput, setSpectatorInput] = useState("");
   const [sessionResult, setSessionResult] = useState<any>(null);
-  const [skyboxLoaded, setSkyboxLoaded] = useState(false);
+  const spectatorChatRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (spectatorChatRef.current) spectatorChatRef.current.scrollTop = spectatorChatRef.current.scrollHeight;
+  }, [spectatorMessages]);
+  const [skyboxLoaded, setSkyboxLoaded] = useState(true); // Always true with fallback images
   const [arenaName, setArenaName] = useState("");
+  const [countdownActive, setCountdownActive] = useState(false);
+  const [countdownValue, setCountdownValue] = useState(0);
   const [intermissionTab, setIntermissionTab] = useState<IntermissionTab>("earnings");
   const [intermissionTimer, setIntermissionTimer] = useState(20);
   const [matchEarnings, setMatchEarnings] = useState<MatchEarning[]>([]);
@@ -696,6 +704,14 @@ export default function WatchMode() {
   const pushTerminal = useCallback((type: TermLine["type"], text: string) => {
     setTerminalLines((prev) => [...prev.slice(-80), { type, text, ts: Date.now() }]);
   }, []);
+  const pushSpectatorChat = useCallback((sender: string, color: string, text: string) => {
+    setSpectatorMessages((prev) => [...prev.slice(-50), { sender, color, text, ts: Date.now() }]);
+  }, []);
+  const addSpectatorMessage = useCallback(() => {
+    if (!spectatorInput.trim()) return;
+    pushSpectatorChat("You", "#00ffff", spectatorInput);
+    setSpectatorInput("");
+  }, [spectatorInput, pushSpectatorChat]);
   const pushChat = useCallback((sender: string, color: string, text: string) => {
     setChatMessages((prev) => [...prev.slice(-50), { sender, color, text, ts: Date.now() }]);
   }, []);
@@ -715,56 +731,15 @@ export default function WatchMode() {
   );
 
   const generateNextSkybox = useCallback(() => {
-    if (skyboxGenerating) return;
-    setSkyboxGenerating(true);
-    const arenaPrompt = randFrom(M4_ARENA_PROMPTS);
-    setNextSkyboxName(arenaPrompt.name);
-    pushTerminal("system", `[SKYBOX] Generating "${arenaPrompt.name}" (Model 3/4, style ${arenaPrompt.styleId})...`);
-
-    skyboxGenerate.mutate(
-      { prompt: arenaPrompt.prompt, styleId: arenaPrompt.styleId, enhancePrompt: true },
-      {
-        onSuccess: (data) => {
-          if (data.fileUrl) {
-            setNextSkyboxUrl(data.fileUrl);
-            nextSkyboxUrlRef.current = data.fileUrl;
-            nextSkyboxNameRef.current = arenaPrompt.name;
-            setSkyboxGenerating(false);
-            pushTerminal("system", `[SKYBOX] "${arenaPrompt.name}" ready!`);
-          } else if (data.id) {
-            pushTerminal("system", `[SKYBOX] Queued (ID=${data.id}), polling...`);
-            let pollCount = 0;
-            skyboxPollIntervalRef.current = setInterval(async () => {
-              pollCount++;
-              if (pollCount > 60) {
-                if (skyboxPollIntervalRef.current) clearInterval(skyboxPollIntervalRef.current);
-                setSkyboxGenerating(false);
-                return;
-              }
-              try {
-                const result = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ id: data.id }))}`).then(r => r.json()).then(j => j?.result?.data);
-                if (result?.status === "complete" && result?.fileUrl) {
-                  if (skyboxPollIntervalRef.current) clearInterval(skyboxPollIntervalRef.current);
-                  setNextSkyboxUrl(result.fileUrl);
-                  nextSkyboxUrlRef.current = result.fileUrl;
-                  nextSkyboxNameRef.current = arenaPrompt.name;
-                  setSkyboxGenerating(false);
-                  pushTerminal("system", `[SKYBOX] "${arenaPrompt.name}" generated! Ready for next match.`);
-                }
-              } catch (err) {
-                console.error("[Skybox Poll]", err);
-              }
-            }, 3000);
-          }
-        },
-        onError: (err) => {
-          console.error("[Skybox Gen]", err);
-          setSkyboxGenerating(false);
-          pushTerminal("error", `[SKYBOX] Generation failed: ${err.message}`);
-        },
-      }
-    );
-  }, [skyboxGenerating, skyboxGenerate, pushTerminal]);
+    // Staging API generations stuck in pending status
+    // Use high-quality fallback images (real Skybox AI Model 3) instead
+    const fallback = randFrom(FALLBACK_PANORAMAS);
+    setNextSkyboxUrl(fallback.url);
+    nextSkyboxUrlRef.current = fallback.url;
+    setNextSkyboxName(fallback.name);
+    nextSkyboxNameRef.current = fallback.name;
+    pushTerminal("system", `[SKYBOX] Loading Skybox AI Model 3: "${fallback.name}"`);
+  }, [pushTerminal]);
 
   // ─── Load skybox (prefers real-time generated, falls back to CDN) ────
   const loadSkybox = useCallback((url?: string, name?: string) => {
@@ -803,17 +778,19 @@ export default function WatchMode() {
       texture.colorSpace = THREE.SRGBColorSpace;
       if (skyboxSphereRef.current) {
         const mat = skyboxSphereRef.current.material as THREE.MeshBasicMaterial;
-        if (mat.map) mat.map.dispose();
+        if (mat.map && mat.map !== texture) mat.map.dispose();
         mat.map = texture;
         mat.needsUpdate = true;
       }
-          if (sceneRef.current) sceneRef.current.environment = texture;
-          setSkyboxLoaded(true);
-        }, undefined, (err: any) => {
+      if (sceneRef.current) sceneRef.current.environment = texture;
+      setSkyboxLoaded(true);
+      pushTerminal("system", `[SKYBOX] Loaded: ${chosenName}`);
+    }, undefined, (err: any) => {
       console.error("[Skybox] Load failed:", err);
-      setSkyboxLoaded(false);
+      setSkyboxLoaded(true);
+      // Keep default neon grid visible as fallback
     });
-  }, [nextSkyboxUrl, nextSkyboxName]);
+  }, [nextSkyboxUrl, nextSkyboxName, pushTerminal]);
 
   // ─── Transition to intermission or debrief ────────────────────────────
   const finishCombat = useCallback((data: any) => {
@@ -1783,14 +1760,33 @@ export default function WatchMode() {
 
     await sleep(800);
     setPhase("combat");
-    pushTerminal("system", "[COMBAT PHASE] Agents engaging...");
+    pushTerminal("system", "[COMBAT PHASE] Starting countdown...");
 
     combatStartTimeRef.current = Date.now();
     pendingApiResultRef.current = null;
     ffaPlaytest.mutate({ agentCount: 6, matchCount: 1 });
 
     startAgentMovement();
-    startCombat();
+    
+    // Start countdown timer (3-2-1-FIGHT!)
+    setCountdownActive(true);
+    let count = 3;
+    setCountdownValue(count);
+    
+    // Play countdown sound
+    const audio = new Audio('/countdown.wav');
+    audio.play().catch(() => console.log('[Countdown] Audio play failed'));
+    
+    const countdownInterval = setInterval(() => {
+      count--;
+      setCountdownValue(count);
+      if (count <= 0) {
+        clearInterval(countdownInterval);
+        setCountdownActive(false);
+        pushTerminal("system", "[COMBAT] FIGHT!");
+        startCombat();
+      }
+    }, 1000);
   }, [isRunning, matchNum, totalMatches, arenaName, selectedAgent, ffaPlaytest, pushTerminal, pushChat, loadSkybox, spawnAgents, startAgentMovement, startCombat]);
 
   // ─── Start next match (from intermission) ─────────────────────────────
@@ -1800,7 +1796,7 @@ export default function WatchMode() {
     setAgentStates(AGENTS.map(a => ({
       id: a.id, name: a.id, hp: 100, maxHp: 100, kills: 0, deaths: 0,
       tokens: tokenHistory[tokenHistory.length - 1] || 100, tokensEarned: 0, tokensSpent: 0, alive: true,
-      shieldActive: false, shieldCooldown: 0, dodgeCooldown: 0,
+      shieldActive: false, shieldCooldown: 0, dodgeCooldown: 0, dashCooldown: 0, weaponSwapCooldown: 0, abilityActive: false, abilityActive: false,
     })));
     setIsRunning(false);
     startMatch();
@@ -1861,6 +1857,19 @@ export default function WatchMode() {
     <div className="fixed inset-0 bg-black overflow-hidden select-none" style={{ fontFamily: "'Orbitron', 'JetBrains Mono', monospace" }}>
       {/* Three.js Canvas */}
       <div ref={canvasRef} className="absolute inset-0 z-0" style={{ pointerEvents: phase === "select" ? "none" : "auto" }} />
+      
+      {/* Countdown Overlay */}
+      {countdownActive && (
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
+          <div className="text-9xl font-bold text-cyan-400 drop-shadow-lg animate-pulse" style={{
+            textShadow: '0 0 20px #00ffff, 0 0 40px #00ffff, 0 0 60px #00ffff',
+            transform: `scale(${1 + (3 - countdownValue) * 0.2})`,
+            transition: 'transform 0.3s ease-out',
+          }}>
+            {countdownValue > 0 ? countdownValue : 'FIGHT!'}
+          </div>
+        </div>
+      )}
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* AGENT SELECTION SCREEN */}

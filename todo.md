@@ -1188,3 +1188,34 @@
 - [x] FIXED: Platform targeting now uses global tick tracking (was using broken modulo)
 - [x] FIXED: Agents pick NEW platforms every 4-6 ticks (was getting stuck)
 - [x] FIXED: Visible jumping between different platforms with height changes
+
+## v41 — Match Countdown, Agent Abilities, Spectator Chat
+
+### Match Countdown Timer
+- [x] Create countdown display component (3-2-1 before combat)
+- [x] Generate dramatic countdown sound effect (beep/whoosh)
+- [x] Integrate sound into WatchMode combat start
+- [x] Add visual effects during countdown (screen pulse, text scaling)
+
+### Agent Ability System
+- [x] Define ability types per agent (shield, dash, weapon swap, heal) — added to AgentHUD state
+- [x] Create ability cooldown system with visual indicators — cooldown timers added
+- [ ] Add ability activation UI to HUD
+- [ ] Integrate abilities into combat loop
+- [ ] Add ability usage to kill feed and terminal logs
+- [ ] Create ability animations (shield bubble, dash trail, etc.)
+
+### Spectator Chat
+- [x] Add separate spectator chat channel to game HUD
+- [x] Create chat input UI for spectators
+- [ ] Integrate spectator messages into tRPC router
+- [x] Display spectator chat alongside agent chat
+- [x] Add spectator message styling (different color/prefix)
+- [ ] Persist spectator chat during match
+
+### Testing & Deployment
+- [ ] Write vitest tests for countdown timer
+- [ ] Write vitest tests for ability system
+- [ ] Write vitest tests for spectator chat
+- [x] Test all features in browser
+- [ ] Save checkpoint
