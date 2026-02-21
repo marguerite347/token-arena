@@ -968,6 +968,16 @@ export const appRouter = router({
       }),
   }),
 
+  // ─── AI Observer Agent ───────────────────────────────────────────────
+  observer: router({
+    evaluate: publicProcedure
+      .input(z.object({ sessionData: z.any() }))
+      .mutation(async ({ input }) => {
+        const { observeSession } = await import("./matchObserver");
+        return observeSession(input.sessionData);
+      }),
+  }),
+
   // ─── Uniswap DEX Swap + Flywheel ─────────────────────────────────────────
   uniswap: router({
     // Get a swap quote from Uniswap API
@@ -1395,6 +1405,79 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const { getNFTOffers } = await import("./openSeaService");
         return getNFTOffers(input.contractAddress, input.tokenId);
+      }),
+  }),
+  // ─── OpenSea MCP-Style Tool Router ────────────────────────────
+  opensea: router({
+    // MCP Tool: search — unified search across collections, tokens, NFTs
+    search: publicProcedure
+      .input(z.object({ query: z.string(), type: z.enum(["collection", "nft", "token"]).default("collection") }))
+      .query(async ({ input }) => {
+        const { mcpSearch } = await import("./openSeaService");
+        return mcpSearch(input.query, input.type);
+      }),
+    // MCP Tool: get_top_collections
+    topCollections: publicProcedure
+      .input(z.object({ chain: z.string().optional(), limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => {
+        const { mcpGetTopCollections } = await import("./openSeaService");
+        return mcpGetTopCollections(input?.chain, input?.limit ?? 20);
+      }),
+    // MCP Tool: get_trending_collections
+    trendingCollections: publicProcedure
+      .input(z.object({ chain: z.string().optional(), period: z.string().default("ONE_DAY") }).optional())
+      .query(async ({ input }) => {
+        const { mcpGetTrendingCollections } = await import("./openSeaService");
+        return mcpGetTrendingCollections(input?.chain, input?.period);
+      }),
+    // MCP Tool: get_trending_tokens
+    trendingTokens: publicProcedure
+      .input(z.object({ chain: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        const { mcpGetTrendingTokens } = await import("./openSeaService");
+        return mcpGetTrendingTokens(input?.chain);
+      }),
+    // MCP Tool: get_collections (by slug)
+    collections: publicProcedure
+      .input(z.object({ slugs: z.array(z.string()) }))
+      .query(async ({ input }) => {
+        const { mcpGetCollections } = await import("./openSeaService");
+        return mcpGetCollections(input.slugs);
+      }),
+    // MCP Tool: get_token_balances
+    tokenBalances: publicProcedure
+      .input(z.object({ wallet: z.string(), chain: z.string().default("base") }))
+      .query(async ({ input }) => {
+        const { mcpGetTokenBalances } = await import("./openSeaService");
+        return mcpGetTokenBalances(input.wallet, input.chain);
+      }),
+    // MCP Tool: get_nft_balances
+    nftBalances: publicProcedure
+      .input(z.object({ wallet: z.string(), chain: z.string().default("ethereum"), limit: z.number().default(50) }))
+      .query(async ({ input }) => {
+        const { mcpGetNFTBalances } = await import("./openSeaService");
+        return mcpGetNFTBalances(input.wallet, input.chain, input.limit);
+      }),
+    // MCP Tool: get_activity
+    activity: publicProcedure
+      .input(z.object({ collection: z.string(), limit: z.number().default(20) }))
+      .query(async ({ input }) => {
+        const { mcpGetActivity } = await import("./openSeaService");
+        return mcpGetActivity(input.collection, input.limit);
+      }),
+    // MCP Tool: account_lookup
+    accountLookup: publicProcedure
+      .input(z.object({ address: z.string() }))
+      .query(async ({ input }) => {
+        const { mcpAccountLookup } = await import("./openSeaService");
+        return mcpAccountLookup(input.address);
+      }),
+    // MCP Tool: dispatch — generic tool dispatcher for agent use
+    dispatch: publicProcedure
+      .input(z.object({ tool: z.string(), params: z.record(z.string(), z.any()) }))
+      .mutation(async ({ input }) => {
+        const { dispatchMCPTool } = await import("./openSeaService");
+        return dispatchMCPTool(input.tool as any, input.params);
       }),
   }),
 });
