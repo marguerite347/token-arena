@@ -1071,7 +1071,7 @@ export default function WatchMode() {
 
     // Arena boundary ring (neon cyan)
     const ringGeo = new THREE.TorusGeometry(7, 0.03, 8, 64);
-    const ringMat = new THREE.MeshStandardMaterial({ color: 0x00ffff, transparent: true, opacity: 0.6, emissive: 0x00ffff, emissiveIntensity: 0.3 });
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.6 });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = Math.PI / 2;
     ring.position.y = 0.01;
@@ -1080,7 +1080,7 @@ export default function WatchMode() {
     
     // Outer neon ring (magenta accent)
     const outerRingGeo = new THREE.TorusGeometry(8, 0.02, 8, 64);
-    const outerRingMat = new THREE.MeshStandardMaterial({ color: 0xff00ff, transparent: true, opacity: 0.3, emissive: 0xff00ff, emissiveIntensity: 0.2 });
+    const outerRingMat = new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.3 });
     const outerRing = new THREE.Mesh(outerRingGeo, outerRingMat);
     outerRing.rotation.x = Math.PI / 2;
     outerRing.position.y = 0.02;
@@ -1263,16 +1263,15 @@ export default function WatchMode() {
     shieldMeshesRef.current.forEach((m) => m.parent?.remove(m));
     shieldMeshesRef.current.clear();
 
-    // Spawn agents ON specific platforms so they're visibly elevated from the start
-    const walkable = PLATFORM_CONFIGS.filter(p => p.w >= 0.5 && p.d >= 0.5);
+    // Spawn agents in a circle on flat ground
     AGENTS.forEach((agent, i) => {
       const mesh = createAgentMesh(agent.shape, agent.color, agent.emissive, agent.scale);
-      // Each agent spawns on a different platform
-      const spawnPlat = walkable[i % walkable.length];
-      const spawnX = spawnPlat.x + (Math.random() - 0.5) * spawnPlat.w * 0.4;
-      const spawnZ = spawnPlat.z + (Math.random() - 0.5) * spawnPlat.d * 0.4;
-      const groundY = spawnPlat.y + spawnPlat.h / 2; // top of platform
-      mesh.position.set(spawnX, groundY, spawnZ);
+      // Spawn in a circle around the arena center
+      const angle = (i / AGENTS.length) * Math.PI * 2;
+      const radius = 5 + Math.random() * 2; // 5-7 units from center
+      const spawnX = Math.cos(angle) * radius;
+      const spawnZ = Math.sin(angle) * radius;
+      mesh.position.set(spawnX, 0, spawnZ);
       mesh.lookAt(0, 0, 0);
       const label = createNameLabel(agent.id, agent.color);
       mesh.add(label);
@@ -1304,9 +1303,6 @@ export default function WatchMode() {
   const globalMoveTickRef = useRef(0);
 
   const startAgentMovement = useCallback(() => {
-    // Walkable platforms only (skip cover walls)
-    const walkable = PLATFORM_CONFIGS.filter(p => p.w >= 0.5 && p.d >= 0.5);
-
     moveIntervalRef.current = setInterval(() => {
       if (!sceneRef.current) return;
       globalMoveTickRef.current++;
@@ -1319,95 +1315,35 @@ export default function WatchMode() {
 
         let newX: number, newZ: number;
 
-        // 70% chance: move toward a platform (creates visible jumping)
-        // 30% chance: personality-based movement (creates variety)
-        const shouldTargetPlatform = Math.random() < 0.7 && walkable.length > 1;
-
-        if (shouldTargetPlatform) {
-          // Get or pick a target platform
-          let targetData = agentTargetPlatformRef.current.get(agent.id);
-          
-          // Pick a new platform every 4-6 ticks
-          if (!targetData || globalMoveTickRef.current >= targetData.nextChangeAt) {
-            // Find which platform agent is currently on
-            const currentPlatIdx = walkable.findIndex(p => {
-              const halfW = p.w / 2;
-              const halfD = p.d / 2;
-              return mesh.position.x >= p.x - halfW && mesh.position.x <= p.x + halfW &&
-                     mesh.position.z >= p.z - halfD && mesh.position.z <= p.z + halfD;
-            });
-            
-            // Pick a DIFFERENT platform to ensure visible jumping
-            const candidates = walkable
-              .map((_, i) => i)
-              .filter(i => i !== currentPlatIdx);
-            const newTargetIdx = candidates.length > 0 
-              ? candidates[Math.floor(Math.random() * candidates.length)]
-              : 0;
-            
-            // Increase to 8-12 ticks so agents have time to reach the platform
-            const nextChangeAt = globalMoveTickRef.current + 8 + Math.floor(Math.random() * 5);
-            targetData = { idx: newTargetIdx, nextChangeAt };
-            agentTargetPlatformRef.current.set(agent.id, targetData);
-          }
-          
-          const targetIdx = targetData.idx;
-
-          const targetPlat = walkable[targetIdx] || walkable[0];
-          // Move toward the center of the target platform with some jitter
-          const jitterX = (Math.random() - 0.5) * targetPlat.w * 0.6;
-          const jitterZ = (Math.random() - 0.5) * targetPlat.d * 0.6;
-          const goalX = targetPlat.x + jitterX;
-          const goalZ = targetPlat.z + jitterZ;
-          const dx = goalX - mesh.position.x;
-          const dz = goalZ - mesh.position.z;
-          const dist = Math.sqrt(dx * dx + dz * dz);
-          // Move speed based on personality
-          const speed = agent.personality === "aggressive" ? 1.2 :
-                        agent.personality === "evasive" ? 1.5 :
-                        agent.personality === "chaotic" ? 1.8 :
-                        agent.personality === "defensive" ? 0.8 : 1.0;
-          // Increase step significantly so agents can actually reach distant platforms
-          const step = Math.min(dist, speed * 2.5);
-          if (dist > 0.1) {
-            newX = mesh.position.x + (dx / dist) * step;
-            newZ = mesh.position.z + (dz / dist) * step;
-          } else {
-            // Already on platform, small shuffle
-            newX = mesh.position.x + (Math.random() - 0.5) * 0.3;
-            newZ = mesh.position.z + (Math.random() - 0.5) * 0.3;
-          }
-        } else {
-          // Personality-based movement (original behavior)
-          let moveAngle: number, moveDist: number;
-          switch (agent.personality) {
-            case "aggressive":
-              moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 1.5;
-              moveDist = 0.6 + Math.random() * 0.8;
-              break;
-            case "defensive":
-              moveAngle = Math.atan2(mesh.position.z, mesh.position.x) + 0.3 + (Math.random() - 0.5) * 0.5;
-              moveDist = 0.3 + Math.random() * 0.4;
-              break;
-            case "evasive":
-              moveAngle = Math.random() * Math.PI * 2;
-              moveDist = 0.8 + Math.random() * 1.0;
-              break;
-            case "chaotic":
-              moveAngle = Math.random() * Math.PI * 2;
-              moveDist = Math.random() > 0.5 ? 1.5 : 0.2;
-              break;
-            case "adaptive":
-              moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 2;
-              moveDist = 0.4 + Math.random() * 0.5;
-              break;
-            default:
-              moveAngle = Math.random() * Math.PI * 2;
-              moveDist = 0.4;
-          }
-          newX = mesh.position.x + Math.cos(moveAngle) * moveDist;
-          newZ = mesh.position.z + Math.sin(moveAngle) * moveDist;
+        // Personality-based movement on flat ground
+        let moveAngle: number, moveDist: number;
+        switch (agent.personality) {
+          case "aggressive":
+            moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 1.5;
+            moveDist = 0.6 + Math.random() * 0.8;
+            break;
+          case "defensive":
+            moveAngle = Math.atan2(mesh.position.z, mesh.position.x) + 0.3 + (Math.random() - 0.5) * 0.5;
+            moveDist = 0.3 + Math.random() * 0.4;
+            break;
+          case "evasive":
+            moveAngle = Math.random() * Math.PI * 2;
+            moveDist = 0.8 + Math.random() * 1.0;
+            break;
+          case "chaotic":
+            moveAngle = Math.random() * Math.PI * 2;
+            moveDist = Math.random() > 0.5 ? 1.5 : 0.2;
+            break;
+          case "adaptive":
+            moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 2;
+            moveDist = 0.4 + Math.random() * 0.5;
+            break;
+          default:
+            moveAngle = Math.random() * Math.PI * 2;
+            moveDist = 0.4;
         }
+        newX = mesh.position.x + Math.cos(moveAngle) * moveDist;
+        newZ = mesh.position.z + Math.sin(moveAngle) * moveDist;
 
         const distFromCenter = Math.sqrt(newX * newX + newZ * newZ);
 
