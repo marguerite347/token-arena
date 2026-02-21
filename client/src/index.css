@@ -242,3 +242,11 @@
   border: 1px solid oklch(0.85 0.18 195 / 0.3);
   backdrop-filter: blur(12px);
 }
+
+/* Slow pan animation for M4 skybox backgrounds */
+@keyframes skyboxFloat {
+  0%, 100% { transform: scale(1.0) translate(0%, 0%); }
+  25% { transform: scale(1.05) translate(-1%, -0.5%); }
+  50% { transform: scale(1.02) translate(1%, 0.5%); }
+  75% { transform: scale(1.08) translate(-0.5%, -1%); }
+}

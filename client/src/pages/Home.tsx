@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Eye, Play, Menu, X, Zap, Swords, Coins, Brain, Trophy, ChevronRight } from "lucide-react";
 
-const HERO_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/7BCFtZ5fWXyj3HdnF9KQB1/sandbox/50QAFITnEfFX4BKquAhRbU-img-1_1771544637000_na1fn_aGVyby1hcmVuYQ.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvN0JDRnRaNWZXWHlqM0hkbkY5S1FCMS9zYW5kYm94LzUwUUFGSVRuRWZGWDRCS3F1QWhSYlUtaW1nLTFfMTc3MTU0NDYzNzAwMF9uYTFmbl9hR1Z5YnkxaGNtVnVZUS5wbmc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=TJ~WUcbAsraZKdAfdrmFDS2528Dwq5OuGQh6CY7cbGSjX7hEq0gt0w1D-xZt5dnwQnZGAN0NRpLd2AGj8QQue7iavJ~jcOiwuI4T2QaF28QfPAMUe3REYvEJ87a9Wehng~hbxIVaYMxk2i6UnSy2kbVhAqCkrMLnqoT0p7UYtAxta46Y-zUhdP3~4MSThcq1pzkP7SOtWzcQQBXD9CD3k9PYdF3nEbKvbc8A7Q0ZAVkSOAEEXszP6kbj9sKXh8zRLJBdXT6~4QNBcCvGIqqN-3wl0gX072AJq73H3qEa8crwa7Blw2fsWHd8a1Mmm8z~f-WBHEXYKij8OYSnBgc4LA__";
+// M4 Skybox: Digital Void Chamber — cyan/magenta neon grid, Tron-like aesthetic
+const HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/ZKYjtULxRbKctHFh.jpg";
 
 export default function Home() {
   const [, navigate] = useLocation();
@@ -35,7 +36,7 @@ export default function Home() {
     <div className="min-h-screen relative overflow-hidden bg-black">
       {/* Full-bleed hero background */}
       <div className="fixed inset-0">
-        <img src={HERO_IMG} alt="" className="w-full h-full object-cover opacity-30" />
+        <img src={HERO_IMG} alt="" className="w-full h-full object-cover opacity-40" style={{ objectPosition: "center 40%", animation: "skyboxFloat 120s ease-in-out infinite" }} />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-black/70" />
       </div>

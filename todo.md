@@ -1314,3 +1314,12 @@
 - [x] Replace all M3 fallback references with M4 S3 skyboxes as primary default
 - [x] Remove FALLBACK_M3_PANORAMAS entirely (was dead code, never referenced in loading logic)
 - [x] Test skybox loading uses M4 by default (TS clean, no M3 references remain)
+
+## v47 — Fix Background Art to Use M4 Skyboxes
+
+- [x] Investigate what background images are used on landing page (Home.tsx, Shop.tsx, Demo.tsx all used private CDN URLs)
+- [x] Send context to Claude for best art asset usage recommendations
+- [x] Apply fixes: Home.tsx → Digital Void Chamber, Shop.tsx → Quantum Computing Lab, Demo.tsx → Cyber Void Arena
+- [x] Added skyboxFloat CSS animation for subtle background pan effect
+- [x] Removed all private-us-east-1.manuscdn.com URLs from codebase (0 remaining)
+- [x] Test and verify M4 art is visible (screenshot confirmed)

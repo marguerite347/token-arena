@@ -19,7 +19,8 @@ const CATEGORIES = [
   { id: "environment", label: "DEPLOYABLES", color: "#FFB800" },
 ] as const;
 
-const SHOP_BG = "https://private-us-east-1.manuscdn.com/sessionFile/7BCFtZ5fWXyj3HdnF9KQB1/sandbox/50QAFITnEfFX4BKquAhRbU-img-4_1771544648000_na1fn_c2hvcC1hcm1vcnk.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvN0JDRnRaNWZXWHlqM0hkbkY5S1FCMS9zYW5kYm94LzUwUUFGSVRuRWZGWDRCS3F1QWhSYlUtaW1nLTRfMTc3MTU0NDY0ODAwMF9uYTFmbl9jMmh2Y0MxaGNtMXZjbmsucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=EBH5TgzYk24NO0q09wMTuQVSAtU-Mqk-hrcbjRtBRElaD-SLf8nVnAAipXkPEAkc6BwP5sFyDuvnOxN-dfV2AEdBkolqqN3HELu9w5LRI0tHQY1PHiWfW7E-ooHCZ1XrMJct408KvWiOEXw22tPov4-UI817sHrMBwAe2hoK0G9A6Ip7qIfS7EY~EYd~aZZlLI8eUu249JEUvpwWt-yv0O7YgsXBO2yuC4Aa2X3SHjC2qzDQdnnCLj9zFvAh1Uf6pWsbpwIHsoGej0bBPXSpvRoGrVc6wTnLZmYSgRAZJMt2RiBSDKH5cXl96I-EOhMyX7ytxUKRuI09QNokz7fIzQ__";
+// M4 Skybox: Quantum Computing Lab — dark sci-fi interior, blue neon circuits
+const SHOP_BG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gqKCKZfzZwQkVTLk.jpg";
 
 export default function Shop() {
   const { state, buyItem, equipWeapon } = useGame();
