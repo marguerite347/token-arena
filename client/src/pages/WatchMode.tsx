@@ -432,18 +432,37 @@ function getGroundHeight(px: number, pz: number): number {
   return maxY;
 }
 
-// Check if moving from (x1,z1) to (x2,z2) would collide with a wall
+// Check if moving from (x1,z1) to (x2,z2) would collide with a wall or platform side
 function collidesWithWall(x1: number, z1: number, x2: number, z2: number): boolean {
+  const AGENT_RADIUS = 0.35;
   for (const p of PLATFORM_CONFIGS) {
-    // Only check walls (narrow objects)
-    if (p.w >= 0.5 && p.d >= 0.5) continue;
-    const halfW = p.w / 2 + 0.3; // agent radius padding
-    const halfD = p.d / 2 + 0.3;
-    const topY = p.y + p.h;
-    // Only block if wall is tall enough
-    if (topY < 0.5) continue;
-    if (x2 >= p.x - halfW && x2 <= p.x + halfW && z2 >= p.z - halfD && z2 <= p.z + halfD) {
-      return true;
+    const halfW = p.w / 2;
+    const halfD = p.d / 2;
+    const topY = p.y + p.h / 2;
+    
+    // Check if agent would walk through platform side (not on top)
+    // Agent is on top if its Y is approximately at topY
+    const currentY = getGroundHeight(x1, z1);
+    const targetY = getGroundHeight(x2, z2);
+    
+    // If moving horizontally but target Y is significantly different, it's a side collision
+    if (Math.abs(targetY - currentY) > 0.15) {
+      // Check if new position is within platform's horizontal bounds
+      if (x2 >= p.x - halfW - AGENT_RADIUS && x2 <= p.x + halfW + AGENT_RADIUS &&
+          z2 >= p.z - halfD - AGENT_RADIUS && z2 <= p.z + halfD + AGENT_RADIUS) {
+        // This is a side collision — block it
+        return true;
+      }
+    }
+    
+    // Also check tall walls (cover walls)
+    if (p.w < 0.5 || p.d < 0.5) {
+      const topWallY = p.y + p.h;
+      if (topWallY < 0.5) continue;
+      if (x2 >= p.x - halfW - AGENT_RADIUS && x2 <= p.x + halfW + AGENT_RADIUS &&
+          z2 >= p.z - halfD - AGENT_RADIUS && z2 <= p.z + halfD + AGENT_RADIUS) {
+        return true;
+      }
     }
   }
   return false;
@@ -784,10 +803,9 @@ export default function WatchMode() {
       setNextSkyboxUrl(null); // consume it
       pushTerminal("system", `[SKYBOX] Loading AI-generated arena: "${chosenName}"`);
     } else {
-      const fallback = FALLBACK_PANORAMAS[Math.floor(Math.random() * FALLBACK_PANORAMAS.length)];
-      chosenUrl = fallback.url;
-      chosenName = fallback.name;
-      pushTerminal("system", `[SKYBOX] Using pre-rendered arena: "${chosenName}" (AI generation pending)`);
+      // NO FALLBACK — wait for real Skybox AI generation
+      pushTerminal("system", `[SKYBOX] Waiting for Skybox AI Model 4 generation to complete...`);
+      return; // Don't load anything until we have a real generated image
     }
 
     setArenaName(chosenName);
@@ -803,28 +821,13 @@ export default function WatchMode() {
         mat.map = texture;
         mat.needsUpdate = true;
       }
-      if (sceneRef.current) sceneRef.current.environment = texture;
-      setSkyboxLoaded(true);
-    }, undefined, (err) => {
-      console.error("[Skybox] Load failed:", err);
-      // Try CDN fallback
-      if (!url) {
-        const fb = FALLBACK_PANORAMAS[Math.floor(Math.random() * FALLBACK_PANORAMAS.length)];
-        setArenaName(fb.name);
-        const fbProxy = `/api/skybox-proxy?url=${encodeURIComponent(fb.url)}`;
-        loader.load(fbProxy, (tex) => {
-          tex.mapping = THREE.EquirectangularReflectionMapping;
-          tex.colorSpace = THREE.SRGBColorSpace;
-          if (skyboxSphereRef.current) {
-            const mat = skyboxSphereRef.current.material as THREE.MeshBasicMaterial;
-            if (mat.map) mat.map.dispose();
-            mat.map = tex;
-            mat.needsUpdate = true;
-          }
-          if (sceneRef.current) sceneRef.current.environment = tex;
+          if (sceneRef.current) sceneRef.current.environment = texture;
           setSkyboxLoaded(true);
-        });
-      }
+        }, undefined, (err: any) => {
+      console.error("[Skybox] Load failed:", err);
+      pushTerminal("system", `[SKYBOX] Generation failed, retrying...`);
+      // NO FALLBACK — only use real Skybox AI generations
+      setSkyboxLoaded(false);
     });
   }, [nextSkyboxUrl, nextSkyboxName]);
 
@@ -1425,7 +1428,7 @@ export default function WatchMode() {
 
         const distFromCenter = Math.sqrt(newX * newX + newZ * newZ);
 
-        if (distFromCenter < 6.5 && !collidesWithWall(mesh.position.x, mesh.position.z, newX, newZ)) {
+        if (distFromCenter < 9.0 && !collidesWithWall(mesh.position.x, mesh.position.z, newX, newZ)) {
           const targetY = getGroundHeight(newX, newZ);
           const currentY = mesh.position.y;
           const heightDiff = Math.abs(targetY - currentY);
