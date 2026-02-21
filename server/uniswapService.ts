@@ -18,6 +18,7 @@
  */
 
 import { logX402Transaction } from "./db";
+import { ERC8021_SUFFIX, BUILDER_CODE } from "../shared/web3";
 
 // ─── Configuration ─────────────────────────────────────────────────────────
 
@@ -208,9 +209,16 @@ export async function executeSwap(
         ? `${UNISWAP_API_URL}/order`
         : `${UNISWAP_API_URL}/swap`;
 
+      // ERC-8021 Builder Code Attribution: append "tokenarena" suffix to swap data
+      let quoteWithAttribution = { ...quote };
+      if (quote.route && typeof quote.route === 'string') {
+        // Append ERC-8021 suffix to transaction data for on-chain attribution
+        quoteWithAttribution.route = quote.route + ERC8021_SUFFIX.slice(2);
+      }
+
       const body = quote.routing === "DUTCH_V2" || quote.routing === "DUTCH_V3" || quote.routing === "PRIORITY"
-        ? { signature, quote: quote }
-        : { signature, quote: quote, permitData };
+        ? { signature, quote: quoteWithAttribution }
+        : { signature, quote: quoteWithAttribution, permitData };
 
       const response = await fetch(endpoint, {
         method: "POST",

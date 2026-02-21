@@ -1445,4 +1445,4 @@
 - [x] Fix 4: Added isRunningRef to mirror isRunning state synchronously for startNextMatch guard
 - [x] Fix 5: All setIsRunning(false) calls also reset isRunningRef.current
 - [x] tsc --noEmit passes with 0 errors
-- [ ] Push to GitHub
+- [x] Push to GitHub (71406ef)
