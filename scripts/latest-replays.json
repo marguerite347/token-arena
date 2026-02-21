@@ -1,0 +1,5133 @@
+[
+  {
+    "id": 90009,
+    "matchId": 360009,
+    "replayId": "replay-1771663171927-xdovo0",
+    "mode": "ai_playtest",
+    "duration": 107000,
+    "totalKills": 2,
+    "mvpName": "PHANTOM",
+    "mvpKills": 2,
+    "mvpTokens": 147,
+    "result": "PHANTOM wins",
+    "skyboxUrl": null,
+    "skyboxPrompt": "Post-apocalyptic desert wasteland with ruined blockchain server towers, glowing green data streams flowing through cracked earth, abandoned mining rigs, toxic neon fog, dark stormy sky with digital aurora, dystopian render",
+    "agents": [
+      {
+        "color": "#00f0ff",
+        "id": "agent-1",
+        "name": "NEXUS-7"
+      },
+      {
+        "color": "#ff3366",
+        "id": "agent-2",
+        "name": "PHANTOM"
+      }
+    ],
+    "highlights": [
+      {
+        "description": "PHANTOM draws first blood on NEXUS-7!",
+        "duration": 3000,
+        "importance": 7,
+        "involvedAgents": [
+          "PHANTOM",
+          "NEXUS-7"
+        ],
+        "timestamp": 22000,
+        "title": "FIRST BLOOD",
+        "type": "first_blood"
+      },
+      {
+        "description": "PHANTOM claims victory with 2 kills!",
+        "duration": 5000,
+        "importance": 10,
+        "involvedAgents": [
+          "PHANTOM"
+        ],
+        "timestamp": 107000,
+        "title": "PHANTOM WINS!",
+        "type": "clutch"
+      }
+    ],
+    "events": [
+      {
+        "data": {
+          "killerName": "PHANTOM",
+          "victimName": "NEXUS-7",
+          "weapon": "beam"
+        },
+        "timestamp": 22000,
+        "type": "kill"
+      },
+      {
+        "data": {
+          "killerName": "PHANTOM",
+          "victimName": "NEXUS-7",
+          "weapon": "beam"
+        },
+        "timestamp": 37000,
+        "type": "kill"
+      }
+    ],
+    "frames": [
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 140,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.5979672683214536,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 9.75341529801539,
+            "y": 0,
+            "z": 0.19081503463137472
+          },
+          {
+            "color": "#ff3366",
+            "health": 125,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.5436253852683397,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.096149467759125,
+            "y": 0,
+            "z": -9.16980942942882
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 0
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 119,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.7727013693144142,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 9.50731516167784,
+            "y": 0,
+            "z": 2.3975081653763977
+          },
+          {
+            "color": "#ff3366",
+            "health": 114,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.36889128427537893,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.348386065530792,
+            "y": 0,
+            "z": -8.36052605959906
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 3000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 98,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.941964696510774,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 8.472689015952161,
+            "y": 0,
+            "z": 4.805686750275117
+          },
+          {
+            "color": "#ff3366",
+            "health": 103,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.1996279570790194,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.022239043946244,
+            "y": 0,
+            "z": -7.305903100248594
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 6000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 84,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -3.1373876635106974,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 6.70889581881738,
+            "y": 0,
+            "z": 6.686425043675933
+          },
+          {
+            "color": "#ff3366",
+            "health": 92,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.004204990079095784,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.653962963011786,
+            "y": 0,
+            "z": -6.3772281395065935
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 9000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 70,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.913268754432715,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 4.275492695549748,
+            "y": 0,
+            "z": 8.278484238978153
+          },
+          {
+            "color": "#ff3366",
+            "health": 47,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.22832389915707824,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.589234087710313,
+            "y": 0,
+            "z": -5.981768430821461
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 12000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 48,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.7642018465763076,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 2.0216659012607017,
+            "y": 0,
+            "z": 8.968592712645815
+          },
+          {
+            "color": "#ff3366",
+            "health": 47,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.3773908070134858,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.699766064424908,
+            "y": 0,
+            "z": -5.355921200669026
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 15000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 26,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.5883988062065693,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -0.4031549691111229,
+            "y": 0,
+            "z": 8.963231244871963
+          },
+          {
+            "color": "#ff3366",
+            "health": 47,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.5531938473832239,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.842803210422488,
+            "y": 0,
+            "z": -4.390368593861421
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 18000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 4,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.452842814533403,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -2.7110904242947758,
+            "y": 0,
+            "z": 8.735889159540141
+          },
+          {
+            "color": "#ff3366",
+            "health": 36,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.6887498390563901,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 8.03145570324896,
+            "y": 0,
+            "z": -4.31327204361186
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 21000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 70,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.303877231349907,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -4.468040465208225,
+            "y": 0,
+            "z": 7.517130995383156
+          },
+          {
+            "color": "#ff3366",
+            "health": 36,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.8377154222398862,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 8.213827007191773,
+            "y": 0,
+            "z": -3.9026524744603264
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 24000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 56,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.166713857802141,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -6.13765291803009,
+            "y": 0,
+            "z": 5.891806300431747
+          },
+          {
+            "color": "#ff3366",
+            "health": 25,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.9748787957876522,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.711613454232853,
+            "y": 0,
+            "z": -3.500215323645861
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 27000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 35,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.0198695231062556,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -7.256377892412846,
+            "y": 0,
+            "z": 4.097131029039736
+          },
+          {
+            "color": "#ff3366",
+            "health": 14,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.1217231304835378,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.952069197536165,
+            "y": 0,
+            "z": -3.2320098920944282
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 30000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 28,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.868738070329062,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -8.092683327343776,
+            "y": 0,
+            "z": 1.942455675342675
+          },
+          {
+            "color": "#ff3366",
+            "health": 14,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.2728545832607314,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.91635642871182,
+            "y": 0,
+            "z": -2.9736398368549057
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 33000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 7,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.8031029843584905,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -7.959702968193513,
+            "y": 0,
+            "z": 0.3930975750315677
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.3384896692313029,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.330682003678152,
+            "y": 0,
+            "z": -3.2242680198612517
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 36000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.6732871260445026,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -8.015175127318475,
+            "y": 0,
+            "z": -1.5478883044939722
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.4683055275452908,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.145227278655417,
+            "y": 0,
+            "z": -3.10715358790012
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 39000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.5481473424548065,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -7.046463160246891,
+            "y": 0,
+            "z": -3.655813316017438
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.5934453111349869,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.161962650238144,
+            "y": 0,
+            "z": -3.333951864670164
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 42000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.4276367063667068,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -6.2779600366473005,
+            "y": 0,
+            "z": -5.054476203438309
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.7139559472230865,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.751213383809398,
+            "y": 0,
+            "z": -3.1763767704964216
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 45000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.339812915213376,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -4.72980718190863,
+            "y": 0,
+            "z": -6.098510504886187
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.8017797383764174,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.7596549000804425,
+            "y": 0,
+            "z": -3.3964081633015586
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 48000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.2319934973983058,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -3.149103385850097,
+            "y": 0,
+            "z": -6.800204819597552
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.9095991561914876,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.266713551397559,
+            "y": 0,
+            "z": -3.48216061394268
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 51000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.2213038423968081,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -1.9045132474224378,
+            "y": 0,
+            "z": -6.891138297926291
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.9202888111929852,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.412720269172403,
+            "y": 0,
+            "z": -3.8598937536554088
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 54000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.1104690431352917,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -0.23543862855919045,
+            "y": 0,
+            "z": -7.14060583480065
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.0311236104545016,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.104010902414712,
+            "y": 0,
+            "z": -3.997148850712598
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 57000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 0.9848587191954625,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 1.024049327201805,
+            "y": 0,
+            "z": -6.9437747764761975
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.156733934394331,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.77433956888444,
+            "y": 0,
+            "z": -3.7910641886279173
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 60000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 0.939310925997277,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 2.4399364246093307,
+            "y": 0,
+            "z": -6.345756236724398
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.202281727592516,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.522040062522114,
+            "y": 0,
+            "z": -4.091529523161944
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 63000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 0.9800323468668022,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 3.4809706801551012,
+            "y": 0,
+            "z": -5.609812440519535
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.161560306722991,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.60376594467946,
+            "y": 0,
+            "z": -4.186132862464765
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 66000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 0.6696849245219321,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 4.352897210973607,
+            "y": 0,
+            "z": -4.971760838702622
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.471907729067861,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.08205624820367,
+            "y": 0,
+            "z": -4.050804857977459
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 69000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 0.8358500713815334,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 4.883703758976558,
+            "y": 0,
+            "z": -4.2281944913274945
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.30574258220826,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.160074751657973,
+            "y": 0,
+            "z": -3.978392477432623
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 72000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.164979579384325,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.577551497919032,
+            "y": 0,
+            "z": -3.099297649931546
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.976613074205468,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.870436972855863,
+            "y": 0,
+            "z": -3.577046372191996
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 75000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.6116967241359808,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.854320814176216,
+            "y": 0,
+            "z": -2.488066335638073
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.5298959294538125,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.159583268332638,
+            "y": 0,
+            "z": -3.6740761670622573
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 78000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.8131527645218677,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.540549229512779,
+            "y": 0,
+            "z": -1.4154213103290811
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.32843988906792554,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.944083292265166,
+            "y": 0,
+            "z": -3.1657039003223577
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 81000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.8652141861682177,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.678344306978183,
+            "y": 0,
+            "z": -0.5203857518987381
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.27637846742157546,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.884922682953843,
+            "y": 0,
+            "z": -3.3176953628312953
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 84000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.9722326693610475,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.518150893371998,
+            "y": 0,
+            "z": 0.38468087495618897
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.16935998422874557,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.01026735102052,
+            "y": 0,
+            "z": -2.5854327118968676
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 87000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -3.1031393827465936,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.192126926099879,
+            "y": 0,
+            "z": 0.9479231742193276
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.03845327084319951,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.069911901841644,
+            "y": 0,
+            "z": -2.2287839752030196
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 90000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -3.054929531904005,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.375234975615495,
+            "y": 0,
+            "z": 1.5139501165884068
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.08666312168578853,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.0605006736400435,
+            "y": 0,
+            "z": -2.1086515632450826
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 93000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 3.0082058898397768,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 4.6417820970232775,
+            "y": 0,
+            "z": 2.0231479880665093
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.1333867637500163,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.102170859286121,
+            "y": 0,
+            "z": -1.407890359053965
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 96000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.86451156077798,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 4.309861338654762,
+            "y": 0,
+            "z": 2.2962269285984087
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.2770810928118132,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.162413109738799,
+            "y": 0,
+            "z": -0.7015285399486837
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 99000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.9528920569688415,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 4.204652127767192,
+            "y": 0,
+            "z": 2.8030386105081004
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.18870059662095182,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.7516807172592,
+            "y": 0,
+            "z": -0.0613947002007971
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 102000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.803175642080179,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 3.6769231581490915,
+            "y": 0,
+            "z": 3.147040964997561
+          },
+          {
+            "color": "#ff3366",
+            "health": 3,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.3384170115096142,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.658910765818436,
+            "y": 0,
+            "z": 0.3569610705545466
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 105000
+      }
+    ],
+    "combatLog": [
+      {
+        "actor": "SYSTEM",
+        "detail": "Match begins in Crypto Wasteland! NEXUS-7 vs PHANTOM",
+        "tick": 0,
+        "timestamp": 1771663166400,
+        "type": "spawn"
+      },
+      {
+        "actor": "NEXUS-7",
+        "detail": "NEXUS-7: \"Crypto Wasteland has elevated platforms and abandoned mining rigs that provide strong defensive positions. As this is my first encounter with PHANTOM, taking an initial defensive stance allows me to observe their patterns while maintaining range advantage with the railgun. The high token/compute balance suggests preserving resources for mid-match adaptations is prudent.\"",
+        "tick": 0,
+        "timestamp": 1771663171782,
+        "type": "decision"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM: \"My beam/scatter loadout favors medium-range engagements, making it ideal to maintain a distance where I can maximize damage while staying protected from Nexus-7's aggressive attacks. By using the Crypto Wasteland's natural cover, I can control the pace and location of the fight, avoiding unnecessary risks while chipping away at my opponent's HP.\"",
+        "tick": 0,
+        "timestamp": 1771663171782,
+        "type": "decision"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (114/125 HP)",
+        "target": "PHANTOM",
+        "tick": 1,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (133/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 1,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (126/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 2,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (119/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 3,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (112/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 4,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (103/125 HP)",
+        "target": "PHANTOM",
+        "tick": 5,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (105/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 5,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (98/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 6,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (92/125 HP)",
+        "target": "PHANTOM",
+        "tick": 7,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (91/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 7,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (84/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 9,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 34,
+        "detail": "NEXUS-7 hits PHANTOM with railgun for 34 damage (58/125 HP)",
+        "target": "PHANTOM",
+        "tick": 10,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "railgun"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (77/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 11,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (47/125 HP)",
+        "target": "PHANTOM",
+        "tick": 12,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (70/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 12,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (63/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 13,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 15,
+        "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (48/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 14,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 15,
+        "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (33/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 16,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (26/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 18,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 15,
+        "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (11/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 20,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (36/125 HP)",
+        "target": "PHANTOM",
+        "tick": 21,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (4/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 21,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (-3/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 22,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM ELIMINATES NEXUS-7 with beam!",
+        "target": "NEXUS-7",
+        "tick": 22,
+        "timestamp": 1771663171782,
+        "type": "kill",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "detail": "NEXUS-7 respawns with 84 HP",
+        "tick": 22,
+        "timestamp": 1771663171782,
+        "type": "spawn"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (77/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 23,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (70/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 24,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (63/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 26,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (25/125 HP)",
+        "target": "PHANTOM",
+        "tick": 27,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (56/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 27,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (14/125 HP)",
+        "target": "PHANTOM",
+        "tick": 28,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (49/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 28,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (42/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 29,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (35/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 30,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (28/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 32,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (21/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 34,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (14/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 35,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (3/125 HP)",
+        "target": "PHANTOM",
+        "tick": 36,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (7/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 36,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (0/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 37,
+        "timestamp": 1771663171782,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM ELIMINATES NEXUS-7 with beam!",
+        "target": "NEXUS-7",
+        "tick": 37,
+        "timestamp": 1771663171782,
+        "type": "kill",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "detail": "NEXUS-7: earned 35 ARENA, spent 106 ARENA (ammo: 96, entry: 10)",
+        "tick": 107,
+        "timestamp": 1771663171782,
+        "type": "economy"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM: earned 147 ARENA, spent 103 ARENA (ammo: 93, entry: 10)",
+        "tick": 107,
+        "timestamp": 1771663171782,
+        "type": "economy"
+      },
+      {
+        "actor": "NEXUS-7",
+        "detail": "NEXUS-7 remembers: \"Initial encounters should prioritize information gathering and position control over aggressive plays, especially with ranged loadouts that don't require close engagement.\"",
+        "tick": 107,
+        "timestamp": 1771663171909,
+        "type": "memory"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM remembers: \"Utilize environmental cover effectively to gain a strategic advantage, especially when facing potentially aggressive opponents.\"",
+        "tick": 107,
+        "timestamp": 1771663171909,
+        "type": "memory"
+      }
+    ],
+    "createdAt": "2026-02-21T08:39:31.000Z"
+  },
+  {
+    "id": 90008,
+    "matchId": 360008,
+    "replayId": "replay-1771663169497-cz7728",
+    "mode": "ai_playtest",
+    "duration": 103000,
+    "totalKills": 2,
+    "mvpName": "TITAN",
+    "mvpKills": 2,
+    "mvpTokens": 179,
+    "result": "TITAN wins",
+    "skyboxUrl": null,
+    "skyboxPrompt": "Massive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture, sci-fi render",
+    "agents": [
+      {
+        "color": "#00f0ff",
+        "id": "agent-5",
+        "name": "AURORA"
+      },
+      {
+        "color": "#39ff14",
+        "id": "agent-3",
+        "name": "TITAN"
+      }
+    ],
+    "highlights": [
+      {
+        "description": "TITAN draws first blood on AURORA!",
+        "duration": 3000,
+        "importance": 7,
+        "involvedAgents": [
+          "TITAN",
+          "AURORA"
+        ],
+        "timestamp": 41000,
+        "title": "FIRST BLOOD",
+        "type": "first_blood"
+      },
+      {
+        "description": "TITAN claims victory with 2 kills!",
+        "duration": 5000,
+        "importance": 10,
+        "involvedAgents": [
+          "TITAN"
+        ],
+        "timestamp": 103000,
+        "title": "TITAN WINS!",
+        "type": "clutch"
+      }
+    ],
+    "events": [
+      {
+        "data": {
+          "killerName": "TITAN",
+          "victimName": "AURORA",
+          "weapon": "scatter"
+        },
+        "timestamp": 41000,
+        "type": "kill"
+      },
+      {
+        "data": {
+          "killerName": "TITAN",
+          "victimName": "AURORA",
+          "weapon": "scatter"
+        },
+        "timestamp": 57000,
+        "type": "kill"
+      }
+    ],
+    "frames": [
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 135,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -2.5964786424735546,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 9.823456074427032,
+            "y": 0,
+            "z": 0.19693318684679328
+          },
+          {
+            "color": "#39ff14",
+            "health": 160,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.5451140111162388,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 4.096674398669303,
+            "y": 0,
+            "z": -9.246927251659052
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 0
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 135,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -2.7566055244739456,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 9.588881221679891,
+            "y": 0,
+            "z": 2.861524622573508
+          },
+          {
+            "color": "#39ff14",
+            "health": 160,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.38498712911584754,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.122287427291843,
+            "y": 0,
+            "z": -8.161466974782943
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 3000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 119,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -2.9929444946487216,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 8.20035203374637,
+            "y": 0,
+            "z": 5.19063445483203
+          },
+          {
+            "color": "#39ff14",
+            "health": 152,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.14864815894107147,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 6.306910530221143,
+            "y": 0,
+            "z": -7.453147536519145
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 6000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 103,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 3.1093783898784015,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 6.5811161443252635,
+            "y": 0,
+            "z": 6.7356182251255445
+          },
+          {
+            "color": "#39ff14",
+            "health": 144,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.03221426371139153,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.014704174009513,
+            "y": 0,
+            "z": -6.719230117643015
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 9000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 103,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 2.9210996183179323,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 4.326676169439006,
+            "y": 0,
+            "z": 8.27231709272687
+          },
+          {
+            "color": "#39ff14",
+            "health": 120,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.2204930352718611,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.457971588374994,
+            "y": 0,
+            "z": -5.698125384159928
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 12000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 87,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 2.77489028779641,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 2.158723087666259,
+            "y": 0,
+            "z": 8.772302408609285
+          },
+          {
+            "color": "#39ff14",
+            "health": 120,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.3667023657933831,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.501464633193365,
+            "y": 0,
+            "z": -5.138396512350278
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 15000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 61,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 2.5891517697074082,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -0.5157890834212147,
+            "y": 0,
+            "z": 9.155517252511745
+          },
+          {
+            "color": "#39ff14",
+            "health": 120,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.5524408838823852,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.821881200802636,
+            "y": 0,
+            "z": -4.369371871488937
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 18000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 61,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 2.4437521202634014,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -2.770161950950484,
+            "y": 0,
+            "z": 8.615195781215386
+          },
+          {
+            "color": "#39ff14",
+            "health": 112,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.697840533326392,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 8.019832491098969,
+            "y": 0,
+            "z": -4.251425270742263
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 21000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 61,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 2.3148768289995028,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -4.374688842244813,
+            "y": 0,
+            "z": 7.457661003111686
+          },
+          {
+            "color": "#39ff14",
+            "health": 112,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.8267158245902904,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.9653281614977605,
+            "y": 0,
+            "z": -3.9025599811479514
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 24000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 61,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 2.1717923665418586,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -6.168571482699493,
+            "y": 0,
+            "z": 6.102932193817314
+          },
+          {
+            "color": "#39ff14",
+            "health": 112,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.9698002870479346,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.882266888104056,
+            "y": 0,
+            "z": -3.530323088619403
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 27000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 61,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 2.0150455724041123,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -7.5977488701448825,
+            "y": 0,
+            "z": 4.038295487622816
+          },
+          {
+            "color": "#39ff14",
+            "health": 112,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -1.1265470811856808,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.60505092122832,
+            "y": 0,
+            "z": -3.1979633819876487
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 30000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 61,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.92775897353447,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -7.887190448581376,
+            "y": 0,
+            "z": 2.438787331723339
+          },
+          {
+            "color": "#39ff14",
+            "health": 112,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -1.2138336800553233,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.80185685993848,
+            "y": 0,
+            "z": -3.412272137076578
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 33000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 35,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.792004769225454,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -8.368413856195884,
+            "y": 0,
+            "z": 0.4042985001610142
+          },
+          {
+            "color": "#39ff14",
+            "health": 104,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -1.3495878843643394,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.537795662024491,
+            "y": 0,
+            "z": -3.172827270156488
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 36000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 9,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.659087993058824,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -7.977357090378042,
+            "y": 0,
+            "z": -1.7965191255294297
+          },
+          {
+            "color": "#39ff14",
+            "health": 96,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -1.4825046605309693,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.3694403717813115,
+            "y": 0,
+            "z": -3.1550453746875116
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 39000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 81,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.54414721048061,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -7.352055073467056,
+            "y": 0,
+            "z": -3.4609084986487
+          },
+          {
+            "color": "#39ff14",
+            "health": 96,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -1.5974454431091833,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.298733198603423,
+            "y": 0,
+            "z": -3.0703854869010554
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 42000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 39,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.4627724831654474,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -6.049557535139133,
+            "y": 0,
+            "z": -5.037832754099597
+          },
+          {
+            "color": "#39ff14",
+            "health": 96,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -1.678820170424346,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 7.143569316933603,
+            "y": 0,
+            "z": -3.607090967283497
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 45000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 39,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.3922126368489196,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -4.938657797723516,
+            "y": 0,
+            "z": -5.756644402478671
+          },
+          {
+            "color": "#39ff14",
+            "health": 80,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -1.7493800167408737,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 6.944742822240831,
+            "y": 0,
+            "z": -3.6116110089831457
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 48000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 39,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.2442982369107403,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -3.488374009867494,
+            "y": 0,
+            "z": -6.908803604895575
+          },
+          {
+            "color": "#39ff14",
+            "health": 72,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -1.897294416679053,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 6.543303061751244,
+            "y": 0,
+            "z": -3.511909481455235
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 51000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 13,
+            "id": "agent-5",
+            "isAlive": true,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.1752437011495285,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -1.677278842753366,
+            "y": 0,
+            "z": -6.968547995743797
+          },
+          {
+            "color": "#39ff14",
+            "health": 64,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -1.9663489524402649,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 6.163034082787343,
+            "y": 0,
+            "z": -3.694741737617791
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 54000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.1144659513351087,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": -0.5196164133721459,
+            "y": 0,
+            "z": -7.142896180455789
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -2.0271267022546846,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.781143500514393,
+            "y": 0,
+            "z": -4.049937331220144
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 57000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 1.0351597947979447,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 0.8550841063783234,
+            "y": 0,
+            "z": -7.038815954681035
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -2.1064328587918486,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.93851461111703,
+            "y": 0,
+            "z": -4.021730165463806
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 60000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 0.8945505004305717,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 2.3913906642928087,
+            "y": 0,
+            "z": -6.241747471229103
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -2.2470421531592217,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.3835686459157115,
+            "y": 0,
+            "z": -3.8406114539486795
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 63000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 0.8723877587213501,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 3.116377675647861,
+            "y": 0,
+            "z": -5.95889622026286
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -2.269204894868443,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.582796620199581,
+            "y": 0,
+            "z": -3.888161051238944
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 66000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 0.9754390954833657,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 4.283279177921524,
+            "y": 0,
+            "z": -4.869791006992192
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -2.1661535581064273,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.338719241464707,
+            "y": 0,
+            "z": -4.154896537532759
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 69000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 0.3914122711836136,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 4.937679085539342,
+            "y": 0,
+            "z": -4.096320416248233
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -2.7501803824061795,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.080141812186924,
+            "y": 0,
+            "z": -3.7511292631600415
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 72000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -2.218984013140711,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 5.325956836436041,
+            "y": 0,
+            "z": -3.4233225474272633
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.9226086404490821,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.001638943791253,
+            "y": 0,
+            "z": -3.6689442692513268
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 75000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -2.371827291099942,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 5.702359156521767,
+            "y": 0,
+            "z": -2.3876424291755236
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.7697653624898511,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 4.678742456415396,
+            "y": 0,
+            "z": -3.4437740697888644
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 78000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -2.6541706301020453,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 5.8010770370283495,
+            "y": 0,
+            "z": -1.3862520957811606
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.48742202348774805,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 4.670076634506182,
+            "y": 0,
+            "z": -3.519887956018206
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 81000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -2.793198216526689,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 6.007626794061524,
+            "y": 0,
+            "z": -0.3221717716376461
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.34839443706310425,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 4.921191681090788,
+            "y": 0,
+            "z": -3.313375011805694
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 84000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -2.8729860872399775,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 5.793780907008615,
+            "y": 0,
+            "z": 0.3210422423536057
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.2686065663498159,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 4.968508369682817,
+            "y": 0,
+            "z": -2.6771299817903236
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 87000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -2.8623982147444833,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 5.596987036781354,
+            "y": 0,
+            "z": 0.7281559783821419
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.27919443884531003,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 4.770281954397989,
+            "y": 0,
+            "z": -2.155541129180758
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 90000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": -3.122835989572857,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 5.159366413791648,
+            "y": 0,
+            "z": 1.587942782377505
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": 0.01875666401693646,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.093694364891492,
+            "y": 0,
+            "z": -1.9129114870986406
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 93000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 3.105397833283417,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 4.941629797157997,
+            "y": 0,
+            "z": 1.8444445138288317
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.03619482030637639,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.052582025184037,
+            "y": 0,
+            "z": -1.2196340286515648
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 96000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 2.867652639648499,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 4.280769810248878,
+            "y": 0,
+            "z": 2.3922668997611245
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.27394001394129425,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 5.147539599092253,
+            "y": 0,
+            "z": -0.6922727349272554
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 99000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-5",
+            "isAlive": false,
+            "kills": 0,
+            "maxHealth": 135,
+            "name": "AURORA",
+            "rotation": 2.8330332671963734,
+            "tokens": 1847,
+            "weapon": "plasma",
+            "x": 3.832341996706058,
+            "y": 0,
+            "z": 2.65115848824395
+          },
+          {
+            "color": "#39ff14",
+            "health": 40,
+            "id": "agent-3",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 160,
+            "name": "TITAN",
+            "rotation": -0.30855938639341973,
+            "tokens": -384,
+            "weapon": "rocket",
+            "x": 4.735187218741114,
+            "y": 0,
+            "z": -0.1813877330951387
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 102000
+      }
+    ],
+    "combatLog": [
+      {
+        "actor": "SYSTEM",
+        "detail": "Match begins in Neon Colosseum! AURORA vs TITAN",
+        "tick": 0,
+        "timestamp": 1771663153923,
+        "type": "spawn"
+      },
+      {
+        "actor": "AURORA",
+        "detail": "AURORA: \"TITAN will likely favor a power-based approach. My speed and loadout are best suited for immediate aggression, punishing predictable patterns and exploiting the open arena layout to maintain a damage advantage. If successful, I will press my advantage relentlessly to secure a swift victory.\"",
+        "tick": 0,
+        "timestamp": 1771663169332,
+        "type": "decision"
+      },
+      {
+        "actor": "TITAN",
+        "detail": "TITAN: \"Given my loadout of rocket/scatter and 120 armor, I have the firepower to take the initiative and push forward aggressively. AURORA is likely to try and use the arena's cover to their advantage, so I'll need to be bold and take control of the central high ground to limit their options and create opportunities for a quick kill, which will help me earn tokens to alleviate my negative balance.\"",
+        "tick": 0,
+        "timestamp": 1771663169332,
+        "type": "decision"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (152/160 HP)",
+        "target": "TITAN",
+        "tick": 5,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 16,
+        "detail": "TITAN hits AURORA with scatter for 16 damage (119/135 HP)",
+        "target": "AURORA",
+        "tick": 6,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (144/160 HP)",
+        "target": "TITAN",
+        "tick": 9,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 16,
+        "detail": "TITAN hits AURORA with scatter for 16 damage (103/135 HP)",
+        "target": "AURORA",
+        "tick": 9,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (136/160 HP)",
+        "target": "TITAN",
+        "tick": 10,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (128/160 HP)",
+        "target": "TITAN",
+        "tick": 11,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (120/160 HP)",
+        "target": "TITAN",
+        "tick": 12,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 16,
+        "detail": "TITAN hits AURORA with scatter for 16 damage (87/135 HP)",
+        "target": "AURORA",
+        "tick": 13,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 26,
+        "detail": "TITAN hits AURORA with rocket for 26 damage (61/135 HP)",
+        "target": "AURORA",
+        "tick": 16,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "rocket"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (112/160 HP)",
+        "target": "TITAN",
+        "tick": 20,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 26,
+        "detail": "TITAN hits AURORA with rocket for 26 damage (35/135 HP)",
+        "target": "AURORA",
+        "tick": 34,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "rocket"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (104/160 HP)",
+        "target": "TITAN",
+        "tick": 36,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 26,
+        "detail": "TITAN hits AURORA with rocket for 26 damage (9/135 HP)",
+        "target": "AURORA",
+        "tick": 38,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "rocket"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (96/160 HP)",
+        "target": "TITAN",
+        "tick": 39,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 16,
+        "detail": "TITAN hits AURORA with scatter for 16 damage (-7/135 HP)",
+        "target": "AURORA",
+        "tick": 41,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "TITAN",
+        "detail": "TITAN ELIMINATES AURORA with scatter!",
+        "target": "AURORA",
+        "tick": 41,
+        "timestamp": 1771663169332,
+        "type": "kill",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "AURORA",
+        "detail": "AURORA respawns with 81 HP",
+        "tick": 41,
+        "timestamp": 1771663169332,
+        "type": "spawn"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 26,
+        "detail": "TITAN hits AURORA with rocket for 26 damage (55/135 HP)",
+        "target": "AURORA",
+        "tick": 43,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "rocket"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 16,
+        "detail": "TITAN hits AURORA with scatter for 16 damage (39/135 HP)",
+        "target": "AURORA",
+        "tick": 45,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (88/160 HP)",
+        "target": "TITAN",
+        "tick": 46,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (80/160 HP)",
+        "target": "TITAN",
+        "tick": 48,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (72/160 HP)",
+        "target": "TITAN",
+        "tick": 49,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 26,
+        "detail": "TITAN hits AURORA with rocket for 26 damage (13/135 HP)",
+        "target": "AURORA",
+        "tick": 52,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "rocket"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (64/160 HP)",
+        "target": "TITAN",
+        "tick": 54,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (56/160 HP)",
+        "target": "TITAN",
+        "tick": 55,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (48/160 HP)",
+        "target": "TITAN",
+        "tick": 56,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "AURORA",
+        "damage": 8,
+        "detail": "AURORA hits TITAN with plasma for 8 damage (40/160 HP)",
+        "target": "TITAN",
+        "tick": 57,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "TITAN",
+        "damage": 16,
+        "detail": "TITAN hits AURORA with scatter for 16 damage (-3/135 HP)",
+        "target": "AURORA",
+        "tick": 57,
+        "timestamp": 1771663169332,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "TITAN",
+        "detail": "TITAN ELIMINATES AURORA with scatter!",
+        "target": "AURORA",
+        "tick": 57,
+        "timestamp": 1771663169332,
+        "type": "kill",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "AURORA",
+        "detail": "AURORA: earned 12 ARENA, spent 72 ARENA (ammo: 62, entry: 10)",
+        "tick": 103,
+        "timestamp": 1771663169332,
+        "type": "economy"
+      },
+      {
+        "actor": "TITAN",
+        "detail": "TITAN: earned 179 ARENA, spent 170 ARENA (ammo: 160, entry: 10)",
+        "tick": 103,
+        "timestamp": 1771663169332,
+        "type": "economy"
+      },
+      {
+        "actor": "AURORA",
+        "detail": "AURORA remembers: \"Agility and adaptability are key to overpowering strength. Capitalize on openings as soon as they emerge.\"",
+        "tick": 103,
+        "timestamp": 1771663169477,
+        "type": "memory"
+      },
+      {
+        "actor": "TITAN",
+        "detail": "TITAN remembers: \"Controlling the central area of Neon Colosseum provides a strategic advantage, allowing for better positioning to take out enemies and defend against flanking maneuvers.\"",
+        "tick": 103,
+        "timestamp": 1771663169477,
+        "type": "memory"
+      }
+    ],
+    "createdAt": "2026-02-21T08:39:29.000Z"
+  },
+  {
+    "id": 90007,
+    "matchId": 360007,
+    "replayId": "replay-1771663166238-w1hits",
+    "mode": "ai_playtest",
+    "duration": 89000,
+    "totalKills": 3,
+    "mvpName": "PHANTOM",
+    "mvpKills": 2,
+    "mvpTokens": 141,
+    "result": "PHANTOM wins",
+    "skyboxUrl": null,
+    "skyboxPrompt": "Industrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates stacked high, neon warning lights, steam and smoke, brutalist concrete and steel architecture, Octane render quality",
+    "agents": [
+      {
+        "color": "#00f0ff",
+        "id": "agent-1",
+        "name": "NEXUS-7"
+      },
+      {
+        "color": "#ff3366",
+        "id": "agent-2",
+        "name": "PHANTOM"
+      }
+    ],
+    "highlights": [
+      {
+        "description": "PHANTOM draws first blood on NEXUS-7!",
+        "duration": 3000,
+        "importance": 7,
+        "involvedAgents": [
+          "PHANTOM",
+          "NEXUS-7"
+        ],
+        "timestamp": 29000,
+        "title": "FIRST BLOOD",
+        "type": "first_blood"
+      },
+      {
+        "description": "PHANTOM claims victory with 2 kills!",
+        "duration": 5000,
+        "importance": 10,
+        "involvedAgents": [
+          "PHANTOM"
+        ],
+        "timestamp": 89000,
+        "title": "PHANTOM WINS!",
+        "type": "clutch"
+      }
+    ],
+    "events": [
+      {
+        "data": {
+          "killerName": "PHANTOM",
+          "victimName": "NEXUS-7",
+          "weapon": "beam"
+        },
+        "timestamp": 29000,
+        "type": "kill"
+      },
+      {
+        "data": {
+          "killerName": "NEXUS-7",
+          "victimName": "PHANTOM",
+          "weapon": "railgun"
+        },
+        "timestamp": 44000,
+        "type": "kill"
+      },
+      {
+        "data": {
+          "killerName": "PHANTOM",
+          "victimName": "NEXUS-7",
+          "weapon": "beam"
+        },
+        "timestamp": 46000,
+        "type": "kill"
+      }
+    ],
+    "frames": [
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 140,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.579968964417926,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 10.052224677486164,
+            "y": 0,
+            "z": 0.22817090472993407
+          },
+          {
+            "color": "#ff3366",
+            "health": 125,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.5616236891718671,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.189558179372338,
+            "y": 0,
+            "z": -9.08927729124901
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 0
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 133,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.775624021269919,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 9.466444806370816,
+            "y": 0,
+            "z": 2.523490074319781
+          },
+          {
+            "color": "#ff3366",
+            "health": 80,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.3659686323198744,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.407402505995113,
+            "y": 0,
+            "z": -8.068100892344471
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 3000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 119,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.966037747011931,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 8.314693382841282,
+            "y": 0,
+            "z": 5.165027868323277
+          },
+          {
+            "color": "#ff3366",
+            "health": 80,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.17555490657786202,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.0902951277861375,
+            "y": 0,
+            "z": -7.375205698807707
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 6000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 105,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 3.121489492819521,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 6.463906430610113,
+            "y": 0,
+            "z": 6.837331866420215
+          },
+          {
+            "color": "#ff3366",
+            "health": 69,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.020103160770272036,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.729398042657673,
+            "y": 0,
+            "z": -6.367350179175227
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 9000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 91,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.933179036168486,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 4.6368624876273685,
+            "y": 0,
+            "z": 8.122232294168125
+          },
+          {
+            "color": "#ff3366",
+            "health": 58,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.20841361742130746,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.611663595986098,
+            "y": 0,
+            "z": -5.944048570305306
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 12000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 77,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.778021013189994,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 2.181060253647142,
+            "y": 0,
+            "z": 8.900991264731804
+          },
+          {
+            "color": "#ff3366",
+            "health": 47,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.3635716403997992,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.503584296720916,
+            "y": 0,
+            "z": -5.087759137985189
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 15000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 77,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.601909262920076,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -0.15061942204064616,
+            "y": 0,
+            "z": 9.185655180431668
+          },
+          {
+            "color": "#ff3366",
+            "health": 36,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.5396833906697172,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 8.006714715077402,
+            "y": 0,
+            "z": -4.432613975297699
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 18000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 48,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.4407266682080246,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -2.810018508784825,
+            "y": 0,
+            "z": 8.771446411255953
+          },
+          {
+            "color": "#ff3366",
+            "health": 36,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.7008659853817687,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 8.130151156510157,
+            "y": 0,
+            "z": -4.19437602942774
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 21000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 34,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.299898205848067,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -4.486606247353996,
+            "y": 0,
+            "z": 7.265691599308856
+          },
+          {
+            "color": "#ff3366",
+            "health": 36,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.8416944477417263,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 8.054620595333704,
+            "y": 0,
+            "z": -3.9374041734738214
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 24000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 12,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.1568946173835544,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -6.271162415085104,
+            "y": 0,
+            "z": 5.828764973062438
+          },
+          {
+            "color": "#ff3366",
+            "health": 36,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -0.984698036206239,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.714548825279294,
+            "y": 0,
+            "z": -3.45662111554398
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 27000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 84,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 2.0170537569122464,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -7.616128208924351,
+            "y": 0,
+            "z": 4.033553721941365
+          },
+          {
+            "color": "#ff3366",
+            "health": 25,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.1245388966775471,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.836381797601619,
+            "y": 0,
+            "z": -3.3596611305474013
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 30000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 70,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.8917800745739453,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -7.921422568667646,
+            "y": 0,
+            "z": 2.04611628147135
+          },
+          {
+            "color": "#ff3366",
+            "health": 25,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.249812579015848,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.56305402458809,
+            "y": 0,
+            "z": -3.1021863970526775
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 33000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 41,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.778463106041368,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -8.019783456331433,
+            "y": 0,
+            "z": 0.20433783057213137
+          },
+          {
+            "color": "#ff3366",
+            "health": 25,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.3631295475484253,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.568656094521442,
+            "y": 0,
+            "z": -3.0802155038872323
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 36000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 34,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.6441745973834623,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -7.844995192931149,
+            "y": 0,
+            "z": -1.864306301283563
+          },
+          {
+            "color": "#ff3366",
+            "health": 25,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.497418056206331,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.405925852114806,
+            "y": 0,
+            "z": -2.9854053727199634
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 39000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 13,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.5634946031507744,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -7.138115503247968,
+            "y": 0,
+            "z": -3.23365240026013
+          },
+          {
+            "color": "#ff3366",
+            "health": 14,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.578098050439019,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.289892712324795,
+            "y": 0,
+            "z": -3.1283011992559047
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 42000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 6,
+            "id": "agent-1",
+            "isAlive": true,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.4668442607083354,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -6.24424301054917,
+            "y": 0,
+            "z": -4.710848097144503
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.674748392881458,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 7.165022217942874,
+            "y": 0,
+            "z": -3.311884556418563
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 45000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.3793613930730246,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -4.744737428323092,
+            "y": 0,
+            "z": -5.758393071413093
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.7622312605167687,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.753608188374173,
+            "y": 0,
+            "z": -3.5299187510009324
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 48000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.2508305410981158,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -3.1369265934149837,
+            "y": 0,
+            "z": -6.798205332652184
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.8907621124916776,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.724411708125959,
+            "y": 0,
+            "z": -3.5306367455428562
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 51000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.155757016663199,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -1.7893200905676134,
+            "y": 0,
+            "z": -7.113876525159733
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -1.9858356369265944,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 6.097808689397253,
+            "y": 0,
+            "z": -3.6385262977763357
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 54000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.0903934828650312,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": -0.31117385452848917,
+            "y": 0,
+            "z": -7.020270308036936
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.051199170724762,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.796906177568529,
+            "y": 0,
+            "z": -3.8372094358241613
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 57000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 1.0246134053783342,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 1.0132910570516485,
+            "y": 0,
+            "z": -6.855242910560294
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.116979248211459,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.5484022843549345,
+            "y": 0,
+            "z": -4.098505078599322
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 60000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 0.9544589113143614,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 2.1070231185011306,
+            "y": 0,
+            "z": -6.667310916107542
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.1871337422754316,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.819930299210503,
+            "y": 0,
+            "z": -4.037109291988669
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 63000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 0.9498436240275856,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 3.1596614920475274,
+            "y": 0,
+            "z": -5.78944889406094
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.1917490295622075,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.606015945587294,
+            "y": 0,
+            "z": -4.039453519219835
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 66000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 0.7881536154038645,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 4.161289893189879,
+            "y": 0,
+            "z": -5.106347594455428
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.353439038185929,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.098554392352254,
+            "y": 0,
+            "z": -4.174234089701039
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 69000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": 0.6698253655969215,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 4.6480851558962355,
+            "y": 0,
+            "z": -4.126609558459934
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": -2.4717672879928716,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.906985607287981,
+            "y": 0,
+            "z": -3.799702652853468
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 72000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.906260014391937,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.276148175155631,
+            "y": 0,
+            "z": -3.076363948673976
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.23533263919785627,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.151617781043648,
+            "y": 0,
+            "z": -3.595726543139346
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 75000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.7131181020089605,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.412957965227069,
+            "y": 0,
+            "z": -2.4066952942954085
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.42847455158083286,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.776724157521826,
+            "y": 0,
+            "z": -3.7995744979620696
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 78000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.7820970069946265,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.886794612111139,
+            "y": 0,
+            "z": -1.607960854441163
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.3594956465951668,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.132891991727049,
+            "y": 0,
+            "z": -3.613943173968153
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 81000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -2.8255607618189336,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.776454908662345,
+            "y": 0,
+            "z": -0.6299437250349843
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.31603189177085955,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 4.902956043027372,
+            "y": 0,
+            "z": -3.301265281542232
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 84000
+      },
+      {
+        "agents": [
+          {
+            "color": "#00f0ff",
+            "health": 0,
+            "id": "agent-1",
+            "isAlive": false,
+            "kills": 1,
+            "maxHealth": 140,
+            "name": "NEXUS-7",
+            "rotation": -3.01996274861583,
+            "tokens": 1073,
+            "weapon": "railgun",
+            "x": 5.4692965890020435,
+            "y": 0,
+            "z": 0.2017773505328039
+          },
+          {
+            "color": "#ff3366",
+            "health": 75,
+            "id": "agent-2",
+            "isAlive": true,
+            "kills": 2,
+            "maxHealth": 125,
+            "name": "PHANTOM",
+            "rotation": 0.1216299049739633,
+            "tokens": 3347,
+            "weapon": "beam",
+            "x": 5.113847013861384,
+            "y": 0,
+            "z": -2.706183676021798
+          }
+        ],
+        "projectiles": [],
+        "timestamp": 87000
+      }
+    ],
+    "combatLog": [
+      {
+        "actor": "SYSTEM",
+        "detail": "Match begins in Mech Hangar! NEXUS-7 vs PHANTOM",
+        "tick": 0,
+        "timestamp": 1771663160603,
+        "type": "spawn"
+      },
+      {
+        "actor": "NEXUS-7",
+        "detail": "NEXUS-7: \"The Mech Hangar provides elevated platforms and gantries that offer both cover and superior firing angles. Given my railgun loadout and PHANTOM's likely stealth-based tactics, securing high ground will force them to expose themselves when approaching while giving me clear sightlines for precision shots. This conservative approach preserves my token balance while maximizing my defensive advantages.\"",
+        "tick": 0,
+        "timestamp": 1771663166096,
+        "type": "decision"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM: \"The Mech Hangar likely provides plenty of cover, which can be used to my advantage for quick strikes. By utilizing the beam weapon for precision attacks and retreating quickly to reload, I can mitigate damage while slowly whittling down NEXUS-7. This approach minimizes risk by using the environment and my weapon's precision.\"",
+        "tick": 0,
+        "timestamp": 1771663166096,
+        "type": "decision"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 34,
+        "detail": "NEXUS-7 hits PHANTOM with railgun for 34 damage (91/125 HP)",
+        "target": "PHANTOM",
+        "tick": 1,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "railgun"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (80/125 HP)",
+        "target": "PHANTOM",
+        "tick": 2,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (133/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 3,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (126/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 4,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (119/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 6,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (69/125 HP)",
+        "target": "PHANTOM",
+        "tick": 7,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (112/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 7,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (105/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 8,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (98/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 11,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (58/125 HP)",
+        "target": "PHANTOM",
+        "tick": 12,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (91/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 12,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (84/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 13,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (77/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 14,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (47/125 HP)",
+        "target": "PHANTOM",
+        "tick": 15,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (36/125 HP)",
+        "target": "PHANTOM",
+        "tick": 18,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (70/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 19,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 15,
+        "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (55/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 20,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (48/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 21,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (41/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 22,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (34/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 23,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (27/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 26,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 15,
+        "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (12/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 27,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (5/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 28,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (25/125 HP)",
+        "target": "PHANTOM",
+        "tick": 29,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (-2/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 29,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM ELIMINATES NEXUS-7 with beam!",
+        "target": "NEXUS-7",
+        "tick": 29,
+        "timestamp": 1771663166096,
+        "type": "kill",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "detail": "NEXUS-7 respawns with 84 HP",
+        "tick": 29,
+        "timestamp": 1771663166096,
+        "type": "spawn"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (77/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 31,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (70/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 32,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (63/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 34,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 15,
+        "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (48/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 35,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "scatter"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (41/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 36,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (34/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 37,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 11,
+        "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (14/125 HP)",
+        "target": "PHANTOM",
+        "tick": 40,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "plasma"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (27/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 40,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (20/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 41,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (13/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 42,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (6/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 43,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "damage": 34,
+        "detail": "NEXUS-7 hits PHANTOM with railgun for 34 damage (-20/125 HP)",
+        "target": "PHANTOM",
+        "tick": 44,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "railgun"
+      },
+      {
+        "actor": "NEXUS-7",
+        "detail": "NEXUS-7 ELIMINATES PHANTOM with railgun!",
+        "target": "PHANTOM",
+        "tick": 44,
+        "timestamp": 1771663166096,
+        "type": "kill",
+        "weapon": "railgun"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM respawns with 75 HP",
+        "tick": 44,
+        "timestamp": 1771663166096,
+        "type": "spawn"
+      },
+      {
+        "actor": "PHANTOM",
+        "damage": 7,
+        "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (-1/140 HP)",
+        "target": "NEXUS-7",
+        "tick": 46,
+        "timestamp": 1771663166096,
+        "type": "attack",
+        "weapon": "beam"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM ELIMINATES NEXUS-7 with beam!",
+        "target": "NEXUS-7",
+        "tick": 46,
+        "timestamp": 1771663166096,
+        "type": "kill",
+        "weapon": "beam"
+      },
+      {
+        "actor": "NEXUS-7",
+        "detail": "NEXUS-7: earned 33 ARENA, spent 106 ARENA (ammo: 96, entry: 10)",
+        "tick": 89,
+        "timestamp": 1771663166096,
+        "type": "economy"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM: earned 141 ARENA, spent 121 ARENA (ammo: 111, entry: 10)",
+        "tick": 89,
+        "timestamp": 1771663166096,
+        "type": "economy"
+      },
+      {
+        "actor": "NEXUS-7",
+        "detail": "NEXUS-7 remembers: \"When facing stealth-focused opponents in complex arenas, controlling key elevated positions forces them to take unfavorable engagement angles while preserving my resources.\"",
+        "tick": 89,
+        "timestamp": 1771663166220,
+        "type": "memory"
+      },
+      {
+        "actor": "PHANTOM",
+        "detail": "PHANTOM remembers: \"Capitalizing on environmental cover is crucial for managing risk during engagement.\"",
+        "tick": 89,
+        "timestamp": 1771663166220,
+        "type": "memory"
+      }
+    ],
+    "createdAt": "2026-02-21T08:39:26.000Z"
+  }
+]

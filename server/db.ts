@@ -157,7 +157,7 @@ export async function getCachedSkyboxByStyleId(styleId: number) {
 export async function getAllCachedSkyboxes() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(skyboxCache).where(eq(skyboxCache.status, "complete"));
+  return db.select().from(skyboxCache).where(eq(skyboxCache.status, "completed"));
 }
 
 // ─── Agent Identities (ERC-8004) ──────────────────────────────────────────────

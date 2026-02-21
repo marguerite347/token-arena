@@ -770,6 +770,33 @@ export const appRouter = router({
 
     // Check governance cooldown (anti-manipulation)
     cooldown: publicProcedure.query(async () => isGovernanceCooldownActive()),
+
+    // Get recent bets for live ticker
+    recentBets: publicProcedure
+      .input(z.object({ limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { predictionBets, predictionMarkets } = await import("../drizzle/schema");
+        const { desc, eq } = await import("drizzle-orm");
+        const bets = await db
+          .select({
+            id: predictionBets.id,
+            marketId: predictionBets.marketId,
+            bettorType: predictionBets.bettorType,
+            bettorName: predictionBets.bettorName,
+            optionId: predictionBets.optionId,
+            amount: predictionBets.amount,
+            status: predictionBets.status,
+            createdAt: predictionBets.createdAt,
+            marketTitle: predictionMarkets.title,
+          })
+          .from(predictionBets)
+          .leftJoin(predictionMarkets, eq(predictionBets.marketId, predictionMarkets.id))
+          .orderBy(desc(predictionBets.createdAt))
+          .limit(input?.limit ?? 20);
+        return bets;
+      }),
   }),
 
   // ─── Ecosystem Dashboard ─────────────────────────────────────────────────
@@ -888,6 +915,21 @@ export const appRouter = router({
         const { runPlaytestSession } = await import("./aiPlaytest");
         const session = await runPlaytestSession(count, useLLM);
         return session;
+      }),
+
+    // Run Free-For-All matches with 4-8 agents
+    ffa: publicProcedure
+      .input(z.object({
+        matchCount: z.number().int().min(1).max(5).default(1),
+        agentCount: z.number().int().min(2).max(8).default(4),
+        useLLM: z.boolean().default(true),
+      }).optional())
+      .mutation(async ({ input }) => {
+        const matchCount = input?.matchCount ?? 1;
+        const agentCount = input?.agentCount ?? 4;
+        const useLLM = input?.useLLM ?? true;
+        const { runFFASession } = await import("./aiPlaytest");
+        return runFFASession(matchCount, agentCount, useLLM);
       }),
   }),
 

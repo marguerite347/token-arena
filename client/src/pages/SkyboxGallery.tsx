@@ -82,7 +82,7 @@ export function SkyboxGallery() {
                     <CardContent className="p-0">
                       <div className="relative h-32 bg-slate-900 overflow-hidden rounded-b">
                         <img
-                          src={skybox.thumbUrl}
+                          src={skybox.thumbUrl?.includes('blockadelabs.com') ? `/api/skybox-proxy?url=${encodeURIComponent(skybox.thumbUrl)}` : skybox.thumbUrl}
                           alt={getStyleName(skybox.styleId)}
                           className="w-full h-full object-cover"
                         />

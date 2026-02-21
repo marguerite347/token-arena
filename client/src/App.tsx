@@ -25,6 +25,7 @@ import AgentDemo from "./pages/AgentDemo";
 import { SkyboxGallery } from "./pages/SkyboxGallery";
 import WatchMode from "./pages/WatchMode";
 import { GameProvider } from "./contexts/GameContext";
+import { LiveBettingTicker } from "./components/LiveBettingTicker";
 
 function Router() {
   return (
@@ -62,6 +63,7 @@ function App() {
           <GameProvider>
             <TooltipProvider>
               <Toaster />
+              <LiveBettingTicker />
               <Router />
             </TooltipProvider>
           </GameProvider>

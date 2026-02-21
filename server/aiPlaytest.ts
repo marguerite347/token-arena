@@ -789,3 +789,292 @@ export async function runPlaytestSession(
     },
   };
 }
+
+// ─── Free-For-All Match (4-8 agents) ────────────────────────────
+
+export interface FFAMatchResult {
+  matchId: number | null;
+  arena: string;
+  duration: number;
+  replayId?: string;
+  agentCount: number;
+  agents: Array<{
+    agentId: number;
+    name: string;
+    kills: number;
+    deaths: number;
+    damageDealt: number;
+    tokensEarned: number;
+    tokensSpent: number;
+    survived: boolean;
+    placement: number;
+    decision?: string;
+    llmModel?: string;
+    llmIcon?: string;
+  }>;
+  combatLog: CombatLogEntry[];
+  winner: string;
+  podium: string[]; // top 3 finishers
+}
+
+export async function runFFAMatch(
+  agentDataList: Array<{ agentId: number; name: string; primaryWeapon: string; secondaryWeapon: string; armor: number; tokenBalance: number; computeBudget: number; computeSpent: number }>,
+  useLLM: boolean = true,
+): Promise<FFAMatchResult> {
+  const arena = ARENA_PROMPTS[Math.floor(Math.random() * ARENA_PROMPTS.length)];
+  const combatLog: CombatLogEntry[] = [];
+
+  // Initialize all combat agents
+  const agents: CombatAgent[] = agentDataList.map((data) => ({
+    ...data,
+    hp: 100 + Math.floor(data.armor / 2),
+    maxHp: 100 + Math.floor(data.armor / 2),
+    kills: 0,
+    deaths: 0,
+    damageDealt: 0,
+    damageTaken: 0,
+    shotsFired: 0,
+    shotsHit: 0,
+    llmModel: getAgentModelKey(data.agentId),
+    llmLabel: getAgentModel(data.agentId).label,
+  }));
+
+  combatLog.push({
+    tick: 0,
+    timestamp: Date.now(),
+    type: "spawn",
+    actor: "SYSTEM",
+    detail: `FREE-FOR-ALL begins in ${arena.name}! ${agents.map(a => a.name).join(" vs ")} — ${agents.length} agents enter, 1 leaves!`,
+  });
+
+  // Pre-match LLM decisions
+  const decisions: Record<string, { action: string; reasoning: string; memory: string; llmUsed: string }> = {};
+  if (useLLM) {
+    try {
+      const decisionPromises = agents.map(agent =>
+        getAgentDecision(agent, arena.name, `${agents.filter(a => a.agentId !== agent.agentId).map(a => a.name).join(", ")}`)
+          .then(d => { decisions[agent.name] = d; })
+          .catch(() => { decisions[agent.name] = { action: "aggressive", reasoning: "Fight to survive", memory: "FFA requires constant vigilance", llmUsed: "heuristic" }; })
+      );
+      await Promise.all(decisionPromises);
+    } catch (e: any) {
+      console.error("[FFAMatch] LLM decisions failed:", e.message);
+    }
+  }
+
+  for (const agent of agents) {
+    const d = decisions[agent.name] || { action: "aggressive", reasoning: "Fight to survive", memory: "Stay alert", llmUsed: "heuristic" };
+    combatLog.push({ tick: 0, timestamp: Date.now(), type: "decision", actor: agent.name, detail: `${agent.name}: "${d.reasoning}"` });
+  }
+
+  // FFA Combat simulation — agents attack random alive opponents
+  const maxTicks = 80 + Math.floor(Math.random() * 60);
+  const eliminationOrder: string[] = []; // last eliminated = last place
+  const respawnCounts: Record<string, number> = {};
+
+  for (let tick = 1; tick <= maxTicks; tick++) {
+    const aliveAgents = agents.filter(a => a.hp > 0);
+    if (aliveAgents.length <= 1) break;
+
+    // Each alive agent attacks a random other alive agent
+    for (const attacker of aliveAgents) {
+      const targets = aliveAgents.filter(a => a.agentId !== attacker.agentId);
+      if (targets.length === 0) continue;
+      const target = targets[Math.floor(Math.random() * targets.length)];
+      simulateCombatTick(attacker, target, tick, combatLog);
+
+      // Handle elimination
+      if (target.hp <= 0 && !eliminationOrder.includes(target.name)) {
+        const respawns = respawnCounts[target.name] || 0;
+        if (respawns < 1) {
+          // One respawn allowed
+          target.hp = Math.floor(target.maxHp * 0.5);
+          respawnCounts[target.name] = respawns + 1;
+          combatLog.push({ tick, timestamp: Date.now(), type: "spawn", actor: target.name, detail: `${target.name} respawns with ${target.hp} HP!` });
+        } else {
+          eliminationOrder.push(target.name);
+          combatLog.push({ tick, timestamp: Date.now(), type: "kill", actor: attacker.name, target: target.name, detail: `${target.name} ELIMINATED from FFA! Placed #${agents.length - eliminationOrder.length + 1}` });
+        }
+      }
+    }
+  }
+
+  // Any remaining alive agents are the top finishers
+  const aliveAtEnd = agents.filter(a => a.hp > 0 && !eliminationOrder.includes(a.name));
+  aliveAtEnd.sort((a, b) => (b.kills * 100 + b.damageDealt) - (a.kills * 100 + a.damageDealt));
+  const finalOrder = [...aliveAtEnd.map(a => a.name), ...eliminationOrder.slice().reverse()];
+
+  const winner = finalOrder[0] || agents[0].name;
+  const podium = finalOrder.slice(0, 3);
+
+  combatLog.push({ tick: maxTicks, timestamp: Date.now(), type: "kill", actor: "SYSTEM", detail: `🏆 FFA WINNER: ${winner}! Podium: ${podium.join(", ")}` });
+
+  // Token economics for FFA
+  const placements: Record<string, number> = {};
+  finalOrder.forEach((name, i) => { placements[name] = i + 1; });
+
+  const agentResults = agents.map(agent => {
+    const placement = placements[agent.name] || agents.length;
+    const baseEarning = Math.max(0, (agents.length - placement + 1) * 20);
+    const killBonus = agent.kills * 15;
+    const tokensEarned = baseEarning + killBonus + Math.floor(Math.random() * 20);
+    const ammoCost = agent.shotsFired * (WEAPON_STATS[agent.primaryWeapon]?.costPerShot || 2);
+    const entryFee = 10;
+    const tokensSpent = ammoCost + entryFee;
+    const d = decisions[agent.name] || { action: "fight", reasoning: "Default", memory: "Learned", llmUsed: "heuristic" };
+    return { ...agent, placement, tokensEarned, tokensSpent, survived: agent.hp > 0, decision: d.reasoning, llmModel: agent.llmLabel || d.llmUsed };
+  });
+
+  // Persist to DB
+  const matchId = await saveMatch({
+    mode: "ai_playtest",
+    duration: maxTicks,
+    skyboxPrompt: arena.prompt,
+    playerName: `FFA: ${agents.map(a => a.name).join(", ")}`,
+    playerKills: agentResults.find(a => a.name === winner)?.kills || 0,
+    playerDeaths: agentResults.find(a => a.name === winner)?.deaths || 0,
+    tokensEarned: agentResults.find(a => a.name === winner)?.tokensEarned || 0,
+    tokensSpent: agentResults.find(a => a.name === winner)?.tokensSpent || 0,
+    tokenNet: (agentResults.find(a => a.name === winner)?.tokensEarned || 0) - (agentResults.find(a => a.name === winner)?.tokensSpent || 0),
+    result: "completed",
+    weaponUsed: agentResults.find(a => a.name === winner)?.primaryWeapon || "plasma",
+    agentData: {
+      mode: "ffa",
+      agentCount: agents.length,
+      agents: agentResults.map(a => ({ id: a.agentId, name: a.name, kills: a.kills, deaths: a.deaths, placement: a.placement, won: a.name === winner })),
+      arena: arena.name,
+      winner,
+      podium,
+    },
+    entryFee: 10 * agents.length,
+  });
+
+  // Update stats for all agents
+  for (const ar of agentResults) {
+    await updateAgentStats(ar.agentId, { kills: ar.kills, deaths: ar.deaths, tokensEarned: ar.tokensEarned, tokensSpent: ar.tokensSpent });
+    await upsertLeaderboardEntry({ playerName: ar.name, kills: ar.kills, deaths: ar.deaths, tokensEarned: ar.tokensEarned, tokensSpent: ar.tokensSpent, won: ar.name === winner, weapon: ar.primaryWeapon });
+  }
+
+  const replayId = `ffa-replay-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  return {
+    matchId,
+    arena: arena.name,
+    duration: maxTicks,
+    replayId,
+    agentCount: agents.length,
+    agents: agentResults.map(a => ({
+      agentId: a.agentId,
+      name: a.name,
+      kills: a.kills,
+      deaths: a.deaths,
+      damageDealt: a.damageDealt,
+      tokensEarned: a.tokensEarned,
+      tokensSpent: a.tokensSpent,
+      survived: a.survived,
+      placement: a.placement,
+      decision: a.decision,
+      llmModel: a.llmModel,
+      llmIcon: getAgentModel(a.agentId).icon || "🤖",
+    })),
+    combatLog,
+    winner,
+    podium,
+  };
+}
+
+// ─── Run FFA Session ────────────────────────────────────────────
+
+export async function runFFASession(
+  matchCount: number = 3,
+  agentCount: number = 4,
+  useLLM: boolean = true,
+): Promise<{
+  matchesPlayed: number;
+  results: FFAMatchResult[];
+  summary: {
+    totalKills: number;
+    totalTokensEarned: number;
+    totalTokensSpent: number;
+    mvp: string;
+    bestKD: string;
+    arenaBreakdown: Record<string, number>;
+  };
+}> {
+  const allAgents = await getAgentIdentities();
+  if (allAgents.length < 2) throw new Error("Need at least 2 agents for FFA");
+
+  const count = Math.min(agentCount, allAgents.length);
+  const results: FFAMatchResult[] = [];
+  const agentKills: Record<string, number> = {};
+  const agentDeaths: Record<string, number> = {};
+  const arenaBreakdown: Record<string, number> = {};
+  let totalKills = 0, totalEarned = 0, totalSpent = 0;
+
+  for (let i = 0; i < matchCount; i++) {
+    // Pick `count` random agents
+    const shuffled = [...allAgents].sort(() => Math.random() - 0.5).slice(0, count);
+    console.log(`[FFASession] Match ${i + 1}/${matchCount}: ${shuffled.map(a => a.name).join(" vs ")}`);
+
+    // Auto-betting for FFA
+    let autoBetMarketId: number | null = null;
+    try {
+      const { marketId } = await createPredictionMarket({
+        councilMemberId: 1,
+        marketType: "match_winner",
+        title: `FFA Winner: ${shuffled.map(a => a.name).join(", ")}?`,
+        description: `${count}-way free-for-all battle. Who will be the last agent standing?`,
+        options: shuffled.map((a, idx) => ({ id: idx + 1, label: a.name, odds: parseFloat((1.5 + Math.random() * 1.5).toFixed(2)) })),
+      });
+      autoBetMarketId = marketId;
+      for (let j = 0; j < shuffled.length; j++) {
+        const a = shuffled[j];
+        const betAmt = Math.max(5, Math.floor(Math.random() * 25) + 5);
+        await placeBet({ marketId, bettorType: "agent", bettorId: `agent-${a.agentId}`, bettorName: a.name, optionId: j + 1, amount: betAmt });
+      }
+      // Spectator bet
+      const specOpt = Math.floor(Math.random() * shuffled.length) + 1;
+      await placeBet({ marketId, bettorType: "spectator", bettorId: `spectator-${Date.now()}`, bettorName: "Arena Spectator", optionId: specOpt, amount: Math.floor(Math.random() * 50) + 10 });
+    } catch (e) { console.warn("[FFASession] Auto-bet failed:", e); }
+
+    const result = await runFFAMatch(
+      shuffled.map(a => ({
+        agentId: a.agentId,
+        name: a.name,
+        primaryWeapon: a.primaryWeapon || "plasma",
+        secondaryWeapon: a.secondaryWeapon || "beam",
+        armor: a.armor ?? 60,
+        tokenBalance: (a.totalTokensEarned ?? 0) - (a.totalTokensSpent ?? 0),
+        computeBudget: a.computeBudget ?? 1000,
+        computeSpent: a.computeSpent ?? 0,
+      })),
+      useLLM,
+    );
+
+    results.push(result);
+
+    // Resolve market
+    if (autoBetMarketId !== null) {
+      try {
+        const winnerIdx = shuffled.findIndex(a => a.name === result.winner);
+        if (winnerIdx >= 0) await resolveMarket({ marketId: autoBetMarketId, winningOptionId: winnerIdx + 1 });
+      } catch (e) { console.warn("[FFASession] Market resolution failed:", e); }
+    }
+
+    for (const agent of result.agents) {
+      agentKills[agent.name] = (agentKills[agent.name] || 0) + agent.kills;
+      agentDeaths[agent.name] = (agentDeaths[agent.name] || 0) + agent.deaths;
+      totalKills += agent.kills;
+      totalEarned += agent.tokensEarned;
+      totalSpent += agent.tokensSpent;
+    }
+    arenaBreakdown[result.arena] = (arenaBreakdown[result.arena] || 0) + 1;
+  }
+
+  const mvp = Object.entries(agentKills).sort(([, a], [, b]) => b - a)[0]?.[0] || "Unknown";
+  const bestKD = Object.entries(agentKills)
+    .map(([name, kills]) => ({ name, kd: kills / Math.max(1, agentDeaths[name] || 1) }))
+    .sort((a, b) => b.kd - a.kd)[0]?.name || "Unknown";
+
+  return { matchesPlayed: results.length, results, summary: { totalKills, totalTokensEarned: totalEarned, totalTokensSpent: totalSpent, mvp, bestKD, arenaBreakdown } };
+}

@@ -35,6 +35,27 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Skybox image proxy (CORS workaround for Blockade Labs staging images)
+  app.get("/api/skybox-proxy", async (req, res) => {
+    try {
+      const url = req.query.url as string;
+      if (!url || !url.includes("blockadelabs.com")) {
+        return res.status(400).send("Invalid URL");
+      }
+      const response = await fetch(url);
+      if (!response.ok) return res.status(response.status).send("Upstream error");
+      const contentType = response.headers.get("content-type") || "image/jpeg";
+      res.set("Content-Type", contentType);
+      res.set("Cache-Control", "public, max-age=86400");
+      res.set("Access-Control-Allow-Origin", "*");
+      const buffer = Buffer.from(await response.arrayBuffer());
+      res.send(buffer);
+    } catch (e: any) {
+      console.error("[Skybox Proxy] Error:", e.message);
+      res.status(500).send("Proxy error");
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

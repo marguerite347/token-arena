@@ -830,3 +830,24 @@
 - [x] Wire backend to stream agent decisions, bets, battle outcomes to UI
 - [x] Add one-click "Let My Agent Play" button that triggers full autonomous loop
 - [ ] Test end-to-end autonomous play and checkpoint
+
+## v34 — Multi-Agent Arena + Live Betting Ticker
+- [ ] Expand aiPlaytest to support 4+ agents per match (free-for-all)
+- [ ] Update runPlaytestMatch for multi-agent combat (not just 1v1)
+- [ ] Update auto-betting to support multi-agent prediction markets
+- [ ] Add live betting ticker component visible across all pages
+- [ ] Wire ticker to show real-time prediction market activity
+- [ ] Run fresh playtest with 4+ agents
+- [ ] Generate video replay with Skybox backgrounds
+- [ ] Fix and verify 360° Skybox viewer is accessible and working
+
+## v34 — ETHDenver 2026 Final Bug Fixes (Feb 21, 2026)
+
+- [x] Fix Skybox Gallery showing "No skyboxes" despite 239 in DB — was a data rendering issue, gallery now shows all 239 M4 panoramas with thumbnails
+- [x] Implement multi-agent Free-For-All (FFA) matches — 2-8 agents per battle with FFA combat simulation, auto-betting, LLM reasoning for all agents
+- [x] Add flywheel.ffa tRPC endpoint for FFA session management
+- [x] Update WatchMode UI with battle mode toggle (1v1 Duel / Free-For-All), agent count selector (2/3/4/6/8), FFA-specific event descriptions
+- [x] Add LiveBettingTicker component — scrolling marquee showing real-time prediction market bets with bettor type, amount, market title, and time
+- [x] Add prediction.recentBets tRPC endpoint joining prediction_bets + prediction_markets tables
+- [x] Mount LiveBettingTicker globally in App.tsx above all routes
+- [x] Fix duplicate React key warnings in Home.tsx (tech-stack, battle-video, bounty-card, contract items)

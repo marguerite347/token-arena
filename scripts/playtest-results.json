@@ -1,0 +1,1512 @@
+{
+  "matchesPlayed": 3,
+  "results": [
+    {
+      "matchId": 360006,
+      "arena": "Neon Brutalism",
+      "duration": 47,
+      "replayId": "replay-1771663160402-60fnyt",
+      "agents": [
+        {
+          "agentId": 6,
+          "name": "WRAITH",
+          "kills": 2,
+          "deaths": 1,
+          "damageDealt": 231,
+          "tokensEarned": 175,
+          "tokensSpent": 82,
+          "survived": true,
+          "decision": "Neon Brutalism's verticality and tight corridors favor ambush strategies. High ground provides a tactical vantage point, while cloaking ensures surprise. NEXUS-7 is likely to follow predictable paths, so placing myself near a choke point maximizes my chances to strike first.",
+          "llmModel": "DeepSeek",
+          "llmIcon": "🔮"
+        },
+        {
+          "agentId": 1,
+          "name": "NEXUS-7",
+          "kills": 1,
+          "deaths": 2,
+          "damageDealt": 168,
+          "tokensEarned": 14,
+          "tokensSpent": 90,
+          "survived": false,
+          "decision": "Neon Brutalism's elevated platforms provide excellent sightlines for railgun gameplay while minimizing exposure. WRAITH typically favors aggressive close-range tactics, so maintaining distance while having height advantage allows for controlled engagements that preserve both HP and compute resources. The relatively high token balance suggests prioritizing sustainability over risky plays.",
+          "llmModel": "Claude",
+          "llmIcon": "🧠"
+        }
+      ],
+      "combatLog": [
+        {
+          "tick": 0,
+          "timestamp": 1771663153831,
+          "type": "spawn",
+          "actor": "SYSTEM",
+          "detail": "Match begins in Neon Brutalism! WRAITH vs NEXUS-7"
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771663160235,
+          "type": "decision",
+          "actor": "WRAITH",
+          "detail": "WRAITH: \"Neon Brutalism's verticality and tight corridors favor ambush strategies. High ground provides a tactical vantage point, while cloaking ensures surprise. NEXUS-7 is likely to follow predictable paths, so placing myself near a choke point maximizes my chances to strike first.\""
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771663160235,
+          "type": "decision",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7: \"Neon Brutalism's elevated platforms provide excellent sightlines for railgun gameplay while minimizing exposure. WRAITH typically favors aggressive close-range tactics, so maintaining distance while having height advantage allows for controlled engagements that preserve both HP and compute resources. The relatively high token balance suggests prioritizing sustainability over risky plays.\""
+        },
+        {
+          "tick": 1,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (133/140 HP)"
+        },
+        {
+          "tick": 2,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (124/140 HP)"
+        },
+        {
+          "tick": 2,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "NEXUS-7 hits WRAITH with plasma for 12 damage (108/120 HP)"
+        },
+        {
+          "tick": 3,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (115/140 HP)"
+        },
+        {
+          "tick": 5,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (108/140 HP)"
+        },
+        {
+          "tick": 8,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (101/140 HP)"
+        },
+        {
+          "tick": 9,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (94/140 HP)"
+        },
+        {
+          "tick": 10,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (87/140 HP)"
+        },
+        {
+          "tick": 12,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (78/140 HP)"
+        },
+        {
+          "tick": 14,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (69/140 HP)"
+        },
+        {
+          "tick": 15,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (60/140 HP)"
+        },
+        {
+          "tick": 16,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (51/140 HP)"
+        },
+        {
+          "tick": 17,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (42/140 HP)"
+        },
+        {
+          "tick": 18,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (33/140 HP)"
+        },
+        {
+          "tick": 18,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "WRAITH",
+          "weapon": "railgun",
+          "damage": 36,
+          "detail": "NEXUS-7 hits WRAITH with railgun for 36 damage (72/120 HP)"
+        },
+        {
+          "tick": 19,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (24/140 HP)"
+        },
+        {
+          "tick": 22,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (17/140 HP)"
+        },
+        {
+          "tick": 23,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (8/140 HP)"
+        },
+        {
+          "tick": 24,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (1/140 HP)"
+        },
+        {
+          "tick": 25,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "NEXUS-7 hits WRAITH with plasma for 12 damage (60/120 HP)"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (-6/140 HP)"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771663160235,
+          "type": "kill",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "detail": "WRAITH ELIMINATES NEXUS-7 with beam!"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771663160235,
+          "type": "spawn",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7 respawns with 84 HP"
+        },
+        {
+          "tick": 27,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (75/140 HP)"
+        },
+        {
+          "tick": 28,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (66/140 HP)"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (57/140 HP)"
+        },
+        {
+          "tick": 30,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (50/140 HP)"
+        },
+        {
+          "tick": 30,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "NEXUS-7 hits WRAITH with plasma for 12 damage (48/120 HP)"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "WRAITH",
+          "weapon": "railgun",
+          "damage": 36,
+          "detail": "NEXUS-7 hits WRAITH with railgun for 36 damage (12/120 HP)"
+        },
+        {
+          "tick": 36,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (43/140 HP)"
+        },
+        {
+          "tick": 37,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (36/140 HP)"
+        },
+        {
+          "tick": 37,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "NEXUS-7 hits WRAITH with plasma for 12 damage (0/120 HP)"
+        },
+        {
+          "tick": 37,
+          "timestamp": 1771663160235,
+          "type": "kill",
+          "actor": "NEXUS-7",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "detail": "NEXUS-7 ELIMINATES WRAITH with plasma!"
+        },
+        {
+          "tick": 37,
+          "timestamp": 1771663160235,
+          "type": "spawn",
+          "actor": "WRAITH",
+          "detail": "WRAITH respawns with 72 HP"
+        },
+        {
+          "tick": 38,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (29/140 HP)"
+        },
+        {
+          "tick": 40,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (22/140 HP)"
+        },
+        {
+          "tick": 42,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (15/140 HP)"
+        },
+        {
+          "tick": 43,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "WRAITH hits NEXUS-7 with beam for 7 damage (8/140 HP)"
+        },
+        {
+          "tick": 43,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "WRAITH",
+          "weapon": "railgun",
+          "damage": 36,
+          "detail": "NEXUS-7 hits WRAITH with railgun for 36 damage (36/120 HP)"
+        },
+        {
+          "tick": 45,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "NEXUS-7 hits WRAITH with plasma for 12 damage (24/120 HP)"
+        },
+        {
+          "tick": 47,
+          "timestamp": 1771663160235,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "damage": 9,
+          "detail": "WRAITH hits NEXUS-7 with plasma for 9 damage (-1/140 HP)"
+        },
+        {
+          "tick": 47,
+          "timestamp": 1771663160235,
+          "type": "kill",
+          "actor": "WRAITH",
+          "target": "NEXUS-7",
+          "weapon": "plasma",
+          "detail": "WRAITH ELIMINATES NEXUS-7 with plasma!"
+        },
+        {
+          "tick": 98,
+          "timestamp": 1771663160235,
+          "type": "economy",
+          "actor": "WRAITH",
+          "detail": "WRAITH: earned 175 ARENA, spent 82 ARENA (ammo: 72, entry: 10)"
+        },
+        {
+          "tick": 98,
+          "timestamp": 1771663160235,
+          "type": "economy",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7: earned 14 ARENA, spent 90 ARENA (ammo: 80, entry: 10)"
+        },
+        {
+          "tick": 98,
+          "timestamp": 1771663160378,
+          "type": "memory",
+          "actor": "WRAITH",
+          "detail": "WRAITH remembers: \"In vertical arenas, controlling choke points and using cloaking effectively can create high-impact opportunities against predictable opponents.\""
+        },
+        {
+          "tick": 98,
+          "timestamp": 1771663160378,
+          "type": "memory",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7 remembers: \"When facing aggressive opponents in vertical arenas, securing high ground early creates tactical advantages that cost opponents more resources to contest than it costs to maintain.\""
+        }
+      ],
+      "winner": "WRAITH"
+    },
+    {
+      "matchId": 360007,
+      "arena": "Mech Hangar",
+      "duration": 46,
+      "replayId": "replay-1771663166238-w1hits",
+      "agents": [
+        {
+          "agentId": 1,
+          "name": "NEXUS-7",
+          "kills": 1,
+          "deaths": 2,
+          "damageDealt": 145,
+          "tokensEarned": 33,
+          "tokensSpent": 106,
+          "survived": false,
+          "decision": "The Mech Hangar provides elevated platforms and gantries that offer both cover and superior firing angles. Given my railgun loadout and PHANTOM's likely stealth-based tactics, securing high ground will force them to expose themselves when approaching while giving me clear sightlines for precision shots. This conservative approach preserves my token balance while maximizing my defensive advantages.",
+          "llmModel": "Claude",
+          "llmIcon": "🧠"
+        },
+        {
+          "agentId": 2,
+          "name": "PHANTOM",
+          "kills": 2,
+          "deaths": 1,
+          "damageDealt": 227,
+          "tokensEarned": 141,
+          "tokensSpent": 121,
+          "survived": true,
+          "decision": "The Mech Hangar likely provides plenty of cover, which can be used to my advantage for quick strikes. By utilizing the beam weapon for precision attacks and retreating quickly to reload, I can mitigate damage while slowly whittling down NEXUS-7. This approach minimizes risk by using the environment and my weapon's precision.",
+          "llmModel": "GPT-4o",
+          "llmIcon": "⚡"
+        }
+      ],
+      "combatLog": [
+        {
+          "tick": 0,
+          "timestamp": 1771663160603,
+          "type": "spawn",
+          "actor": "SYSTEM",
+          "detail": "Match begins in Mech Hangar! NEXUS-7 vs PHANTOM"
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771663166096,
+          "type": "decision",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7: \"The Mech Hangar provides elevated platforms and gantries that offer both cover and superior firing angles. Given my railgun loadout and PHANTOM's likely stealth-based tactics, securing high ground will force them to expose themselves when approaching while giving me clear sightlines for precision shots. This conservative approach preserves my token balance while maximizing my defensive advantages.\""
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771663166096,
+          "type": "decision",
+          "actor": "PHANTOM",
+          "detail": "PHANTOM: \"The Mech Hangar likely provides plenty of cover, which can be used to my advantage for quick strikes. By utilizing the beam weapon for precision attacks and retreating quickly to reload, I can mitigate damage while slowly whittling down NEXUS-7. This approach minimizes risk by using the environment and my weapon's precision.\""
+        },
+        {
+          "tick": 1,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "railgun",
+          "damage": 34,
+          "detail": "NEXUS-7 hits PHANTOM with railgun for 34 damage (91/125 HP)"
+        },
+        {
+          "tick": 2,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (80/125 HP)"
+        },
+        {
+          "tick": 3,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (133/140 HP)"
+        },
+        {
+          "tick": 4,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (126/140 HP)"
+        },
+        {
+          "tick": 6,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (119/140 HP)"
+        },
+        {
+          "tick": 7,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (69/125 HP)"
+        },
+        {
+          "tick": 7,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (112/140 HP)"
+        },
+        {
+          "tick": 8,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (105/140 HP)"
+        },
+        {
+          "tick": 11,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (98/140 HP)"
+        },
+        {
+          "tick": 12,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (58/125 HP)"
+        },
+        {
+          "tick": 12,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (91/140 HP)"
+        },
+        {
+          "tick": 13,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (84/140 HP)"
+        },
+        {
+          "tick": 14,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (77/140 HP)"
+        },
+        {
+          "tick": 15,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (47/125 HP)"
+        },
+        {
+          "tick": 18,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (36/125 HP)"
+        },
+        {
+          "tick": 19,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (70/140 HP)"
+        },
+        {
+          "tick": 20,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "scatter",
+          "damage": 15,
+          "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (55/140 HP)"
+        },
+        {
+          "tick": 21,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (48/140 HP)"
+        },
+        {
+          "tick": 22,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (41/140 HP)"
+        },
+        {
+          "tick": 23,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (34/140 HP)"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (27/140 HP)"
+        },
+        {
+          "tick": 27,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "scatter",
+          "damage": 15,
+          "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (12/140 HP)"
+        },
+        {
+          "tick": 28,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (5/140 HP)"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (25/125 HP)"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (-2/140 HP)"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771663166096,
+          "type": "kill",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "detail": "PHANTOM ELIMINATES NEXUS-7 with beam!"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771663166096,
+          "type": "spawn",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7 respawns with 84 HP"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (77/140 HP)"
+        },
+        {
+          "tick": 32,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (70/140 HP)"
+        },
+        {
+          "tick": 34,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (63/140 HP)"
+        },
+        {
+          "tick": 35,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "scatter",
+          "damage": 15,
+          "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (48/140 HP)"
+        },
+        {
+          "tick": 36,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (41/140 HP)"
+        },
+        {
+          "tick": 37,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (34/140 HP)"
+        },
+        {
+          "tick": 40,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (14/125 HP)"
+        },
+        {
+          "tick": 40,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (27/140 HP)"
+        },
+        {
+          "tick": 41,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (20/140 HP)"
+        },
+        {
+          "tick": 42,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (13/140 HP)"
+        },
+        {
+          "tick": 43,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (6/140 HP)"
+        },
+        {
+          "tick": 44,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "railgun",
+          "damage": 34,
+          "detail": "NEXUS-7 hits PHANTOM with railgun for 34 damage (-20/125 HP)"
+        },
+        {
+          "tick": 44,
+          "timestamp": 1771663166096,
+          "type": "kill",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "railgun",
+          "detail": "NEXUS-7 ELIMINATES PHANTOM with railgun!"
+        },
+        {
+          "tick": 44,
+          "timestamp": 1771663166096,
+          "type": "spawn",
+          "actor": "PHANTOM",
+          "detail": "PHANTOM respawns with 75 HP"
+        },
+        {
+          "tick": 46,
+          "timestamp": 1771663166096,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (-1/140 HP)"
+        },
+        {
+          "tick": 46,
+          "timestamp": 1771663166096,
+          "type": "kill",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "detail": "PHANTOM ELIMINATES NEXUS-7 with beam!"
+        },
+        {
+          "tick": 89,
+          "timestamp": 1771663166096,
+          "type": "economy",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7: earned 33 ARENA, spent 106 ARENA (ammo: 96, entry: 10)"
+        },
+        {
+          "tick": 89,
+          "timestamp": 1771663166096,
+          "type": "economy",
+          "actor": "PHANTOM",
+          "detail": "PHANTOM: earned 141 ARENA, spent 121 ARENA (ammo: 111, entry: 10)"
+        },
+        {
+          "tick": 89,
+          "timestamp": 1771663166220,
+          "type": "memory",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7 remembers: \"When facing stealth-focused opponents in complex arenas, controlling key elevated positions forces them to take unfavorable engagement angles while preserving my resources.\""
+        },
+        {
+          "tick": 89,
+          "timestamp": 1771663166220,
+          "type": "memory",
+          "actor": "PHANTOM",
+          "detail": "PHANTOM remembers: \"Capitalizing on environmental cover is crucial for managing risk during engagement.\""
+        }
+      ],
+      "winner": "PHANTOM"
+    },
+    {
+      "matchId": 360009,
+      "arena": "Crypto Wasteland",
+      "duration": 37,
+      "replayId": "replay-1771663171927-xdovo0",
+      "agents": [
+        {
+          "agentId": 1,
+          "name": "NEXUS-7",
+          "kills": 0,
+          "deaths": 2,
+          "damageDealt": 122,
+          "tokensEarned": 35,
+          "tokensSpent": 106,
+          "survived": false,
+          "decision": "Crypto Wasteland has elevated platforms and abandoned mining rigs that provide strong defensive positions. As this is my first encounter with PHANTOM, taking an initial defensive stance allows me to observe their patterns while maintaining range advantage with the railgun. The high token/compute balance suggests preserving resources for mid-match adaptations is prudent.",
+          "llmModel": "Claude",
+          "llmIcon": "🧠"
+        },
+        {
+          "agentId": 2,
+          "name": "PHANTOM",
+          "kills": 2,
+          "deaths": 0,
+          "damageDealt": 227,
+          "tokensEarned": 147,
+          "tokensSpent": 103,
+          "survived": true,
+          "decision": "My beam/scatter loadout favors medium-range engagements, making it ideal to maintain a distance where I can maximize damage while staying protected from Nexus-7's aggressive attacks. By using the Crypto Wasteland's natural cover, I can control the pace and location of the fight, avoiding unnecessary risks while chipping away at my opponent's HP.",
+          "llmModel": "GPT-4o",
+          "llmIcon": "⚡"
+        }
+      ],
+      "combatLog": [
+        {
+          "tick": 0,
+          "timestamp": 1771663166400,
+          "type": "spawn",
+          "actor": "SYSTEM",
+          "detail": "Match begins in Crypto Wasteland! NEXUS-7 vs PHANTOM"
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771663171782,
+          "type": "decision",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7: \"Crypto Wasteland has elevated platforms and abandoned mining rigs that provide strong defensive positions. As this is my first encounter with PHANTOM, taking an initial defensive stance allows me to observe their patterns while maintaining range advantage with the railgun. The high token/compute balance suggests preserving resources for mid-match adaptations is prudent.\""
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771663171782,
+          "type": "decision",
+          "actor": "PHANTOM",
+          "detail": "PHANTOM: \"My beam/scatter loadout favors medium-range engagements, making it ideal to maintain a distance where I can maximize damage while staying protected from Nexus-7's aggressive attacks. By using the Crypto Wasteland's natural cover, I can control the pace and location of the fight, avoiding unnecessary risks while chipping away at my opponent's HP.\""
+        },
+        {
+          "tick": 1,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (114/125 HP)"
+        },
+        {
+          "tick": 1,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (133/140 HP)"
+        },
+        {
+          "tick": 2,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (126/140 HP)"
+        },
+        {
+          "tick": 3,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (119/140 HP)"
+        },
+        {
+          "tick": 4,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (112/140 HP)"
+        },
+        {
+          "tick": 5,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (103/125 HP)"
+        },
+        {
+          "tick": 5,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (105/140 HP)"
+        },
+        {
+          "tick": 6,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (98/140 HP)"
+        },
+        {
+          "tick": 7,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (92/125 HP)"
+        },
+        {
+          "tick": 7,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (91/140 HP)"
+        },
+        {
+          "tick": 9,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (84/140 HP)"
+        },
+        {
+          "tick": 10,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "railgun",
+          "damage": 34,
+          "detail": "NEXUS-7 hits PHANTOM with railgun for 34 damage (58/125 HP)"
+        },
+        {
+          "tick": 11,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (77/140 HP)"
+        },
+        {
+          "tick": 12,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (47/125 HP)"
+        },
+        {
+          "tick": 12,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (70/140 HP)"
+        },
+        {
+          "tick": 13,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (63/140 HP)"
+        },
+        {
+          "tick": 14,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "scatter",
+          "damage": 15,
+          "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (48/140 HP)"
+        },
+        {
+          "tick": 16,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "scatter",
+          "damage": 15,
+          "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (33/140 HP)"
+        },
+        {
+          "tick": 18,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (26/140 HP)"
+        },
+        {
+          "tick": 20,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "scatter",
+          "damage": 15,
+          "detail": "PHANTOM hits NEXUS-7 with scatter for 15 damage (11/140 HP)"
+        },
+        {
+          "tick": 21,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (36/125 HP)"
+        },
+        {
+          "tick": 21,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (4/140 HP)"
+        },
+        {
+          "tick": 22,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (-3/140 HP)"
+        },
+        {
+          "tick": 22,
+          "timestamp": 1771663171782,
+          "type": "kill",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "detail": "PHANTOM ELIMINATES NEXUS-7 with beam!"
+        },
+        {
+          "tick": 22,
+          "timestamp": 1771663171782,
+          "type": "spawn",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7 respawns with 84 HP"
+        },
+        {
+          "tick": 23,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (77/140 HP)"
+        },
+        {
+          "tick": 24,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (70/140 HP)"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (63/140 HP)"
+        },
+        {
+          "tick": 27,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (25/125 HP)"
+        },
+        {
+          "tick": 27,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (56/140 HP)"
+        },
+        {
+          "tick": 28,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (14/125 HP)"
+        },
+        {
+          "tick": 28,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (49/140 HP)"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (42/140 HP)"
+        },
+        {
+          "tick": 30,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (35/140 HP)"
+        },
+        {
+          "tick": 32,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (28/140 HP)"
+        },
+        {
+          "tick": 34,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (21/140 HP)"
+        },
+        {
+          "tick": 35,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (14/140 HP)"
+        },
+        {
+          "tick": 36,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "NEXUS-7",
+          "target": "PHANTOM",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "NEXUS-7 hits PHANTOM with plasma for 11 damage (3/125 HP)"
+        },
+        {
+          "tick": 36,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (7/140 HP)"
+        },
+        {
+          "tick": 37,
+          "timestamp": 1771663171782,
+          "type": "attack",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "damage": 7,
+          "detail": "PHANTOM hits NEXUS-7 with beam for 7 damage (0/140 HP)"
+        },
+        {
+          "tick": 37,
+          "timestamp": 1771663171782,
+          "type": "kill",
+          "actor": "PHANTOM",
+          "target": "NEXUS-7",
+          "weapon": "beam",
+          "detail": "PHANTOM ELIMINATES NEXUS-7 with beam!"
+        },
+        {
+          "tick": 107,
+          "timestamp": 1771663171782,
+          "type": "economy",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7: earned 35 ARENA, spent 106 ARENA (ammo: 96, entry: 10)"
+        },
+        {
+          "tick": 107,
+          "timestamp": 1771663171782,
+          "type": "economy",
+          "actor": "PHANTOM",
+          "detail": "PHANTOM: earned 147 ARENA, spent 103 ARENA (ammo: 93, entry: 10)"
+        },
+        {
+          "tick": 107,
+          "timestamp": 1771663171909,
+          "type": "memory",
+          "actor": "NEXUS-7",
+          "detail": "NEXUS-7 remembers: \"Initial encounters should prioritize information gathering and position control over aggressive plays, especially with ranged loadouts that don't require close engagement.\""
+        },
+        {
+          "tick": 107,
+          "timestamp": 1771663171909,
+          "type": "memory",
+          "actor": "PHANTOM",
+          "detail": "PHANTOM remembers: \"Utilize environmental cover effectively to gain a strategic advantage, especially when facing potentially aggressive opponents.\""
+        }
+      ],
+      "winner": "PHANTOM"
+    }
+  ],
+  "summary": {
+    "totalKills": 8,
+    "totalTokensEarned": 545,
+    "totalTokensSpent": 608,
+    "mvp": "PHANTOM",
+    "bestKD": "PHANTOM",
+    "arenaBreakdown": {
+      "Neon Brutalism": 1,
+      "Mech Hangar": 1,
+      "Crypto Wasteland": 1
+    }
+  }
+}

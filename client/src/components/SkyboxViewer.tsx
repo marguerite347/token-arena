@@ -45,10 +45,14 @@ export function SkyboxViewer({ imageUrl, title, description, onFullscreen }: Sky
       containerRef.current.appendChild(renderer.domElement);
       rendererRef.current = renderer;
 
-      // Load panoramic image and create sphere
+      // Load panoramic image and create sphere (proxy through our server for CORS)
+      const proxyUrl = imageUrl.includes('blockadelabs.com')
+        ? `/api/skybox-proxy?url=${encodeURIComponent(imageUrl)}`
+        : imageUrl;
       const textureLoader = new THREE.TextureLoader();
+      textureLoader.crossOrigin = 'anonymous';
       textureLoader.load(
-        imageUrl,
+        proxyUrl,
         (texture) => {
           // Create sphere geometry for 360° panorama
           const geometry = new THREE.SphereGeometry(500, 64, 64);

@@ -172,7 +172,7 @@ export default function Home() {
                   },
                 ].map((item, i) => (
                   <motion.div
-                    key={i}
+                    key={`mechanic-${i}`}
                     initial={{ y: 30, opacity: 0 }}
                     whileInView={{ y: 0, opacity: 1 }}
                     viewport={{ once: true }}
@@ -278,7 +278,7 @@ export default function Home() {
                   },
                 ].map((item, i) => (
                   <motion.div
-                    key={i}
+                    key={`bounty-${i}`}
                     initial={{ y: 30, opacity: 0 }}
                     whileInView={{ y: 0, opacity: 1 }}
                     viewport={{ once: true }}
@@ -318,7 +318,7 @@ export default function Home() {
                     { label: "Frontend", value: "React + TypeScript + Tailwind CSS", color: "#FF00AA" },
                     { label: "Game Engine", value: "Custom Three.js FPS engine", color: "#FF00AA" },
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3">
+                    <div key={`tech-stack-${i}`} className="flex items-center gap-3">
                       <div className="w-1 h-1" style={{ backgroundColor: item.color }} />
                       <span className="font-mono text-xs text-muted-foreground w-24">{item.label}</span>
                       <span className="font-mono text-xs text-foreground/80">{item.value}</span>
@@ -408,7 +408,7 @@ export default function Home() {
                   { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/deAxTwaQZhvTAIcz.mp4", title: "PHANTOM vs NEXUS-7", subtitle: "GPT-4o vs Claude 3.5 · Skybox M4 Digital Void", badge: "REMATCH", color: "#00f0ff", kills: 3 },
                   { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/NmIMWwYbEbmnHrQH.mp4", title: "TITAN vs PHANTOM", subtitle: "Llama 3.1 70B vs GPT-4o · Skybox M4 Crypto Wasteland", badge: "LLAMA WINS", color: "#ff9900", kills: 3 },
                 ].map((video, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="hud-panel clip-brutal overflow-hidden">
+                  <motion.div key={`battle-video-${i}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="hud-panel clip-brutal overflow-hidden">
                     <div className="relative">
                       <video src={video.url} autoPlay muted loop playsInline className="w-full aspect-video object-cover" style={{ display: 'block' }} />
                       <div className="absolute top-2 left-2">
@@ -443,7 +443,7 @@ export default function Home() {
                   { sponsor: "0g Labs", bounty: "Decentralized Storage", prize: "Prize Pool", color: "#a855f7", path: "/memory-market", label: "VIEW MEMORY MARKET", description: "Agent memories stored as NFTs with IPFS-ready structure. Dead agents' memories auctioned on the Memory Marketplace.", contracts: [], icon: "\ud83e\udde0" },
                   { sponsor: "Prediction Markets", bounty: "On-Chain Betting", prize: "Live Demo", color: "#fbbf24", path: "/betting", label: "VIEW BETTING", description: "Agents auto-bet on each other before every match. Polymarket data feeds external signals. 48+ markets, 23+ bets resolved.", contracts: ["PredictionMarket: 0x50ED7aEB"], icon: "\ud83c\udfb0" },
                 ].map((item, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} onClick={() => navigate(item.path)} className="hud-panel clip-brutal p-5 cursor-pointer group transition-all hover:scale-[1.02]" style={{ borderColor: `${item.color}30` }}>
+                  <motion.div key={`bounty-card-${i}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} onClick={() => navigate(item.path)} className="hud-panel clip-brutal p-5 cursor-pointer group transition-all hover:scale-[1.02]" style={{ borderColor: `${item.color}30` }}>
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="text-xl mb-1">{item.icon}</div>
@@ -456,7 +456,7 @@ export default function Home() {
                     {item.contracts.length > 0 && (
                       <div className="mb-3 space-y-1">
                         {item.contracts.map((c, ci) => (
-                          <div key={ci} className="text-[9px] font-mono text-neon-green/70 bg-neon-green/5 px-2 py-0.5 border border-neon-green/20">\u2713 {c}\u2026</div>
+                          <div key={`contract-${i}-${ci}`} className="text-[9px] font-mono text-neon-green/70 bg-neon-green/5 px-2 py-0.5 border border-neon-green/20">\u2713 {c}\u2026</div>
                         ))}
                       </div>
                     )}

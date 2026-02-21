@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,8 @@ import {
   Flame,
   DollarSign,
   BarChart3,
+  Users,
+  Crown,
 } from "lucide-react";
 
 interface ActivityEvent {
@@ -32,10 +34,14 @@ interface ActivityEvent {
   color: string;
 }
 
+type BattleMode = "1v1" | "ffa";
+
 export default function WatchMode() {
   const [, navigate] = useLocation();
   const [isRunning, setIsRunning] = useState(false);
   const [matchCount, setMatchCount] = useState(3);
+  const [battleMode, setBattleMode] = useState<BattleMode>("1v1");
+  const [agentCount, setAgentCount] = useState(4);
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [currentMatch, setCurrentMatch] = useState(0);
   const [sessionResult, setSessionResult] = useState<any>(null);
@@ -46,7 +52,7 @@ export default function WatchMode() {
     onSuccess: (data: any) => {
       setIsRunning(false);
       setSessionResult(data);
-      addEvent("summary", <Trophy className="w-4 h-4" />, "Session Complete!", 
+      addEvent("summary", <Trophy className="w-4 h-4" />, "Session Complete!",
         `${data.matchesPlayed} matches played. MVP: ${data.summary.mvp}. Total kills: ${data.summary.totalKills}. Tokens earned: ${data.summary.totalTokensEarned} ARENA.`,
         "text-yellow-400"
       );
@@ -54,6 +60,21 @@ export default function WatchMode() {
     onError: (err: any) => {
       setIsRunning(false);
       addEvent("system", <Square className="w-4 h-4" />, "Session Error", err.message, "text-red-400");
+    },
+  });
+
+  const ffaPlaytest = trpc.flywheel.ffa.useMutation({
+    onSuccess: (data: any) => {
+      setIsRunning(false);
+      setSessionResult({ ...data, isFFA: true });
+      addEvent("summary", <Crown className="w-4 h-4" />, "FFA Session Complete!",
+        `${data.matchesPlayed} free-for-all matches. MVP: ${data.summary.mvp}. Total kills: ${data.summary.totalKills}. Tokens earned: ${data.summary.totalTokensEarned} ARENA.`,
+        "text-yellow-400"
+      );
+    },
+    onError: (err: any) => {
+      setIsRunning(false);
+      addEvent("system", <Square className="w-4 h-4" />, "FFA Error", err.message, "text-red-400");
     },
   });
 
@@ -86,36 +107,47 @@ export default function WatchMode() {
     setSessionResult(null);
     setCurrentMatch(0);
 
-    addEvent("system", <Play className="w-4 h-4" />, "Autonomous Session Starting",
-      `Launching ${matchCount} AI vs AI matches with LLM reasoning, auto-betting, and token economics...`,
+    const isFFA = battleMode === "ffa";
+    const modeLabel = isFFA ? `${agentCount}-Agent FFA` : "1v1";
+
+    addEvent("system", <Play className="w-4 h-4" />, `${modeLabel} Session Starting`,
+      `Launching ${matchCount} ${modeLabel} AI matches with LLM reasoning, auto-betting, and token economics...`,
       "text-cyan-400"
     );
 
     // Simulate the pre-match events with delays for visual effect
     for (let i = 1; i <= matchCount; i++) {
       setCurrentMatch(i);
-      
+
       await new Promise((r) => setTimeout(r, 800));
       addEvent("match_start", <Swords className="w-4 h-4" />, `Match ${i}/${matchCount} Initializing`,
-        "Selecting agents, generating Skybox arena, creating prediction market...",
+        isFFA
+          ? `Selecting ${agentCount} agents for free-for-all battle, generating Skybox arena, creating prediction market...`
+          : "Selecting agents, generating Skybox arena, creating prediction market...",
         "text-purple-400"
       );
 
       await new Promise((r) => setTimeout(r, 600));
       addEvent("bet", <DollarSign className="w-4 h-4" />, "Prediction Market Created",
-        "Agents betting on themselves. Spectator placing wager. Market odds calculated.",
+        isFFA
+          ? `${agentCount} agents betting on themselves. Spectator placing wager. Market odds calculated for all ${agentCount} outcomes.`
+          : "Agents betting on themselves. Spectator placing wager. Market odds calculated.",
         "text-green-400"
       );
 
       await new Promise((r) => setTimeout(r, 400));
       addEvent("decision", <Bot className="w-4 h-4" />, "LLM Reasoning Phase",
-        "Agents analyzing arena terrain via vision model, choosing weapons and tactics...",
+        isFFA
+          ? `All ${agentCount} agents analyzing arena terrain via vision model, choosing weapons and tactics for multi-way combat...`
+          : "Agents analyzing arena terrain via vision model, choosing weapons and tactics...",
         "text-blue-400"
       );
 
       await new Promise((r) => setTimeout(r, 500));
       addEvent("attack", <Target className="w-4 h-4" />, "Combat Underway",
-        "Agents exchanging fire. Every bullet is a token transfer. Damage = ARENA tokens spent.",
+        isFFA
+          ? `${agentCount}-way free-for-all! Agents attacking nearest enemies. Every bullet is a token transfer.`
+          : "Agents exchanging fire. Every bullet is a token transfer. Damage = ARENA tokens spent.",
         "text-orange-400"
       );
 
@@ -132,7 +164,11 @@ export default function WatchMode() {
       "text-yellow-400"
     );
 
-    playtest.mutate({ matchCount, useLLM: true });
+    if (isFFA) {
+      ffaPlaytest.mutate({ matchCount, agentCount, useLLM: true });
+    } else {
+      playtest.mutate({ matchCount, useLLM: true });
+    }
   };
 
   return (
@@ -149,6 +185,11 @@ export default function WatchMode() {
             <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-500/30">
               AUTONOMOUS
             </span>
+            {battleMode === "ffa" && (
+              <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/30">
+                FREE-FOR-ALL
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3">
             {isRunning && (
@@ -176,12 +217,64 @@ export default function WatchMode() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Battle Mode Toggle */}
+              <div>
+                <label className="text-sm text-slate-400 mb-2 block">Battle Mode</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant={battleMode === "1v1" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setBattleMode("1v1")}
+                    disabled={isRunning}
+                    className={battleMode === "1v1" ? "bg-cyan-600 hover:bg-cyan-700" : "border-slate-600"}
+                  >
+                    <Swords className="w-3 h-3 mr-1" />
+                    1v1 Duel
+                  </Button>
+                  <Button
+                    variant={battleMode === "ffa" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setBattleMode("ffa")}
+                    disabled={isRunning}
+                    className={battleMode === "ffa" ? "bg-orange-600 hover:bg-orange-700" : "border-slate-600"}
+                  >
+                    <Users className="w-3 h-3 mr-1" />
+                    Free-For-All
+                  </Button>
+                </div>
+              </div>
+
+              {/* Agent Count (FFA only) */}
+              {battleMode === "ffa" && (
+                <div>
+                  <label className="text-sm text-slate-400 mb-2 block">
+                    Agents in Arena
+                    <span className="ml-2 text-orange-400 font-semibold">{agentCount} agents</span>
+                  </label>
+                  <div className="flex gap-2">
+                    {[2, 3, 4, 6, 8].map((n) => (
+                      <Button
+                        key={`agent-count-${n}`}
+                        variant={agentCount === n ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setAgentCount(n)}
+                        disabled={isRunning}
+                        className={agentCount === n ? "bg-orange-600 hover:bg-orange-700 text-xs px-2" : "border-slate-600 text-xs px-2"}
+                      >
+                        {n}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Match Count */}
               <div>
                 <label className="text-sm text-slate-400 mb-2 block">Number of Matches</label>
                 <div className="flex gap-2">
                   {[1, 3, 5, 10].map((n) => (
                     <Button
-                      key={n}
+                      key={`match-count-${n}`}
                       variant={matchCount === n ? "default" : "outline"}
                       size="sm"
                       onClick={() => setMatchCount(n)}
@@ -195,7 +288,11 @@ export default function WatchMode() {
               </div>
 
               <Button
-                className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-bold py-6 text-lg"
+                className={`w-full text-white font-bold py-6 text-lg ${
+                  battleMode === "ffa"
+                    ? "bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500"
+                    : "bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500"
+                }`}
                 onClick={startAutonomousPlay}
                 disabled={isRunning}
               >
@@ -203,6 +300,11 @@ export default function WatchMode() {
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                     Agent Playing...
+                  </>
+                ) : battleMode === "ffa" ? (
+                  <>
+                    <Flame className="w-5 h-5 mr-2" />
+                    LAUNCH {agentCount}-WAY FFA
                   </>
                 ) : (
                   <>
@@ -213,7 +315,9 @@ export default function WatchMode() {
               </Button>
 
               <p className="text-xs text-slate-500 text-center">
-                Agent uses LLM reasoning (GPT-4o, Claude, Llama) to make tactical decisions, places bets on prediction markets, and earns ARENA tokens.
+                {battleMode === "ffa"
+                  ? `${agentCount} AI agents enter, 1 survives. All use LLM reasoning (GPT-4o, Claude, Llama) and bet on prediction markets.`
+                  : "Agent uses LLM reasoning (GPT-4o, Claude, Llama) to make tactical decisions, places bets on prediction markets, and earns ARENA tokens."}
               </p>
             </CardContent>
           </Card>
@@ -238,7 +342,11 @@ export default function WatchMode() {
               </div>
               <div className="flex items-start gap-3">
                 <Swords className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
-                <p className="text-slate-300">Fights opponent using weapon tokens (every bullet = token transfer)</p>
+                <p className="text-slate-300">
+                  {battleMode === "ffa"
+                    ? `Fights ${agentCount - 1} opponents simultaneously — every bullet = token transfer`
+                    : "Fights opponent using weapon tokens (every bullet = token transfer)"}
+                </p>
               </div>
               <div className="flex items-start gap-3">
                 <Trophy className="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" />
@@ -254,6 +362,11 @@ export default function WatchMode() {
                 <CardTitle className="flex items-center gap-2 text-lg text-yellow-400">
                   <Trophy className="w-5 h-5" />
                   Session Results
+                  {sessionResult.isFFA && (
+                    <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/30 ml-1">
+                      FFA
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -288,15 +401,28 @@ export default function WatchMode() {
                 <div className="space-y-2 mt-4">
                   <p className="text-sm font-semibold text-slate-300">Match Results</p>
                   {sessionResult.results.map((r: any, i: number) => (
-                    <div key={i} className="bg-slate-800/30 rounded p-2 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
+                    <div key={`match-result-${i}`} className="bg-slate-800/30 rounded p-2 text-xs">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="text-slate-500">#{i + 1}</span>
-                        <span className="text-slate-300">{r.agents[0]?.name} vs {r.agents[1]?.name}</span>
+                        <div className="flex items-center gap-1">
+                          <Trophy className="w-3 h-3 text-yellow-400" />
+                          <span className="text-yellow-400 font-semibold">{r.winner}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Trophy className="w-3 h-3 text-yellow-400" />
-                        <span className="text-yellow-400 font-semibold">{r.winner}</span>
-                      </div>
+                      {r.agentCount ? (
+                        // FFA result
+                        <div className="text-slate-400">
+                          {r.agentCount}-way FFA in {r.arena} •{" "}
+                          {r.podium?.slice(0, 3).map((name: string, pi: number) => (
+                            <span key={`podium-${i}-${pi}`} className={pi === 0 ? "text-yellow-400" : pi === 1 ? "text-slate-300" : "text-amber-700"}>
+                              {pi > 0 ? " · " : ""}{pi + 1}. {name}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        // 1v1 result
+                        <span className="text-slate-300">{r.agents?.[0]?.name} vs {r.agents?.[1]?.name}</span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -342,12 +468,22 @@ export default function WatchMode() {
                   <div className="flex flex-col items-center justify-center h-full text-slate-500">
                     <Eye className="w-12 h-12 mb-4 opacity-30" />
                     <p className="text-lg font-semibold">Waiting for Action</p>
-                    <p className="text-sm mt-1">Click "LET MY AGENT PLAY" to start autonomous mode</p>
+                    <p className="text-sm mt-1">
+                      {battleMode === "ffa"
+                        ? `Click "LAUNCH ${agentCount}-WAY FFA" to start free-for-all mode`
+                        : 'Click "LET MY AGENT PLAY" to start autonomous mode'}
+                    </p>
+                    {battleMode === "ffa" && (
+                      <div className="mt-4 flex items-center gap-2 text-xs text-orange-400 bg-orange-500/10 px-3 py-2 rounded-full border border-orange-500/20">
+                        <Flame className="w-3 h-3" />
+                        {agentCount} agents will fight to the death — last one standing wins
+                      </div>
+                    )}
                   </div>
                 ) : (
                   events.map((event) => (
                     <div
-                      key={event.id}
+                      key={`event-${event.id}`}
                       className="flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300"
                     >
                       <div className={`mt-1 shrink-0 ${event.color}`}>
