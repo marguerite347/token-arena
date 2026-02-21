@@ -1071,7 +1071,7 @@ export default function WatchMode() {
 
     // Arena boundary ring (neon cyan)
     const ringGeo = new THREE.TorusGeometry(7, 0.03, 8, 64);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.6, emissive: 0x00ffff, emissiveIntensity: 0.3 });
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x00ffff, transparent: true, opacity: 0.6, emissive: 0x00ffff, emissiveIntensity: 0.3 });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = Math.PI / 2;
     ring.position.y = 0.01;
@@ -1080,7 +1080,7 @@ export default function WatchMode() {
     
     // Outer neon ring (magenta accent)
     const outerRingGeo = new THREE.TorusGeometry(8, 0.02, 8, 64);
-    const outerRingMat = new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.3, emissive: 0xff00ff, emissiveIntensity: 0.2 });
+    const outerRingMat = new THREE.MeshStandardMaterial({ color: 0xff00ff, transparent: true, opacity: 0.3, emissive: 0xff00ff, emissiveIntensity: 0.2 });
     const outerRing = new THREE.Mesh(outerRingGeo, outerRingMat);
     outerRing.rotation.x = Math.PI / 2;
     outerRing.position.y = 0.02;
@@ -1151,9 +1151,11 @@ export default function WatchMode() {
       }
 
       // Bob agent meshes
-      agentMeshesRef.current.forEach((mesh) => {
-        if (mesh) mesh.position.y = Math.sin(elapsed * 2 + mesh.position.x) * 0.05;
-      });
+      if (agentMeshesRef.current) {
+        agentMeshesRef.current.forEach((mesh) => {
+          if (mesh) mesh.position.y = Math.sin(elapsed * 2 + mesh.position.x) * 0.05;
+        });
+      }
 
       // Pulse lights
       if (pointLightsRef.current && pointLightsRef.current.length >= 3) {
