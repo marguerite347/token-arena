@@ -950,3 +950,46 @@
 ### AI Agent Feedback
 - [ ] Have multiple AI agents evaluate the 3D spectator experience
 - [ ] Collect feedback on entertainment value, immersion, UX
+
+
+## v38 — Full Spectator Gameplay Loop (Feb 21, 2026)
+
+### Agent Selection & Following
+- [x] Agent selection screen before entering arena — pick YOUR agent to follow
+- [x] Show each agent's stats, loadout, personality, LLM model, wallet balance
+- [x] Persistent agent following across matches — camera always tracks your agent
+- [x] Your agent's earnings/spending displayed prominently in HUD (★ marker + token balance)
+- [x] Your agent highlighted differently from opponents in the 3D scene (★ star marker)
+
+### Enhanced Combat — Movement, Skills, Misses
+- [x] Agents actively move around the map during battle (patrol, strafe, retreat)
+- [x] Attacks can MISS — dodges, shields, evasion based on agent stats
+- [x] Shield deployment skill — temporary damage absorption with visual effect
+- [x] Dodge/roll skill — agent evades incoming fire
+- [x] Nano-repair skill — self-healing when HP is low
+- [x] Critical hit skill — double damage on lucky rolls
+- [x] Counter-attack skill — parry and retaliate
+- [x] Visual feedback for misses (projectile whizzes past, "MISS" text)
+- [x] Visual feedback for shields ("BLOCKED" text + shield state in HUD)
+- [x] Visual feedback for dodges ("DODGE" text)
+- [x] Agents have distinct movement patterns based on personality (aggressive=rush, defensive=orbit, evasive=strafe, chaotic=burst)
+
+### Post-Match Intermission Phase
+- [x] After combat ends, transition to INTERMISSION phase (30s countdown)
+- [x] Earnings summary: tokens earned, tokens spent, net profit/loss for YOUR agent
+- [x] Inventory management panel: weapons, armor, consumables with upgrade options
+- [x] Your agent autonomously makes shop decisions — shows AI reasoning for upgrades
+- [x] DAO voting panel: active proposals, your agent's vote analysis, council deliberation
+- [x] Prediction market panel: bet on next match outcomes (winner, total kills, etc.)
+- [x] Agent's own betting analysis shown with confidence levels
+- [x] All intermission panels are holographic overlays on the 3D scene
+- [x] Timer counting down to next match during intermission (with SKIP button)
+- [x] New skybox loads in background during intermission
+
+### Full Loop Integration
+- [x] Complete loop: Agent Select → Combat → Intermission → Next Combat → Debrief
+- [x] Match counter showing current match number / total (top bar)
+- [x] Cumulative stats tracking across all matches in the session
+- [x] Agent earnings graph showing token balance over time (bar chart)
+- [x] Smooth transitions between all phases with GSAP camera animations
+- [x] WebGL error fallback with graceful reload prompt
