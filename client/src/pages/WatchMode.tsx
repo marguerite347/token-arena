@@ -432,37 +432,23 @@ function getGroundHeight(px: number, pz: number): number {
   return maxY;
 }
 
-// Check if moving from (x1,z1) to (x2,z2) would collide with a wall or platform side
+// Check if moving would collide with a wall (only tall cover walls, not platforms)
 function collidesWithWall(x1: number, z1: number, x2: number, z2: number): boolean {
   const AGENT_RADIUS = 0.35;
   for (const p of PLATFORM_CONFIGS) {
+    // Only block movement if it's a tall cover wall (narrow and tall)
+    if (p.w >= 0.5 && p.d >= 0.5) continue; // Skip walkable platforms
+    
     const halfW = p.w / 2;
     const halfD = p.d / 2;
-    const topY = p.y + p.h / 2;
+    const topWallY = p.y + p.h;
     
-    // Check if agent would walk through platform side (not on top)
-    // Agent is on top if its Y is approximately at topY
-    const currentY = getGroundHeight(x1, z1);
-    const targetY = getGroundHeight(x2, z2);
+    // Only block if wall is tall enough to block agent movement
+    if (topWallY < 0.5) continue;
     
-    // If moving horizontally but target Y is significantly different, it's a side collision
-    if (Math.abs(targetY - currentY) > 0.15) {
-      // Check if new position is within platform's horizontal bounds
-      if (x2 >= p.x - halfW - AGENT_RADIUS && x2 <= p.x + halfW + AGENT_RADIUS &&
-          z2 >= p.z - halfD - AGENT_RADIUS && z2 <= p.z + halfD + AGENT_RADIUS) {
-        // This is a side collision — block it
-        return true;
-      }
-    }
-    
-    // Also check tall walls (cover walls)
-    if (p.w < 0.5 || p.d < 0.5) {
-      const topWallY = p.y + p.h;
-      if (topWallY < 0.5) continue;
-      if (x2 >= p.x - halfW - AGENT_RADIUS && x2 <= p.x + halfW + AGENT_RADIUS &&
-          z2 >= p.z - halfD - AGENT_RADIUS && z2 <= p.z + halfD + AGENT_RADIUS) {
-        return true;
-      }
+    if (x2 >= p.x - halfW - AGENT_RADIUS && x2 <= p.x + halfW + AGENT_RADIUS &&
+        z2 >= p.z - halfD - AGENT_RADIUS && z2 <= p.z + halfD + AGENT_RADIUS) {
+      return true;
     }
   }
   return false;
