@@ -39,11 +39,24 @@ import { AGENT_SMART_WALLETS, ACTIVE_EXPLORER } from "@shared/web3";
 // ─── Completed Skybox AI Model 4 panoramas (high-quality, pre-generated) ────
 // These were successfully generated via the staging API and are ready to use
 const COMPLETED_M4_SKYBOXES = [
-  { name: "Quantum Computing Lab", style: "M4 Scifi Render A", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gqKCKZfzZwQkVTLk.jpg" },
-  { name: "Digital Void Chamber", style: "M4 UE Render", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/ZKYjtULxRbKctHFh.jpg" },
-  { name: "Cyber Void Arena", style: "M4 UE Render", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/DRHxtlvwfRpwnNgg.jpg" },
-  { name: "Post-Apocalyptic Pit", style: "M4 Scifi Render B", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/uRIDteJKcvkSurxb.jpg" },
-  { name: "Void Space Arena", style: "M4 UE Render", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/qryzPOHnxfcHcJcf.jpg" },
+  { name: "Quantum Lab", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/GCvIZcrplcaWArRu.jpg" },
+  { name: "Orbital Command", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/VYeiGyfmKkVWKJxW.jpg" },
+  { name: "Hacker Den", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/iJOEnHVIYqlLIDDO.jpg" },
+  { name: "Weapons Lab", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/TBYHGNguPRabMzOk.jpg" },
+  { name: "Apocalyptic Pit", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/uNLWodDuZcypLKdk.jpg" },
+  { name: "Android Factory", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/CQxuweYgbxxvotWv.jpg" },
+  { name: "Rooftop Arena", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/cVpZbIGIhyPeUvpW.jpg" },
+  { name: "Deep Sea Station", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/EKyzVEfNGPeokCUd.jpg" },
+  { name: "Mech Hangar", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/XTKSyDabWRQxowFs.jpg" },
+  { name: "Alien Chamber", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/aTfcSQVhUtuKOxbj.jpg" },
+  { name: "Dystopian Colosseum", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/EEgRRsYlrLrEYYBs.jpg" },
+  { name: "Reactor Core", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/xpyFUIIcgfQzUUOc.jpg" },
+  { name: "Neon Street", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/sevgPYdaStRaWAye.jpg" },
+  { name: "VR Grid", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/dKRNyTyQwHJiGfNO.jpg" },
+  { name: "Black Market", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/KwsQtmbbdJjkVBBJ.jpg" },
+  { name: "Neon Club", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/chQlWersXtPKcQBj.jpg" },
+  { name: "Digital Void", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/HOAXaKYIZnIwsgpx.jpg" },
+  { name: "Crystal Cavern", style: "M4 Scifi", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/myyzoBVvYdODrPGy.jpg" },
 ];
 
 
@@ -160,6 +173,7 @@ interface AgentHUD {
 interface TermLine { type: "call" | "response" | "system" | "error"; text: string; ts: number; }
 interface ChatMsg { sender: string; color: string; text: string; ts: number; }
 interface MatchEarning { matchNum: number; earned: number; spent: number; kills: number; deaths: number; }
+interface KillRecord { matchNum: number; killer: string; victim: string; weapon: string; isCrit: boolean; timestamp: number; }
 interface DAOProposal { id: string; title: string; desc: string; proposer: string; proposerColor: string; votes: { for: number; against: number }; status: "active" | "passed" | "failed"; gmVote?: string; gmReason?: string; }
 interface BetOption { id: string; label: string; odds: number; type: string; backers: number; totalStaked: number; agentBets: { name: string; color: string; amount: number }[]; }
 
@@ -529,6 +543,44 @@ function showDamageNumber(scene: THREE.Scene, pos: THREE.Vector3, value: number 
   gsap.to(mat, { opacity: 0, duration: 1, onComplete: () => { scene.remove(sprite); tex.dispose(); mat.dispose(); } });
 }
 
+// ─── Dramatic Elimination Explosion Effect ──────────────────────────────────
+function createEliminationExplosion(scene: THREE.Scene, position: THREE.Vector3, color: number) {
+  // Expanding shockwave ring
+  const ringGeo = new THREE.RingGeometry(0.1, 0.3, 32);
+  const ringMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.8, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.position.copy(position);
+  ring.position.y = 0.5;
+  ring.rotation.x = -Math.PI / 2;
+  scene.add(ring);
+  gsap.to(ring.scale, { x: 8, y: 8, z: 8, duration: 0.8, ease: "power2.out" });
+  gsap.to(ringMat, { opacity: 0, duration: 0.8, onComplete: () => { scene.remove(ring); ringGeo.dispose(); ringMat.dispose(); } });
+
+  // Particle burst (20 particles)
+  for (let i = 0; i < 20; i++) {
+    const pGeo = new THREE.SphereGeometry(0.05 + Math.random() * 0.08, 6, 6);
+    const pMat = new THREE.MeshBasicMaterial({ color: Math.random() > 0.5 ? color : 0xffffff, transparent: true, opacity: 1, blending: THREE.AdditiveBlending });
+    const particle = new THREE.Mesh(pGeo, pMat);
+    particle.position.copy(position);
+    particle.position.y = 0.8;
+    scene.add(particle);
+    const dir = new THREE.Vector3((Math.random() - 0.5) * 2, Math.random() * 2, (Math.random() - 0.5) * 2);
+    const target = particle.position.clone().add(dir.multiplyScalar(1.5 + Math.random() * 2));
+    gsap.to(particle.position, { x: target.x, y: target.y, z: target.z, duration: 0.5 + Math.random() * 0.5, ease: "power2.out" });
+    gsap.to(pMat, { opacity: 0, duration: 0.6 + Math.random() * 0.4, onComplete: () => { scene.remove(particle); pGeo.dispose(); pMat.dispose(); } });
+  }
+
+  // Central flash sphere
+  const flashGeo = new THREE.SphereGeometry(0.5, 16, 16);
+  const flashMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1, blending: THREE.AdditiveBlending });
+  const flash = new THREE.Mesh(flashGeo, flashMat);
+  flash.position.copy(position);
+  flash.position.y = 0.8;
+  scene.add(flash);
+  gsap.to(flash.scale, { x: 3, y: 3, z: 3, duration: 0.3, ease: "power2.out" });
+  gsap.to(flashMat, { opacity: 0, duration: 0.4, onComplete: () => { scene.remove(flash); flashGeo.dispose(); flashMat.dispose(); } });
+}
+
 function createNameLabel(name: string, color: number): THREE.Sprite {
   const canvas = document.createElement("canvas");
   canvas.width = 256; canvas.height = 64;
@@ -589,6 +641,7 @@ export default function WatchMode() {
   const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
   const [spectatorMessages, setSpectatorMessages] = useState<ChatMsg[]>([]);
   const [killFeed, setKillFeed] = useState<string[]>([]);
+  const [killRecords, setKillRecords] = useState<KillRecord[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [spectatorInput, setSpectatorInput] = useState("");
   const [sessionResult, setSessionResult] = useState<any>(null);
@@ -776,10 +829,11 @@ export default function WatchMode() {
     }
 
     setArenaName(chosenName);
-    const proxyUrl = `/api/skybox-proxy?url=${encodeURIComponent(chosenUrl)}`;
+    // Load S3 CDN URLs directly (no proxy needed), use proxy only for staging URLs
+    const loadUrl = chosenUrl.includes("manuscdn.com") ? chosenUrl : `/api/skybox-proxy?url=${encodeURIComponent(chosenUrl)}`;
     const loader = new THREE.TextureLoader();
     loader.crossOrigin = "anonymous";
-    loader.load(proxyUrl, (texture) => {
+    loader.load(loadUrl, (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
       texture.colorSpace = THREE.SRGBColorSpace;
       if (skyboxSphereRef.current) {
@@ -1033,7 +1087,8 @@ export default function WatchMode() {
     // Load a random M4 skybox immediately as the initial background
     // This ensures the title/agent-selection screen shows high-quality art from the start
     const initialM4 = COMPLETED_M4_SKYBOXES[Math.floor(Math.random() * COMPLETED_M4_SKYBOXES.length)];
-    const initialProxyUrl = `/api/skybox-proxy?url=${encodeURIComponent(initialM4.url)}`;
+    // Load S3 CDN URLs directly (no proxy needed)
+    const initialLoadUrl = initialM4.url.includes("manuscdn.com") ? initialM4.url : `/api/skybox-proxy?url=${encodeURIComponent(initialM4.url)}`;
     
     // Start with a dark placeholder material, then swap in the M4 texture once loaded
     const skyMat = new THREE.MeshBasicMaterial({ color: 0x0a0a1a, side: THREE.FrontSide });
@@ -1047,7 +1102,7 @@ export default function WatchMode() {
     // Immediately load the M4 skybox texture for the title/agent-selection screen
     const initLoader = new THREE.TextureLoader();
     initLoader.crossOrigin = "anonymous";
-    initLoader.load(initialProxyUrl, (tex) => {
+    initLoader.load(initialLoadUrl, (tex) => {
       tex.mapping = THREE.EquirectangularReflectionMapping;
       tex.colorSpace = THREE.SRGBColorSpace;
       skyMat.map = tex;
@@ -1451,6 +1506,44 @@ export default function WatchMode() {
       // Check for ability activation (15% chance per combat tick)
       const attackerState = currentStates.find(s => s.id === attacker.id);
       const defenderState = currentStates.find(s => s.id === defender.id);
+
+      // ─── Personality-driven combat modifiers ───────────────────────
+      const attackerDef = AGENTS.find(a => a.id === attacker.id);
+      const defenderDef = AGENTS.find(a => a.id === defender.id);
+      const personality = attackerDef?.personality || "adaptive";
+      const defPersonality = defenderDef?.personality || "adaptive";
+
+      // Personality modifiers affect hit chance, crit chance, damage
+      let hitBonus = 0, critBonus = 0, damageMultiplier = 1.0;
+      let dodgeBonus = 0, blockBonus = 0;
+      switch (personality) {
+        case "aggressive": hitBonus = 0.05; critBonus = 0.08; damageMultiplier = 1.25; break;
+        case "evasive": hitBonus = -0.03; critBonus = 0.02; damageMultiplier = 0.9; break;
+        case "defensive": hitBonus = 0.02; critBonus = -0.02; damageMultiplier = 0.85; break;
+        case "chaotic": hitBonus = -0.05; critBonus = 0.15; damageMultiplier = 1.0 + (Math.random() * 0.6 - 0.3); break;
+        case "adaptive": hitBonus = 0.03; critBonus = 0.03; damageMultiplier = 1.05; break;
+      }
+      switch (defPersonality) {
+        case "evasive": dodgeBonus = 0.08; break;
+        case "defensive": blockBonus = 0.1; break;
+        case "chaotic": dodgeBonus = Math.random() > 0.5 ? 0.12 : -0.05; break;
+      }
+
+      // Comeback mechanic: low HP agents get damage/crit boost
+      const hpPercent = (attackerState?.hp ?? 100) / 100;
+      if (hpPercent < 0.3) {
+        damageMultiplier *= 1.4; // Berserker rage!
+        critBonus += 0.1;
+        if (Math.random() < 0.15) {
+          pushChat(attacker.id, hexColor(attacker.color), randFrom([
+            "BERSERKER MODE ACTIVATED!", "You can't stop me!",
+            "Low HP? Maximum damage!", "This isn't over!",
+          ]));
+        }
+      }
+
+      // Preferred weapon: agents use their loadout weapons more often
+      const preferredWeapons = attackerDef ? [attackerDef.loadout.primary, attackerDef.loadout.secondary] : [];
       
       if (Math.random() < 0.15 && attackerState) {
         // 40% shield, 35% dash, 25% weapon swap
@@ -1486,8 +1579,10 @@ export default function WatchMode() {
       })));
 
       const weapons = Object.keys(WEAPON_COLORS);
-      const weapon = randFrom(weapons);
-      const baseDamage = Math.floor(Math.random() * 35) + 20;
+      const weapon = Math.random() < 0.7 && preferredWeapons.length > 0
+        ? randFrom(preferredWeapons)
+        : randFrom(weapons);
+      const baseDamage = Math.floor((Math.random() * 35 + 20) * damageMultiplier);
 
       const attackerMesh = agentMeshesRef.current.get(attacker.id);
       const defenderMesh = agentMeshesRef.current.get(defender.id);
@@ -1499,7 +1594,15 @@ export default function WatchMode() {
       const roll = Math.random();
       const currentScene = sceneRef.current;
 
-      if (roll < 0.15) {
+      // Apply personality modifiers to outcome thresholds
+      const missThreshold = Math.max(0.05, 0.15 - hitBonus + dodgeBonus);
+      const blockThreshold = missThreshold + Math.min(0.15, 0.08 + blockBonus);
+      const dodgeThreshold = blockThreshold + Math.min(0.12, 0.07 + dodgeBonus);
+      const healThreshold = dodgeThreshold + 0.06;
+      const critThreshold = healThreshold + Math.min(0.15, 0.04 + critBonus);
+      const counterThreshold = critThreshold + 0.04;
+
+      if (roll < missThreshold) {
         // MISS
         createMissProjectile(currentScene, from, to, weapon);
         showDamageNumber(currentScene, to, "MISS", 0x888888);
@@ -1508,7 +1611,7 @@ export default function WatchMode() {
         // TX: small gas fee for miss
         const missHash = fakeTxHash();
         pushTx({ type: "transfer", from: attacker.id, to: "Arena Contract", amount: 1, token: "ARENA", desc: `${attacker.id} fired ${weapon} (miss) — 1 ARENA gas`, txHash: missHash });
-      } else if (roll < 0.23) {
+      } else if (roll < blockThreshold) {
         // SHIELD BLOCK
         createProjectile(currentScene, from, to, weapon, () => {
           showDamageNumber(currentScene, to, "BLOCKED", 0x00ffff);
@@ -1528,7 +1631,7 @@ export default function WatchMode() {
         setTimeout(() => setAgentStates(prev => prev.map(a => a.id === defender.id ? { ...a, shieldActive: false } : a)), 1500);
         // TX: shield activation costs tokens
         pushTx({ type: "contract", from: defender.id, to: "ShieldModule.sol", amount: 3, token: "ARENA", desc: `${defender.id} activated shield module — 3 ARENA`, txHash: fakeTxHash() });
-      } else if (roll < 0.30) {
+      } else if (roll < dodgeThreshold) {
         // DODGE
         createMissProjectile(currentScene, from, to, weapon);
         createDodgeEffect(currentScene, defenderMesh.position.clone(), defender.color);
@@ -1540,7 +1643,7 @@ export default function WatchMode() {
         }
         pushTerminal("call", `${attacker.id}.attack("${weapon}", target="${defender.id}")`);
         pushTerminal("response", `  DODGED — ${defender.id} phase-dashed!`);
-      } else if (roll < 0.36 && attackerState && attackerState.hp < 60) {
+      } else if (roll < healThreshold && attackerState && attackerState.hp < 60) {
         // NANO REPAIR
         const healAmt = Math.floor(Math.random() * 15) + 10;
         showDamageNumber(currentScene, from, `+${healAmt}`, 0x00ff88);
@@ -1550,7 +1653,7 @@ export default function WatchMode() {
         setAgentStates(prev => prev.map(a => a.id === attacker.id ? { ...a, hp: Math.min(100, a.hp + healAmt) } : a));
         // TX: nano repair token cost
         pushTx({ type: "contract", from: attacker.id, to: "NanoRepair.sol", amount: healAmt / 2, token: "ARENA", desc: `${attacker.id} nano-repair: +${healAmt} HP — ${Math.floor(healAmt/2)} ARENA`, txHash: fakeTxHash() });
-      } else if (roll < 0.40) {
+      } else if (roll < critThreshold) {
         // CRITICAL HIT
         const critDamage = baseDamage * 2;
         createProjectile(currentScene, from, to, weapon, () => {
@@ -1575,6 +1678,7 @@ export default function WatchMode() {
               // Sync ref immediately so next interval doesn't target dead agent
               agentStatesRef.current = updated;
               pushKill(`${attacker.id} CRIT-eliminated ${defender.id}`);
+              setKillRecords(prev => [...prev, { matchNum: matchNum + 1, killer: attacker.id, victim: defender.id, weapon, isCrit: true, timestamp: Date.now() }]);
               pushChat("SYSTEM", "#ff4444", `${defender.id} eliminated! (CRITICAL)`);
               lastKillTimeRef.current = Date.now();
               cameraShakeRef.current = 1.0;
@@ -1587,6 +1691,7 @@ export default function WatchMode() {
               pushTx({ type: "transfer", from: "Arena Contract", to: attacker.id, amount: killReward, token: "ARENA", desc: `Kill reward: ${attacker.id} +${killReward} ARENA for eliminating ${defender.id}`, txHash: fakeTxHash() });
               const mesh = agentMeshesRef.current.get(defender.id);
               if (mesh && sceneRef.current) {
+                createEliminationExplosion(sceneRef.current, mesh.position.clone(), defender.color);
                 gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => {
                   mesh.traverse((child) => { if (child instanceof THREE.Mesh) { child.geometry?.dispose(); if (Array.isArray(child.material)) child.material.forEach(m => m.dispose()); else child.material?.dispose(); } });
                   sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id);
@@ -1596,7 +1701,7 @@ export default function WatchMode() {
           }
           return updated;
         });
-      } else if (roll < 0.44) {
+      } else if (roll < counterThreshold) {
         // COUNTER-ATTACK
         createProjectile(currentScene, from, to, weapon, () => {
           showDamageNumber(currentScene, to, "PARRY", 0xffaa00);
@@ -1651,6 +1756,7 @@ export default function WatchMode() {
               // Sync ref immediately so next interval doesn't target dead agent
               agentStatesRef.current = updated;
               pushKill(`${attacker.id} eliminated ${defender.id} with ${weapon}`);
+              setKillRecords(prev => [...prev, { matchNum: matchNum + 1, killer: attacker.id, victim: defender.id, weapon, isCrit: false, timestamp: Date.now() }]);
               pushChat("SYSTEM", "#ff4444", `${defender.id} has been eliminated!`);
               lastKillTimeRef.current = Date.now();
               cameraShakeRef.current = 0.6;
@@ -1663,6 +1769,7 @@ export default function WatchMode() {
               pushTx({ type: "transfer", from: "Arena Contract", to: attacker.id, amount: killReward, token: "ARENA", desc: `Kill reward: ${attacker.id} +${killReward} ARENA`, txHash: fakeTxHash() });
               const mesh = agentMeshesRef.current.get(defender.id);
               if (mesh && sceneRef.current) {
+                createEliminationExplosion(sceneRef.current, mesh.position.clone(), defender.color);
                 gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => {
                   mesh.traverse((child) => { if (child instanceof THREE.Mesh) { child.geometry?.dispose(); if (Array.isArray(child.material)) child.material.forEach(m => m.dispose()); else child.material?.dispose(); } });
                   sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id);
@@ -1673,7 +1780,8 @@ export default function WatchMode() {
           return updated;
         });
       }
-    }, 400);
+
+    }, 350); // Slightly faster base tick for more exciting combat
   }, [pushTerminal, pushChat, pushKill, finishCombat]);
 
   // ─── Start a match ────────────────────────────────────────────────────
@@ -1684,6 +1792,7 @@ export default function WatchMode() {
     setTerminalLines([]);
     setChatMessages([]);
     setKillFeed([]);
+    setKillRecords([]);
     setSessionResult(null);
 
     // x402: All agents pay arena access fee via x402 HTTP payment protocol
@@ -2567,34 +2676,132 @@ export default function WatchMode() {
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* DEBRIEF OVERLAY */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {phase === "debrief" && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.8)" }}>
-          <div className="text-center max-w-lg">
-            <h1 className="text-3xl font-black tracking-[0.2em] mb-4" style={{ color: "#ffd700", textShadow: "0 0 30px rgba(255,215,0,0.5)" }}>TOURNAMENT COMPLETE</h1>
-            <p className="text-gray-400 text-sm mb-6">{totalMatches} matches played</p>
-            {myAgentState && myAgentDef && (
-              <div className="p-4 rounded-lg mb-6" style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.2)" }}>
-                <div className="text-lg font-bold mb-1" style={{ color: hexColor(myAgentDef.color) }}>{myAgentDef.id}</div>
-                <a href={BASESCAN_ADDR(getAgentWallet(myAgentDef.id))} target="_blank" rel="noopener noreferrer" className="text-[9px] font-mono text-blue-400 hover:text-blue-300 mb-3 block">
-                  {getAgentWallet(myAgentDef.id)} ↗
-                </a>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div><div className="text-2xl font-bold text-yellow-400">{myAgentState.tokens}</div><div className="text-[9px] text-gray-500">Final Balance</div></div>
-                  <div><div className="text-2xl font-bold text-green-400">{matchEarnings.reduce((s, m) => s + m.kills, 0)}</div><div className="text-[9px] text-gray-500">Total Kills</div></div>
-                  <div><div className="text-2xl font-bold text-red-400">{matchEarnings.reduce((s, m) => s + m.deaths, 0)}</div><div className="text-[9px] text-gray-500">Total Deaths</div></div>
+      {phase === "debrief" && (() => {
+        // Build leaderboard data from agentStates
+        const leaderboard = AGENTS.map(ag => {
+          const state = agentStates.find(s => s.id === ag.id);
+          const agKills = killRecords.filter(k => k.killer === ag.id);
+          const agDeaths = killRecords.filter(k => k.victim === ag.id);
+          return {
+            id: ag.id,
+            color: ag.color,
+            personality: ag.personality,
+            llm: ag.llm,
+            tokens: state?.tokens ?? 0,
+            kills: state?.kills ?? 0,
+            deaths: state?.deaths ?? 0,
+            alive: state?.alive ?? false,
+            killDetails: agKills,
+            deathDetails: agDeaths,
+          };
+        }).sort((a, b) => {
+          // Sort: alive first, then by kills desc, then by tokens desc
+          if (a.alive !== b.alive) return a.alive ? -1 : 1;
+          if (a.kills !== b.kills) return b.kills - a.kills;
+          return b.tokens - a.tokens;
+        });
+
+        const winner = leaderboard[0];
+        const isMyAgent = (id: string) => selectedAgent === id;
+
+        return (
+          <div className="absolute inset-0 z-20 flex items-center justify-center overflow-y-auto py-8" style={{ background: "rgba(0,0,0,0.85)" }}>
+            <div className="w-full max-w-3xl px-4">
+              {/* Title */}
+              <h1 className="text-3xl font-black tracking-[0.2em] mb-1 text-center" style={{ color: "#ffd700", textShadow: "0 0 30px rgba(255,215,0,0.5)" }}>TOURNAMENT COMPLETE</h1>
+              <p className="text-gray-400 text-sm mb-6 text-center">{totalMatches} matches played</p>
+
+              {/* Winner spotlight */}
+              <div className="p-4 rounded-lg mb-6 text-center" style={{ background: "linear-gradient(135deg, rgba(255,215,0,0.12) 0%, rgba(255,215,0,0.04) 100%)", border: "1px solid rgba(255,215,0,0.3)", boxShadow: "0 0 40px rgba(255,215,0,0.1)" }}>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-yellow-500/70 mb-1">Champion</div>
+                <div className="text-2xl font-black" style={{ color: hexColor(winner.color) }}>{winner.id}</div>
+                <div className="text-[10px] text-gray-400 mt-1">{winner.llm} · {winner.personality}</div>
+                <div className="grid grid-cols-3 gap-4 mt-3">
+                  <div><div className="text-xl font-bold text-yellow-400">{winner.tokens}</div><div className="text-[9px] text-gray-500">Tokens</div></div>
+                  <div><div className="text-xl font-bold text-green-400">{winner.kills}</div><div className="text-[9px] text-gray-500">Kills</div></div>
+                  <div><div className="text-xl font-bold text-red-400">{winner.deaths}</div><div className="text-[9px] text-gray-500">Deaths</div></div>
                 </div>
               </div>
-            )}
-            <button
-              onClick={() => { setPhase("select"); setMatchNum(0); setMatchEarnings([]); setTokenHistory([100]); setSelectedAgent(null); }}
-              className="px-8 py-3 rounded-lg text-sm font-bold tracking-[0.15em] uppercase transition-all hover:scale-105"
-              style={{ background: "linear-gradient(135deg, #00ffff 0%, #ff44aa 100%)", color: "#000" }}
-            >
-              WATCH AGAIN
-            </button>
+
+              {/* Full Leaderboard */}
+              <div className="rounded-lg overflow-hidden mb-4" style={{ border: "1px solid rgba(0,255,255,0.15)" }}>
+                <div className="grid grid-cols-[40px_1fr_80px_60px_60px_60px] gap-2 px-3 py-2 text-[9px] uppercase tracking-wider text-gray-500" style={{ background: "rgba(0,255,255,0.05)" }}>
+                  <div>#</div><div>Agent</div><div>LLM</div><div className="text-center">Tokens</div><div className="text-center">Kills</div><div className="text-center">Deaths</div>
+                </div>
+                {leaderboard.map((ag, idx) => (
+                  <div key={ag.id} className="grid grid-cols-[40px_1fr_80px_60px_60px_60px] gap-2 px-3 py-2 items-center transition-colors" style={{
+                    background: isMyAgent(ag.id) ? "rgba(0,255,255,0.08)" : idx % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                    borderLeft: isMyAgent(ag.id) ? "2px solid #00ffff" : "2px solid transparent",
+                  }}>
+                    <div className="text-sm font-bold" style={{ color: idx === 0 ? "#ffd700" : idx === 1 ? "#c0c0c0" : idx === 2 ? "#cd7f32" : "#666" }}>
+                      {idx === 0 ? "🏆" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm" style={{ color: hexColor(ag.color) }}>{ag.id}</span>
+                      {!ag.alive && <span className="text-[8px] px-1 py-0.5 rounded bg-red-900/50 text-red-400">ELIMINATED</span>}
+                      {isMyAgent(ag.id) && <span className="text-[8px] px-1 py-0.5 rounded bg-cyan-900/50 text-cyan-400">YOUR PICK</span>}
+                    </div>
+                    <div className="text-[10px] text-gray-400 truncate">{ag.llm}</div>
+                    <div className="text-center text-sm font-bold text-yellow-400">{ag.tokens}</div>
+                    <div className="text-center text-sm font-bold text-green-400">{ag.kills}</div>
+                    <div className="text-center text-sm font-bold text-red-400">{ag.deaths}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Kill Feed / Who Killed Who */}
+              {killRecords.length > 0 && (
+                <div className="rounded-lg p-4 mb-6" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">Kill Feed</h3>
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {killRecords.map((kr, idx) => {
+                      const killerDef = AGENTS.find(a => a.id === kr.killer);
+                      const victimDef = AGENTS.find(a => a.id === kr.victim);
+                      return (
+                        <div key={idx} className="flex items-center gap-2 text-xs">
+                          <span className="text-[9px] text-gray-600 w-8">M{kr.matchNum}</span>
+                          <span className="font-bold" style={{ color: hexColor(killerDef?.color ?? 0xffffff) }}>{kr.killer}</span>
+                          <span className="text-gray-500">{kr.isCrit ? "⚡ CRIT" : "→"}</span>
+                          <span className="font-bold" style={{ color: hexColor(victimDef?.color ?? 0xffffff) }}>{kr.victim}</span>
+                          <span className="text-[9px] text-gray-600 ml-auto">{kr.weapon}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Your Agent Summary (if selected) */}
+              {myAgentState && myAgentDef && (
+                <div className="rounded-lg p-4 mb-6" style={{ background: "rgba(0,255,255,0.05)", border: "1px solid rgba(0,255,255,0.15)" }}>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">Your Agent Summary</h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-lg font-black" style={{ color: hexColor(myAgentDef.color) }}>{myAgentDef.id}</span>
+                    <span className="text-[10px] text-gray-500">{myAgentDef.llm} · {myAgentDef.personality}</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-3 text-center">
+                    <div><div className="text-lg font-bold text-yellow-400">{myAgentState.tokens}</div><div className="text-[9px] text-gray-500">Final Balance</div></div>
+                    <div><div className="text-lg font-bold text-green-400">{matchEarnings.reduce((s, m) => s + m.kills, 0)}</div><div className="text-[9px] text-gray-500">Total Kills</div></div>
+                    <div><div className="text-lg font-bold text-red-400">{matchEarnings.reduce((s, m) => s + m.deaths, 0)}</div><div className="text-[9px] text-gray-500">Total Deaths</div></div>
+                    <div><div className="text-lg font-bold text-cyan-400">{myAgentState.alive ? "SURVIVED" : "ELIMINATED"}</div><div className="text-[9px] text-gray-500">Status</div></div>
+                  </div>
+                </div>
+              )}
+
+              {/* Watch Again button */}
+              <div className="text-center">
+                <button
+                  onClick={() => { setPhase("select"); setMatchNum(0); setMatchEarnings([]); setKillRecords([]); setTokenHistory([100]); setSelectedAgent(null); }}
+                  className="px-8 py-3 rounded-lg text-sm font-bold tracking-[0.15em] uppercase transition-all hover:scale-105"
+                  style={{ background: "linear-gradient(135deg, #00ffff 0%, #ff44aa 100%)", color: "#000" }}
+                >
+                  WATCH AGAIN
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

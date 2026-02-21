@@ -1,0 +1,14 @@
+{
+  "query": "SELECT COUNT(*) as total, fileUrl FROM skybox_cache GROUP BY fileUrl LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT COUNT(*) as total, fileUrl FROM skybox_cache GROUP BY fileUrl LIMIT 5;",
+  "rows": [
+    {
+      "total": "137",
+      "fileUrl": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\tfileUrl\n137\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

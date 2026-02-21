@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 
 // M4 Skybox: Cyber Void Arena — dark void, cyan/pink neon grid, floating platforms
-const HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/DRHxtlvwfRpwnNgg.jpg";
+const HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/HOAXaKYIZnIwsgpx.jpg";
 
 interface BountySection {
   id: string;

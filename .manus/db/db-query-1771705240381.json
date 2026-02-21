@@ -1,0 +1,70 @@
+{
+  "query": "SELECT id, status, fileUrl, styleId FROM skybox_cache LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT id, status, fileUrl, styleId FROM skybox_cache LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "35"
+    },
+    {
+      "id": "2",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "89"
+    },
+    {
+      "id": "3",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "89"
+    },
+    {
+      "id": "180001",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "180002",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "210001",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "210002",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "210003",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "210004",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "210005",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tfileUrl\tstyleId\n1\tpending\tNULL\t35\n2\tpending\tNULL\t89\n3\tpending\tNULL\t89\n180001\tpending\tNULL\t188\n180002\tpending\tNULL\t188\n210001\tpending\tNULL\t177\n210002\tpending\tNULL\t185\n210003\tpending\tNULL\t188\n210004\tpending\tNULL\t185\n210005\tpending\tNULL\t179\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

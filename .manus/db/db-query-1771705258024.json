@@ -1,0 +1,832 @@
+{
+  "query": "SELECT id, status, fileUrl, styleId FROM skybox_cache;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT id, status, fileUrl, styleId FROM skybox_cache;",
+  "rows": [
+    {
+      "id": "1",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "35"
+    },
+    {
+      "id": "2",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "89"
+    },
+    {
+      "id": "3",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "89"
+    },
+    {
+      "id": "180001",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "180002",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "210001",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "210002",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "210003",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "210004",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "210005",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "210006",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "210007",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "187"
+    },
+    {
+      "id": "240001",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240002",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240003",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "187"
+    },
+    {
+      "id": "240004",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "240005",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240006",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "187"
+    },
+    {
+      "id": "240007",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "240008",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240009",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "240010",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "240011",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "240012",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "240013",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "187"
+    },
+    {
+      "id": "240014",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "187"
+    },
+    {
+      "id": "240015",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240016",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "240017",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240018",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240019",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "240020",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240021",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "240022",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "240023",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240024",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "187"
+    },
+    {
+      "id": "240025",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240026",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "240027",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "240028",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240029",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "240030",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240031",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "240032",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240033",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "240034",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240035",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "240036",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240037",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "187"
+    },
+    {
+      "id": "240038",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240039",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240040",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "240041",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "240042",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240043",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "240044",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240045",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240046",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240047",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240048",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240049",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "240050",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "240051",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "240052",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "240053",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240054",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240055",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "240056",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "240057",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "270001",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270002",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "270003",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "270004",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "270005",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "270006",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270007",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "184"
+    },
+    {
+      "id": "270008",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "270009",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "270010",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "184"
+    },
+    {
+      "id": "270011",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "184"
+    },
+    {
+      "id": "270012",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270013",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "270014",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "270015",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "270016",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "184"
+    },
+    {
+      "id": "270017",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "184"
+    },
+    {
+      "id": "270018",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270019",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "184"
+    },
+    {
+      "id": "270020",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "270021",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "270022",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270023",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270024",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "270025",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270026",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "184"
+    },
+    {
+      "id": "270027",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270028",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270029",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "270030",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "270031",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "270032",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "270033",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270034",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270035",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270036",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270037",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "270038",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "270039",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "270040",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "270041",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "270042",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "270043",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "270044",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "270045",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270046",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270047",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270048",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270049",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270050",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270051",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "188"
+    },
+    {
+      "id": "270052",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270053",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "270054",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "184"
+    },
+    {
+      "id": "270055",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "270056",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "270057",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "270058",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270059",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270060",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "178"
+    },
+    {
+      "id": "270061",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "270062",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "186"
+    },
+    {
+      "id": "270063",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "300001",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "300002",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "185"
+    },
+    {
+      "id": "300003",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "179"
+    },
+    {
+      "id": "300004",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "177"
+    },
+    {
+      "id": "300005",
+      "status": "pending",
+      "fileUrl": "NULL",
+      "styleId": "184"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tfileUrl\tstyleId\n1\tpending\tNULL\t35\n2\tpending\tNULL\t89\n3\tpending\tNULL\t89\n180001\tpending\tNULL\t188\n180002\tpending\tNULL\t188\n210001\tpending\tNULL\t177\n210002\tpending\tNULL\t185\n210003\tpending\tNULL\t188\n210004\tpending\tNULL\t185\n210005\tpending\tNULL\t179\n210006\tpending\tNULL\t179\n210007\tpending\tNULL\t187\n240001\tpending\tNULL\t179\n240002\tpending\tNULL\t177\n240003\tpending\tNULL\t187\n240004\tpending\tNULL\t178\n240005\tpending\tNULL\t177\n240006\tpending\tNULL\t187\n240007\tpending\tNULL\t186\n240008\tpending\tNULL\t179\n240009\tpending\tNULL\t188\n240010\tpending\tNULL\t188\n240011\tpending\tNULL\t185\n240012\tpending\tNULL\t188\n240013\tpending\tNULL\t187\n240014\tpending\tNULL\t187\n240015\tpending\tNULL\t177\n240016\tpending\tNULL\t178\n240017\tpending\tNULL\t177\n240018\tpending\tNULL\t179\n240019\tpending\tNULL\t188\n240020\tpending\tNULL\t177\n240021\tpending\tNULL\t178\n240022\tpending\tNULL\t185\n240023\tpending\tNULL\t179\n240024\tpending\tNULL\t187\n240025\tpending\tNULL\t179\n240026\tpending\tNULL\t188\n240027\tpending\tNULL\t188\n240028\tpending\tNULL\t179\n240029\tpending\tNULL\t178\n240030\tpending\tNULL\t179\n240031\tpending\tNULL\t188\n240032\tpending\tNULL\t177\n240033\tpending\tNULL\t188\n240034\tpending\tNULL\t179\n240035\tpending\tNULL\t186\n240036\tpending\tNULL\t177\n240037\tpending\tNULL\t187\n240038\tpending\tNULL\t179\n240039\tpending\tNULL\t179\n240040\tpending\tNULL\t178\n240041\tpending\tNULL\t185\n240042\tpending\tNULL\t179\n240043\tpending\tNULL\t178\n240044\tpending\tNULL\t177\n240045\tpending\tNULL\t179\n240046\tpending\tNULL\t177\n240047\tpending\tNULL\t177\n240048\tpending\tNULL\t179\n240049\tpending\tNULL\t186\n240050\tpending\tNULL\t186\n240051\tpending\tNULL\t178\n240052\tpending\tNULL\t186\n240053\tpending\tNULL\t179\n240054\tpending\tNULL\t177\n240055\tpending\tNULL\t177\n240056\tpending\tNULL\t179\n240057\tpending\tNULL\t177\n270001\tpending\tNULL\t178\n270002\tpending\tNULL\t177\n270003\tpending\tNULL\t185\n270004\tpending\tNULL\t179\n270005\tpending\tNULL\t186\n270006\tpending\tNULL\t178\n270007\tpending\tNULL\t184\n270008\tpending\tNULL\t179\n270009\tpending\tNULL\t186\n270010\tpending\tNULL\t184\n270011\tpending\tNULL\t184\n270012\tpending\tNULL\t188\n270013\tpending\tNULL\t185\n270014\tpending\tNULL\t179\n270015\tpending\tNULL\t185\n270016\tpending\tNULL\t184\n270017\tpending\tNULL\t184\n270018\tpending\tNULL\t188\n270019\tpending\tNULL\t184\n270020\tpending\tNULL\t177\n270021\tpending\tNULL\t177\n270022\tpending\tNULL\t188\n270023\tpending\tNULL\t188\n270024\tpending\tNULL\t179\n270025\tpending\tNULL\t188\n270026\tpending\tNULL\t184\n270027\tpending\tNULL\t188\n270028\tpending\tNULL\t178\n270029\tpending\tNULL\t177\n270030\tpending\tNULL\t177\n270031\tpending\tNULL\t177\n270032\tpending\tNULL\t177\n270033\tpending\tNULL\t178\n270034\tpending\tNULL\t178\n270035\tpending\tNULL\t178\n270036\tpending\tNULL\t178\n270037\tpending\tNULL\t185\n270038\tpending\tNULL\t185\n270039\tpending\tNULL\t185\n270040\tpending\tNULL\t185\n270041\tpending\tNULL\t186\n270042\tpending\tNULL\t186\n270043\tpending\tNULL\t186\n270044\tpending\tNULL\t186\n270045\tpending\tNULL\t188\n270046\tpending\tNULL\t188\n270047\tpending\tNULL\t188\n270048\tpending\tNULL\t188\n270049\tpending\tNULL\t188\n270050\tpending\tNULL\t178\n270051\tpending\tNULL\t188\n270052\tpending\tNULL\t178\n270053\tpending\tNULL\t177\n270054\tpending\tNULL\t184\n270055\tpending\tNULL\t179\n270056\tpending\tNULL\t186\n270057\tpending\tNULL\t179\n270058\tpending\tNULL\t178\n270059\tpending\tNULL\t178\n270060\tpending\tNULL\t178\n270061\tpending\tNULL\t179\n270062\tpending\tNULL\t186\n270063\tpending\tNULL\t179\n300001\tpending\tNULL\t179\n300002\tpending\tNULL\t185\n300003\tpending\tNULL\t179\n300004\tpending\tNULL\t177\n300005\tpending\tNULL\t184\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}

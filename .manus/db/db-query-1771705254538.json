@@ -1,0 +1,31 @@
+{
+  "query": "SELECT COUNT(*) as total FROM skybox_cache; SELECT id, status, LEFT(fileUrl, 80) as url_prefix, styleId FROM skybox_cache ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT COUNT(*) as total FROM skybox_cache; SELECT id, status, LEFT(fileUrl, 80) as url_prefix, styleId FROM skybox_cache ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "total": "137"
+    },
+    {
+      "total": "id\tstatus\turl_prefix\tstyleId"
+    },
+    {
+      "total": "300005\tpending\tNULL\t184"
+    },
+    {
+      "total": "300004\tpending\tNULL\t177"
+    },
+    {
+      "total": "300003\tpending\tNULL\t179"
+    },
+    {
+      "total": "300002\tpending\tNULL\t185"
+    },
+    {
+      "total": "300001\tpending\tNULL\t179"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n137\nid\tstatus\turl_prefix\tstyleId\n300005\tpending\tNULL\t184\n300004\tpending\tNULL\t177\n300003\tpending\tNULL\t179\n300002\tpending\tNULL\t185\n300001\tpending\tNULL\t179\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

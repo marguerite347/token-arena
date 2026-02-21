@@ -1347,4 +1347,53 @@
 - [x] Removed both M3 Dark Fantasy entries from COMPLETED_M4_SKYBOXES (now 5 confirmed M4 images)
 - [x] Verified DB cache has 239 entries across styleIds 177,178,185,186,188 (all M4 styles, no M3)
 - [x] Verified static pages (Home, Shop, Demo) use confirmed M4 images
+- [x] Push to GitHub (e0e9190)
+
+## v51 — Deep Debug: 3D Background Still Looks M3
+
+- [ ] Gather full skybox pipeline: proxy endpoint, loadSkybox, DB cache sample URLs
+- [ ] Send to Claude for deep analysis of what image is actually being rendered
+- [ ] Verify DB cached staging URLs actually serve M4 images (download and check)
+- [ ] Apply fix
+- [ ] Test and verify
 - [ ] Push to GitHub
+
+## v52 — Fresh M4 Skybox Generation (Replace All Old)
+
+- [x] Batch-generate 15-20 fresh M4 skyboxes via staging API
+- [x] Poll until all complete, download images
+- [x] Visually verify each is M4 quality
+- [x] Upload all to S3 CDN
+- [x] Replace COMPLETED_M4_SKYBOXES with only new S3 URLs
+- [x] Clear old DB skybox cache entries
+- [x] Remove DB cache fallback from loadSkybox — only use hardcoded S3 URLs
+- [x] Update Home/Shop/Demo backgrounds with new images
+- [x] Test and verify
+- [x] Push to GitHub
+
+## v53 — Tournament Complete Leaderboard
+
+- [x] Add full agent leaderboard to Tournament Complete screen
+- [x] Show all agents ranked by performance (kills, deaths, balance)
+- [x] Show kill feed / who killed who details
+- [x] Style with neon brutalist theme matching the rest of the UI
+
+## v54 — Combat Excitement + Leaderboard
+
+- [x] Send combat system to Claude for visual and mechanic improvement recommendations
+- [x] Add KillRecord interface and structured kill tracking (who killed who, with what weapon, match number)
+- [x] Build full tournament leaderboard on debrief screen (all agents ranked, kills, deaths, K/D ratio)
+- [x] Add kill feed / elimination history to debrief screen
+- [x] Improve combat visual effects (more impactful hits, explosions, screen effects)
+- [x] Improve combat mechanics (more varied damage, special moves, momentum shifts)
+- [x] Apply Claude's combat recommendations
+
+## v55 — Final Cleanup & GitHub Push
+
+- [x] Clear all old staging URLs from skybox_cache DB table (137 entries removed)
+- [x] Verify DB is clean (0 old entries remaining)
+- [x] Verify TypeScript compiles cleanly (0 errors via `npx tsc --noEmit`)
+- [x] Verify all pages use M4 S3 URLs (Home, Shop, Demo, WatchMode all confirmed)
+- [x] Tests: 140/143 pass (3 pre-existing external API failures)
+- [x] Save checkpoint
+- [x] Push to GitHub

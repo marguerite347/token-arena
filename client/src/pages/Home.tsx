@@ -8,8 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Eye, Play, Menu, X, Zap, Swords, Coins, Brain, Trophy, ChevronRight } from "lucide-react";
 
-// M4 Skybox: Digital Void Chamber — cyan/magenta neon grid, Tron-like aesthetic
-const HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/ZKYjtULxRbKctHFh.jpg";
+// Fresh M4 Skybox: Neon Club — vibrant cyberpunk neon environment
+const HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/chQlWersXtPKcQBj.jpg";
 
 export default function Home() {
   const [, navigate] = useLocation();

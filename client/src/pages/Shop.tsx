@@ -20,7 +20,7 @@ const CATEGORIES = [
 ] as const;
 
 // M4 Skybox: Quantum Computing Lab — dark sci-fi interior, blue neon circuits
-const SHOP_BG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gqKCKZfzZwQkVTLk.jpg";
+const SHOP_BG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/XTKSyDabWRQxowFs.jpg";
 
 export default function Shop() {
   const { state, buyItem, equipWeapon } = useGame();
