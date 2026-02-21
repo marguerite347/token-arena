@@ -829,8 +829,8 @@ export default function WatchMode() {
     }
 
     setArenaName(chosenName);
-    // Load S3 CDN URLs directly (no proxy needed), use proxy only for staging URLs
-    const loadUrl = chosenUrl.includes("manuscdn.com") ? chosenUrl : `/api/skybox-proxy?url=${encodeURIComponent(chosenUrl)}`;
+    // Always route through server proxy to avoid CORS issues with manuscdn.com in the browser
+    const loadUrl = `/api/skybox-proxy?url=${encodeURIComponent(chosenUrl)}`;
     const loader = new THREE.TextureLoader();
     loader.crossOrigin = "anonymous";
     loader.load(loadUrl, (texture) => {
@@ -1082,16 +1082,16 @@ export default function WatchMode() {
 
     // Skybox Sphere with default cyberpunk neon grid
     const skyGeo = new THREE.SphereGeometry(100, 64, 64);
-    skyGeo.scale(-1, 1, 1);
+    // No scale(-1,1,1) hack needed — BackSide renders texture on the inside correctly
     
     // Load a random M4 skybox immediately as the initial background
     // This ensures the title/agent-selection screen shows high-quality art from the start
     const initialM4 = COMPLETED_M4_SKYBOXES[Math.floor(Math.random() * COMPLETED_M4_SKYBOXES.length)];
-    // Load S3 CDN URLs directly (no proxy needed)
-    const initialLoadUrl = initialM4.url.includes("manuscdn.com") ? initialM4.url : `/api/skybox-proxy?url=${encodeURIComponent(initialM4.url)}`;
+    // Always route through server proxy — manuscdn.com blocks direct browser requests (CORS)
+    const initialLoadUrl = `/api/skybox-proxy?url=${encodeURIComponent(initialM4.url)}`;
     
-    // Start with a dark placeholder material, then swap in the M4 texture once loaded
-    const skyMat = new THREE.MeshBasicMaterial({ color: 0x0a0a1a, side: THREE.FrontSide });
+    // BackSide renders texture on the inside of the sphere — correct approach for skyboxes
+    const skyMat = new THREE.MeshBasicMaterial({ color: 0x0a0a1a, side: THREE.BackSide });
     const skySphere = new THREE.Mesh(skyGeo, skyMat);
     skySphere.renderOrder = -1;
     skySphere.frustumCulled = false;

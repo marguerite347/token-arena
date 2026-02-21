@@ -1418,3 +1418,20 @@
 - [x] All secrets now use process.env.* - no hardcoded values in working tree
 - [x] NOTE: Git history still contains old keys - must rotate all 3 keys immediately
 - [ ] Push remediated code to GitHub
+
+## Git History Secret Purge
+
+- [x] Install git-filter-repo (v2.47.0)
+- [x] Create secrets replacement file (3 secrets → REDACTED placeholders)
+- [x] Run git-filter-repo — rewrote all 70 commits
+- [x] Verify: all 3 secrets return 0 matches across entire git history
+- [x] Force-push cleaned history to GitHub (196bce7, forced update)
+
+## Bug Fix — M4 Skyboxes Not Visible in Game
+
+- [x] Diagnose root cause: CORS — manuscdn.com blocks direct browser requests; THREE.TextureLoader was loading URLs directly instead of via server proxy
+- [x] Fix 1: Route ALL skybox URLs through /api/skybox-proxy (not just non-manuscdn URLs)
+- [x] Fix 2: Replace skyGeo.scale(-1,1,1) + FrontSide hack with correct THREE.BackSide rendering
+- [x] Proxy verified: all 18 M4 skybox URLs return HTTP 200 via proxy
+- [x] tsc --noEmit passes with 0 errors
+- [ ] Push to GitHub
