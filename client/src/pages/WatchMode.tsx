@@ -620,6 +620,9 @@ export default function WatchMode() {
   const moveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const combatStartTimeRef = useRef<number>(0);
   const pendingApiResultRef = useRef<any>(null);
+  // Match ID guard: incremented on every new match start to invalidate stale finishCombat calls
+  const currentMatchIdRef = useRef<number>(0);
+  const combatFinishedRef = useRef<boolean>(false); // prevents double finishCombat within same match
   const platformsRef = useRef<THREE.Group | null>(null);
 
   // Dynamic camera state
@@ -853,7 +856,17 @@ export default function WatchMode() {
   }, [nextSkyboxUrl, nextSkyboxName, pushTerminal]);
 
   // ─── Transition to intermission or debrief ────────────────────────────
-  const finishCombat = useCallback((data: any) => {
+  const finishCombat = useCallback((data: any, matchId?: number) => {
+    // Guard: prevent double finishCombat for the same match (race between early-winner and ffaPlaytest.onSuccess)
+    if (matchId !== undefined && matchId !== currentMatchIdRef.current) {
+      console.warn(`[finishCombat] Ignoring stale call for match ${matchId}, current is ${currentMatchIdRef.current}`);
+      return;
+    }
+    if (combatFinishedRef.current) {
+      console.warn(`[finishCombat] Already finished this match, ignoring duplicate call`);
+      return;
+    }
+    combatFinishedRef.current = true;
     if (combatIntervalRef.current) { clearInterval(combatIntervalRef.current); combatIntervalRef.current = null; }
     if (moveIntervalRef.current) { clearInterval(moveIntervalRef.current); moveIntervalRef.current = null; }
 
@@ -1012,6 +1025,7 @@ export default function WatchMode() {
       }, 1000);
     } else {
       setPhase("debrief");
+      isRunningRef.current = false;
       setIsRunning(false);
       pushTerminal("system", `[SESSION COMPLETE] ${totalMatches} matches played`);
       pushChat("SYSTEM", "#fbbf24", `Tournament complete! MVP: ${data.summary?.mvp || "Unknown"}`);
@@ -1022,19 +1036,22 @@ export default function WatchMode() {
   const ffaPlaytest = trpc.flywheel.ffa.useMutation({
     onSuccess: (data: any) => {
       pendingApiResultRef.current = data;
+      // Capture matchId at the time the API call completes to guard against stale closures
+      const matchId = currentMatchIdRef.current;
       const elapsed = Date.now() - combatStartTimeRef.current;
       const MIN_COMBAT_MS = 120000; // 2 minutes
       const remaining = Math.max(0, MIN_COMBAT_MS - elapsed);
       if (remaining <= 0) {
-        finishCombat(data);
+        finishCombat(data, matchId);
       } else {
-        setTimeout(() => finishCombat(data), remaining);
+        setTimeout(() => finishCombat(data, matchId), remaining);
       }
     },
     onError: (err: any) => {
       if (combatIntervalRef.current) { clearInterval(combatIntervalRef.current); combatIntervalRef.current = null; }
       if (moveIntervalRef.current) { clearInterval(moveIntervalRef.current); moveIntervalRef.current = null; }
       setPhase("select");
+      isRunningRef.current = false;
       setIsRunning(false);
       pushTerminal("error", `[ERROR] ${err.message}`);
     },
@@ -1496,9 +1513,9 @@ export default function WatchMode() {
           clearInterval(moveIntervalRef.current);
           moveIntervalRef.current = null;
         }
-        // Finish combat immediately with current state
+        // Finish combat immediately with current state — pass matchId to prevent race with ffaPlaytest.onSuccess
         const data = { agents: currentStates, winner: aliveAgents[0]?.id || "DRAW" };
-        finishCombat(data);
+        finishCombat(data, currentMatchIdRef.current);
         return;
       }
 
@@ -1789,7 +1806,12 @@ export default function WatchMode() {
 
   // ─── Start a match ────────────────────────────────────────────────────
   const startMatch = useCallback(async () => {
-    if (isRunning) return;
+    // Check both state (for normal flow) and ref (for synchronous guard in startNextMatch)
+    if (isRunning || isRunningRef.current) return;
+    isRunningRef.current = true;
+    // Increment match ID to invalidate any stale finishCombat calls from previous match
+    currentMatchIdRef.current += 1;
+    combatFinishedRef.current = false;
     setIsRunning(true);
     setPhase("loading");
     setTerminalLines([]);
@@ -1854,6 +1876,8 @@ export default function WatchMode() {
 
   // ─── Start next match (from intermission) ─────────────────────────────
   const startNextMatchRef = useRef<() => void>(() => {});
+  // isRunning ref mirrors the state so startMatch guard works synchronously (React setState is async)
+  const isRunningRef = useRef(false);
   const startNextMatch = useCallback(() => {
     if (intermissionTimerRef.current) clearInterval(intermissionTimerRef.current);
     setAgentStates(AGENTS.map(a => ({
@@ -1861,6 +1885,8 @@ export default function WatchMode() {
       tokens: tokenHistory[tokenHistory.length - 1] || 100, tokensEarned: 0, tokensSpent: 0, alive: true,
       shieldActive: false, shieldCooldown: 0, dodgeCooldown: 0, dashCooldown: 0, weaponSwapCooldown: 0, abilityActive: false,
     })));
+    // Reset ref synchronously so startMatch guard sees the correct value immediately
+    isRunningRef.current = false;
     setIsRunning(false);
     startMatch();
   }, [startMatch, tokenHistory]);
@@ -2794,7 +2820,7 @@ export default function WatchMode() {
               {/* Watch Again button */}
               <div className="text-center">
                 <button
-                  onClick={() => { setPhase("select"); setMatchNum(0); setMatchEarnings([]); setKillRecords([]); setTokenHistory([100]); setSelectedAgent(null); }}
+                  onClick={() => { isRunningRef.current = false; setPhase("select"); setMatchNum(0); setMatchEarnings([]); setKillRecords([]); setTokenHistory([100]); setSelectedAgent(null); }}
                   className="px-8 py-3 rounded-lg text-sm font-bold tracking-[0.15em] uppercase transition-all hover:scale-105"
                   style={{ background: "linear-gradient(135deg, #00ffff 0%, #ff44aa 100%)", color: "#000" }}
                 >

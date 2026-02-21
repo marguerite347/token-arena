@@ -1356,7 +1356,7 @@
 - [ ] Verify DB cached staging URLs actually serve M4 images (download and check)
 - [ ] Apply fix
 - [ ] Test and verify
-- [ ] Push to GitHub
+- [x] Push to GitHub (12f2750f)
 
 ## v52 — Fresh M4 Skybox Generation (Replace All Old)
 
@@ -1433,5 +1433,16 @@
 - [x] Fix 1: Route ALL skybox URLs through /api/skybox-proxy (not just non-manuscdn URLs)
 - [x] Fix 2: Replace skyGeo.scale(-1,1,1) + FrontSide hack with correct THREE.BackSide rendering
 - [x] Proxy verified: all 18 M4 skybox URLs return HTTP 200 via proxy
+- [x] tsc --noEmit passes with 0 errors
+- [x] Push to GitHub (12f2750f)
+
+## Bug Fix — Battle Restart Loop / Skybox Cycling
+
+- [x] Diagnose root cause: double finishCombat race (startCombat early-winner + ffaPlaytest.onSuccess both fire), stale matchNum closure, async isRunning state race in startNextMatch
+- [x] Fix 1: Added currentMatchIdRef + combatFinishedRef guards to finishCombat to prevent duplicate calls
+- [x] Fix 2: startMatch increments matchId and resets combatFinishedRef on every new match
+- [x] Fix 3: ffaPlaytest.onSuccess captures matchId at call time (not stale closure)
+- [x] Fix 4: Added isRunningRef to mirror isRunning state synchronously for startNextMatch guard
+- [x] Fix 5: All setIsRunning(false) calls also reset isRunningRef.current
 - [x] tsc --noEmit passes with 0 errors
 - [ ] Push to GitHub
