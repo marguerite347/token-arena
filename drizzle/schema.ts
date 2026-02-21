@@ -777,3 +777,39 @@ export const daoDomainActions = mysqlTable("dao_domain_actions", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type DaoDomainActionRow = typeof daoDomainActions.$inferSelect;
+
+/**
+ * NFT Ownership — tracks who owns which memory NFTs (for gated access)
+ */
+export const nftOwnership = mysqlTable("nft_ownership", {
+  id: int("id").autoincrement().primaryKey(),
+  tokenId: varchar("tokenId", { length: 64 }).notNull(),
+  ownerWallet: varchar("ownerWallet", { length: 128 }).notNull(),
+  ownerType: varchar("ownerType", { length: 16 }).notNull().default("spectator"),
+  ownerAgentId: int("ownerAgentId"),
+  purchasePrice: int("purchasePrice").notNull().default(0),
+  purchasedAt: timestamp("purchasedAt").defaultNow().notNull(),
+});
+export type NftOwnershipRow = typeof nftOwnership.$inferSelect;
+export type InsertNftOwnership = typeof nftOwnership.$inferInsert;
+
+/**
+ * Transaction Log — real-time log of all on-chain activity visible in Watch Mode
+ */
+export const txLog = mysqlTable("tx_log", {
+  id: int("id").autoincrement().primaryKey(),
+  txType: varchar("txType", { length: 32 }).notNull(),
+  txHash: varchar("txHash", { length: 128 }).notNull(),
+  fromAgent: varchar("fromAgent", { length: 64 }),
+  toAgent: varchar("toAgent", { length: 64 }),
+  amount: varchar("amount", { length: 64 }),
+  token: varchar("token", { length: 32 }),
+  description: text("description").notNull(),
+  basescanUrl: varchar("basescanUrl", { length: 256 }),
+  matchId: int("matchId"),
+  nftTokenId: varchar("nftTokenId", { length: 64 }),
+  metadata: text("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type TxLogRow = typeof txLog.$inferSelect;
+export type InsertTxLog = typeof txLog.$inferInsert;

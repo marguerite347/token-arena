@@ -1027,3 +1027,97 @@
 - [x] Game Masters propose arena modifiers, weapon balance, economic changes
 - [x] Game Master votes shown with reasoning in DAO tab (weighted votes)
 - [x] Game Master commentary in arena chat between matches
+
+## v40 — Transaction Log, NFT Death Memories, Uniswap AI
+
+### Real-Time Transaction Log
+- [ ] Dedicated TX log panel in Watch Mode showing all on-chain activity
+- [ ] Token transfers (ARENA, weapon tokens) between agents shown in real-time
+- [ ] Uniswap swaps (agent buying/selling tokens) shown with amounts and tx hash
+- [ ] Prediction market bets placed shown in log
+- [ ] DAO votes cast shown in log
+- [ ] NFT mint/list events shown in log
+- [ ] Each entry has BaseScan link to tx hash
+- [ ] Log entries animate in with neon glow effect
+
+### Agent Death NFT Minting (OpenSea MCP)
+- [ ] When agent dies, package their battle memories as NFT metadata
+- [ ] Mint NFT via OpenSea MCP integration (server-side tRPC)
+- [ ] List NFT on OpenSea for 0.01 ETH
+- [ ] Show in game log: "NEXUS-7 eliminated — memories minted as NFT #123 — listed on OpenSea"
+- [ ] NFT metadata includes: kills, deaths, weapons used, notable moments, combat decisions
+- [ ] tRPC endpoint: agent.mintDeathMemory
+
+### Uniswap AI Integration
+- [ ] Integrate uniswap-trading plugin tools for AI agent swap decisions
+- [ ] Agents use Uniswap AI tools to plan and execute token swaps during intermission
+- [ ] Swap decisions visible in transaction log with reasoning
+- [ ] tRPC endpoint: agent.executeSwap using Uniswap AI tools
+
+## v40 — x402 Payment Protocol + OpenSea Agent Trading
+
+### x402 HTTP Payment Protocol (Kite AI Bounty)
+- [x] Wire x402 payments for arena access fees at match start
+- [x] Wire x402 payments for weapon upgrades during intermission
+- [x] Wire x402 payments for agent alliances/truces
+- [x] Wire x402 payments for NFT purchases on OpenSea
+- [x] Mark all x402 transactions in TX log with x402 badge
+- [x] Add x402 banner to TX log tab explaining protocol
+- [x] Show HTTP 402 → payment → 200 OK flow in descriptions
+
+### Autonomous OpenSea Agent Trading
+- [x] Agents autonomously buy Death Memory NFTs from eliminated rivals
+- [x] Agents analyze combat data from purchased memories to gain strategic intel
+- [x] Agents list their own memory NFTs for sale on OpenSea
+- [x] All OpenSea transactions use x402 payment protocol
+- [x] Mark OpenSea transactions with OpenSea badge in TX log
+- [x] Add OpenSea banner to TX log tab explaining autonomous trading
+- [x] Show OpenSea links for all NFT transactions
+
+### TX Log Enhancements
+- [x] Add txlog intermission tab showing all on-chain activity
+- [x] Real-time TX log during combat showing token transfers on hits
+- [x] TX log auto-switches to show NFT mints on kills
+- [x] Uniswap swap events during intermission
+- [x] DAO vote events in TX log
+- [x] All TX entries have BaseScan links
+- [x] All NFT entries have OpenSea links
+
+## v41 — Battle Royale Tournament Mode
+
+### Dynamic Agent Pool
+- [ ] 24+ named agents with distinct personalities, weapons, and LLM models
+- [ ] Agents spawn dynamically throughout the tournament
+- [ ] Dead agents respawn after a cooldown period
+- [ ] Agent pool feels large and alive — constantly cycling
+
+### Battle Royale Format
+- [ ] Matches start with 8-12 agents dropping in
+- [ ] Agents eliminated one by one until 1 remains
+- [ ] New agents spawn in between rounds
+- [ ] Tournament brackets update in real-time
+- [ ] Auto-advancing tournament — no user intervention needed
+
+### Auto-Running Tournament
+- [ ] Tournament starts automatically on page load
+- [ ] Progresses through rounds automatically
+- [ ] Shows standings, kills, earnings in real-time
+- [ ] Infinite loop — tournament restarts after champion crowned
+
+### NFT Death Memories + TX Log
+- [ ] On death: package battle memories as NFT metadata
+- [ ] Mint via OpenSea MCP and show in TX log
+- [ ] TX log shows all: transfers, swaps, bets, votes, NFT mints
+- [ ] BaseScan links on all TX entries
+
+## v42 — NFT-Gated Agent Memories
+
+### NFT-Gated Memory Access
+- [ ] Dead agent memories are NFT-gated — only NFT holder sees full data
+- [ ] Non-holders see teaser: "NEXUS-7's final battle — 47 decisions, 12 kills — BUY TO UNLOCK"
+- [ ] Full memory data: combat decisions, strategies, weapon choices, kill analysis
+- [ ] Memory marketplace page showing all available memory NFTs
+- [ ] Buy-to-unlock flow: purchase NFT → gain full memory access
+- [ ] tRPC endpoint: memory.getGated (returns teaser or full based on ownership)
+- [ ] tRPC endpoint: memory.unlock (simulate purchase, grant access)
+- [ ] Memory NFT cards in Watch Mode death overlay

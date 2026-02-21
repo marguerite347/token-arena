@@ -1480,6 +1480,173 @@ export const appRouter = router({
         return dispatchMCPTool(input.tool as any, input.params);
       }),
   }),
+
+  // ─── Battle Royale Service ─────────────────────────────────────
+  battleRoyale: router({
+    // Get the full agent pool
+    agentPool: publicProcedure.query(async () => {
+      const { BATTLE_ROYALE_AGENTS, GAME_MASTER_AGENTS } = await import("./battleRoyaleService");
+      return { agents: BATTLE_ROYALE_AGENTS, gameMasters: GAME_MASTER_AGENTS };
+    }),
+
+    // Mint death memory NFT when an agent is eliminated
+    mintDeathMemory: publicProcedure
+      .input(z.object({
+        agentId: z.number(),
+        agentName: z.string(),
+        kills: z.number(),
+        deaths: z.number(),
+        matchesPlayed: z.number().default(1),
+        finalWeapon: z.string(),
+        matchId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { mintDeathMemoryNFT } = await import("./battleRoyaleService");
+        return mintDeathMemoryNFT(input);
+      }),
+
+    // Generate dynamic bets for next match
+    generateBets: publicProcedure
+      .input(z.object({
+        matchNum: z.number(),
+        agents: z.array(z.object({
+          name: z.string(),
+          kills: z.number(),
+          hp: z.number(),
+          tokenBalance: z.number(),
+          alive: z.boolean(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        const { generateDynamicBets } = await import("./battleRoyaleService");
+        return generateDynamicBets(input.agents, input.matchNum);
+      }),
+
+    // Log a transaction event
+    logTransaction: publicProcedure
+      .input(z.object({
+        txType: z.string(),
+        fromAgent: z.string().optional(),
+        toAgent: z.string().optional(),
+        amount: z.string().optional(),
+        token: z.string().optional(),
+        description: z.string(),
+        matchId: z.number().optional(),
+        nftTokenId: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { logTx } = await import("./battleRoyaleService");
+        return logTx(input);
+      }),
+
+    // Get recent transaction log
+    recentTxLog: publicProcedure
+      .input(z.object({ limit: z.number().default(50), matchId: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        const { getRecentTxLog } = await import("./battleRoyaleService");
+        return getRecentTxLog(input?.limit ?? 50, input?.matchId);
+      }),
+  }),
+
+  // ─── NFT-Gated Memory Access ───────────────────────────────────
+  gatedMemory: router({
+    // Get memory NFT — returns teaser or full based on ownership
+    get: publicProcedure
+      .input(z.object({
+        tokenId: z.string(),
+        ownerWallet: z.string().optional(), // if provided, check ownership for full access
+      }))
+      .query(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        if (!db) return null;
+        const { memoryNfts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        const rows = await db.select().from(memoryNfts).where(eq(memoryNfts.tokenId, input.tokenId)).limit(1);
+        if (!rows.length) return null;
+        const nft = rows[0];
+        // Check ownership
+        let hasAccess = false;
+        if (input.ownerWallet) {
+          const { checkNFTOwnership } = await import("./battleRoyaleService");
+          hasAccess = await checkNFTOwnership(input.tokenId, input.ownerWallet);
+        }
+        if (hasAccess) {
+          // Full access — return everything
+          return { ...nft, gated: false, fullAccess: true };
+        } else {
+          // Teaser only
+          const content = JSON.parse(nft.content || "{}");
+          const memCount = (content.memories?.length ?? 0) + (content.strategies?.length ?? 0);
+          return {
+            tokenId: nft.tokenId,
+            originalAgentName: nft.originalAgentName,
+            rarity: nft.rarity,
+            listPrice: nft.listPrice,
+            summary: nft.summary,
+            status: nft.status,
+            mintedAt: nft.mintedAt,
+            gated: true,
+            fullAccess: false,
+            teaser: `${nft.originalAgentName}'s final battle memories — ${memCount} combat decisions — BUY TO UNLOCK (${nft.listPrice} ARENA)`,
+            previewMemory: content.memories?.[0] ?? "Combat data encrypted",
+          };
+        }
+      }),
+
+    // Purchase a memory NFT to unlock full access
+    purchase: publicProcedure
+      .input(z.object({
+        tokenId: z.string(),
+        ownerWallet: z.string(),
+        ownerType: z.enum(["spectator", "agent"]).default("spectator"),
+        ownerAgentId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { purchaseMemoryNFT } = await import("./battleRoyaleService");
+        // Get the price from DB
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        let price = 50;
+        if (db) {
+          const { memoryNfts } = await import("../drizzle/schema");
+          const { eq } = await import("drizzle-orm");
+          const rows = await db.select().from(memoryNfts).where(eq(memoryNfts.tokenId, input.tokenId)).limit(1);
+          if (rows.length) price = rows[0].listPrice;
+        }
+        return purchaseMemoryNFT(input.tokenId, input.ownerWallet, input.ownerType, input.ownerAgentId, price);
+      }),
+
+    // List all memory NFTs with teaser data
+    listAll: publicProcedure
+      .input(z.object({ limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        if (!db) return [];
+        const { memoryNfts } = await import("../drizzle/schema");
+        const { desc } = await import("drizzle-orm");
+        const rows = await db.select().from(memoryNfts)
+          .orderBy(desc(memoryNfts.mintedAt))
+          .limit(input?.limit ?? 20);
+        return rows.map(nft => {
+          const content = JSON.parse(nft.content || "{}");
+          const memCount = (content.memories?.length ?? 0) + (content.strategies?.length ?? 0);
+          return {
+            tokenId: nft.tokenId,
+            originalAgentName: nft.originalAgentName,
+            rarity: nft.rarity,
+            listPrice: nft.listPrice,
+            summary: nft.summary,
+            status: nft.status,
+            mintedAt: nft.mintedAt,
+            gated: true,
+            teaser: `${nft.originalAgentName}'s battle — ${memCount} decisions — BUY TO UNLOCK`,
+            previewMemory: content.memories?.[0] ?? "Combat data encrypted",
+          };
+        });
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

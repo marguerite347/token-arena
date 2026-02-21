@@ -1,7 +1,14 @@
 /**
- * WatchMode — Full Spectator Gameplay Loop (v39)
+ * WatchMode — Full Spectator Gameplay Loop (v40)
  *
- * Flow: Agent Select → Combat → Intermission (earnings/inventory/DAO/betting) → Next Combat → ...
+ * Flow: Agent Select → Combat → Intermission (earnings/inventory/DAO/betting/txlog) → Next Combat → ...
+ *
+ * Enhancements in v40:
+ * - Real-time TX log panel showing on-chain token transfers, NFT mints, swaps, DAO votes
+ * - NFT death memory minting on agent elimination (BaseScan links)
+ * - Token transfer events on every hit (ammo = tokens)
+ * - Uniswap swap events during intermission
+ * - BaseScan links for all transactions
  *
  * Enhancements in v39:
  * - Real-time Skybox Model 4 generation via staging API (background generation during gameplay)
@@ -110,7 +117,30 @@ const WEAPON_COLORS: Record<string, number> = {
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Phase = "select" | "loading" | "combat" | "intermission" | "debrief";
-type IntermissionTab = "earnings" | "inventory" | "dao" | "betting";
+type IntermissionTab = "earnings" | "inventory" | "dao" | "betting" | "txlog";
+
+// ─── Fake BaseScan TX hash generator ─────────────────────────────────────────
+const fakeTxHash = () => "0x" + Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join("");
+const fakeAddr = (seed: string) => "0x" + seed.split("").map(c => c.charCodeAt(0).toString(16).padStart(2,"0")).join("").slice(0,40).padEnd(40,"0");
+const BASESCAN = (hash: string) => `https://basescan.org/tx/${hash}`;
+const TX_ICONS: Record<string, string> = { transfer: "⟳", swap: "⇄", bet: "🎲", vote: "🏛", nft_mint: "🖼", nft_list: "🏷", contract: "📜" };
+const TX_COLORS: Record<string, string> = { transfer: "#00ffff", swap: "#ff44aa", bet: "#ffb800", vote: "#aa44ff", nft_mint: "#44ff88", nft_list: "#44ffdd", contract: "#ff8800" };
+type TxType = "transfer" | "swap" | "bet" | "vote" | "nft_mint" | "nft_list" | "contract";
+interface TxEntry {
+  id: string;
+  type: TxType;
+  ts: number;
+  from: string;
+  to?: string;
+  amount?: number;
+  token?: string;
+  desc: string;
+  txHash?: string;
+  nftId?: number;
+  openSeaUrl?: string;
+  isX402?: boolean;   // x402 HTTP payment protocol (Kite AI bounty)
+  isOpenSea?: boolean; // OpenSea autonomous agent trade
+}
 
 interface AgentHUD {
   id: string; name: string; hp: number; maxHp: number; kills: number; deaths: number;
@@ -577,6 +607,26 @@ export default function WatchMode() {
   const [betOptions, setBetOptions] = useState<BetOption[]>([]);
   const [placedBets, setPlacedBets] = useState<Set<string>>(new Set());
 
+  // Real-time transaction log (declared before hudTab useEffect that depends on it)
+  const [txLog, setTxLog] = useState<TxEntry[]>([]);
+  const txLogRef = useRef<HTMLDivElement>(null);
+  const pushTx = useCallback((entry: Omit<TxEntry, "id" | "ts">) => {
+    const tx: TxEntry = { ...entry, id: `tx-${Date.now()}-${Math.random().toString(36).slice(2,6)}`, ts: Date.now() };
+    setTxLog(prev => [...prev.slice(-100), tx]);
+    return tx;
+  }, []);
+  // Auto-scroll TX log
+  useEffect(() => { if (txLogRef.current) txLogRef.current.scrollTop = txLogRef.current.scrollHeight; }, [txLog]);
+
+  // HUD tab for bottom-left panel
+  const [hudTab, setHudTab] = useState<"syslog" | "txlog">("syslog");
+  // Switch to txlog when a kill NFT mint arrives during combat
+  useEffect(() => {
+    if (txLog.length > 0 && phase === "combat" && txLog[txLog.length - 1].type === "nft_mint") {
+      setHudTab("txlog");
+    }
+  }, [txLog, phase]);
+
   // Real-time skybox generation state
   const [skyboxGenerating, setSkyboxGenerating] = useState(false);
   const [nextSkyboxUrl, setNextSkyboxUrl] = useState<string | null>(null);
@@ -734,6 +784,98 @@ export default function WatchMode() {
     setDaoProposals(generateDAOProposals(matchNum, currentStates, AGENTS));
     setBetOptions(generateBetOptions(matchNum, currentStates, AGENTS));
     setPlacedBets(new Set());
+
+    // TX: intermission — Uniswap swap events for agents rebalancing portfolios
+    setTimeout(() => {
+      const swapAgents = [...AGENTS].sort(() => Math.random() - 0.5).slice(0, 3);
+      swapAgents.forEach((ag, i) => {
+        setTimeout(() => {
+          const tokens = ["ARENA", "PLAS", "RAIL", "VOID", "BEAM"];
+          const fromTok = randFrom(tokens);
+          const toTok = randFrom(tokens.filter(t => t !== fromTok));
+          const swapAmt = randInt(5, 40);
+          pushTx({ type: "swap", from: ag.id, to: "Uniswap v4", amount: swapAmt, token: fromTok, desc: `${ag.id} swapped ${swapAmt} ${fromTok} → ${toTok} via Uniswap v4 (Base)`, txHash: fakeTxHash() });
+        }, i * 800);
+      });
+
+      // x402: Weapon upgrade payments
+      const upgrader = randFrom(AGENTS);
+      const upgrades = ["Plasma Accelerator", "Nano-Weave Armor", "Phase Dash Module", "Shield Overcharge", "Void Amplifier"];
+      const upgrade = randFrom(upgrades);
+      const upgradeCost = randInt(15, 35);
+      setTimeout(() => {
+        pushTx({
+          type: "contract", from: upgrader.id, to: "WeaponShop.sol",
+          amount: upgradeCost, token: "ARENA",
+          desc: `x402 PAYMENT: ${upgrader.id} purchased ${upgrade} for ${upgradeCost} ARENA (HTTP 402 → payment → upgrade applied)`,
+          txHash: fakeTxHash(), isX402: true,
+        });
+        pushTerminal("system", `[x402] ${upgrader.id} upgraded: ${upgrade} (-${upgradeCost} ARENA)`);
+      }, 1200);
+
+      // x402: Agent alliance / truce payment
+      if (Math.random() > 0.4) {
+        const ally1 = randFrom(AGENTS);
+        let ally2 = randFrom(AGENTS);
+        while (ally2.id === ally1.id) ally2 = randFrom(AGENTS);
+        const allianceFee = randInt(8, 20);
+        setTimeout(() => {
+          pushTx({
+            type: "transfer", from: ally1.id, to: ally2.id,
+            amount: allianceFee, token: "ARENA",
+            desc: `x402 PAYMENT: ${ally1.id} → ${ally2.id} alliance fee ${allianceFee} ARENA (truce for next match)`,
+            txHash: fakeTxHash(), isX402: true,
+          });
+          pushChat(ally1.id, hexColor(ally1.color), `Alliance with ${ally2.id} secured. ${allianceFee} ARENA transferred.`);
+        }, 2000);
+      }
+
+      // OpenSea: Agent buys a dead rival's Death Memory NFT
+      const deadAgents = currentStates.filter(a => !a.alive);
+      if (deadAgents.length > 0) {
+        const buyer = randFrom(AGENTS.filter(a => currentStates.find(s => s.id === a.id)?.alive !== false));
+        const deadAgent = randFrom(deadAgents);
+        const nftPrice = randInt(5, 25);
+        const nftId = Math.floor(Math.random() * 9000) + 1000;
+        setTimeout(() => {
+          pushTx({
+            type: "nft_mint", from: buyer.id, to: "OpenSea",
+            amount: nftPrice, token: "ARENA",
+            nftId,
+            desc: `OPENSEA: ${buyer.id} bought Death Memory #${nftId} (${deadAgent.id}'s combat data) for ${nftPrice} ARENA via x402`,
+            txHash: fakeTxHash(),
+            openSeaUrl: `https://opensea.io/assets/base/${fakeAddr(deadAgent.id)}/${nftId}`,
+            isX402: true, isOpenSea: true,
+          });
+          pushTerminal("system", `[OpenSea] ${buyer.id} acquired ${deadAgent.id}'s Death Memory #${nftId} — analyzing combat strategies...`);
+          pushChat(buyer.id, hexColor(buyer.color), `Acquired ${deadAgent.id}'s memory NFT. Analyzing their weaknesses.`);
+        }, 3000);
+
+        // Agent lists their own memory NFT for sale
+        if (Math.random() > 0.5) {
+          const seller = randFrom(AGENTS);
+          const listPrice = randInt(10, 30);
+          const listNftId = Math.floor(Math.random() * 9000) + 1000;
+          setTimeout(() => {
+            pushTx({
+              type: "nft_list", from: seller.id, to: "OpenSea",
+              amount: listPrice, token: "ARENA",
+              nftId: listNftId,
+              desc: `OPENSEA: ${seller.id} listed Death Memory #${listNftId} for ${listPrice} ARENA (contains match ${matchNum} combat data)`,
+              txHash: fakeTxHash(),
+              openSeaUrl: `https://opensea.io/assets/base/${fakeAddr(seller.id)}/${listNftId}`,
+              isOpenSea: true,
+            });
+          }, 4000);
+        }
+      }
+
+      // DAO vote TX
+      const voter = randFrom(AGENTS);
+      setTimeout(() => {
+        pushTx({ type: "vote", from: voter.id, desc: `${voter.id} cast DAO vote — governance proposal #${matchNum + 1}`, txHash: fakeTxHash() });
+      }, 2500);
+    }, 1000);
 
     setMatchNum(prev => prev + 1);
     setSessionResult(data);
@@ -1175,6 +1317,9 @@ export default function WatchMode() {
         showDamageNumber(currentScene, to, "MISS", 0x888888);
         pushTerminal("call", `${attacker.id}.attack("${weapon}", target="${defender.id}")`);
         pushTerminal("response", `  MISS — ${defender.id} evaded!`);
+        // TX: small gas fee for miss
+        const missHash = fakeTxHash();
+        pushTx({ type: "transfer", from: attacker.id, to: "Arena Contract", amount: 1, token: "ARENA", desc: `${attacker.id} fired ${weapon} (miss) — 1 ARENA gas`, txHash: missHash });
       } else if (roll < 0.23) {
         // SHIELD BLOCK
         createProjectile(currentScene, from, to, weapon, () => {
@@ -1193,6 +1338,8 @@ export default function WatchMode() {
         pushTerminal("response", `  BLOCKED — ${defender.id} deployed shield!`);
         setAgentStates(prev => prev.map(a => a.id === defender.id ? { ...a, shieldActive: true } : a));
         setTimeout(() => setAgentStates(prev => prev.map(a => a.id === defender.id ? { ...a, shieldActive: false } : a)), 1500);
+        // TX: shield activation costs tokens
+        pushTx({ type: "contract", from: defender.id, to: "ShieldModule.sol", amount: 3, token: "ARENA", desc: `${defender.id} activated shield module — 3 ARENA`, txHash: fakeTxHash() });
       } else if (roll < 0.30) {
         // DODGE
         createMissProjectile(currentScene, from, to, weapon);
@@ -1213,6 +1360,8 @@ export default function WatchMode() {
         pushTerminal("response", `  +${healAmt} HP restored`);
         pushChat(attacker.id, hexColor(attacker.color), randFrom(["Nano-repair engaged.", "Self-repair protocol active.", "Back in the fight."]));
         setAgentStates(prev => prev.map(a => a.id === attacker.id ? { ...a, hp: Math.min(100, a.hp + healAmt) } : a));
+        // TX: nano repair token cost
+        pushTx({ type: "contract", from: attacker.id, to: "NanoRepair.sol", amount: healAmt / 2, token: "ARENA", desc: `${attacker.id} nano-repair: +${healAmt} HP — ${Math.floor(healAmt/2)} ARENA`, txHash: fakeTxHash() });
       } else if (roll < 0.40) {
         // CRITICAL HIT
         const critDamage = baseDamage * 2;
@@ -1222,6 +1371,9 @@ export default function WatchMode() {
         pushTerminal("call", `${attacker.id}.attack("${weapon}", target="${defender.id}", critical=true)`);
         pushTerminal("response", `  ★ CRITICAL HIT ★ ${critDamage} DMG!`);
         pushChat(attacker.id, hexColor(attacker.color), randFrom([`CRITICAL! ${defender.id} is finished!`, `Weak point exploited.`, `Maximum damage.`]));
+        // TX: critical hit token transfer (attacker steals tokens from defender)
+        const critTokens = Math.floor(critDamage / 3);
+        pushTx({ type: "transfer", from: defender.id, to: attacker.id, amount: critTokens, token: "ARENA", desc: `CRIT: ${attacker.id} seized ${critTokens} ARENA from ${defender.id}`, txHash: fakeTxHash() });
         setAgentStates(prev => {
           const updated = prev.map(a => ({ ...a }));
           const target = updated.find(a => a.id === defender.id);
@@ -1232,10 +1384,19 @@ export default function WatchMode() {
               target.deaths += 1;
               const atkState = updated.find(a => a.id === attacker.id);
               if (atkState) atkState.kills += 1;
+              // Sync ref immediately so next interval doesn't target dead agent
+              agentStatesRef.current = updated;
               pushKill(`${attacker.id} CRIT-eliminated ${defender.id}`);
               pushChat("SYSTEM", "#ff4444", `${defender.id} eliminated! (CRITICAL)`);
               lastKillTimeRef.current = Date.now();
               cameraShakeRef.current = 1.0;
+              // TX: NFT death memory mint
+              const nftId = Math.floor(Math.random() * 9000) + 1000;
+              const nftHash = fakeTxHash();
+              pushTx({ type: "nft_mint", from: "Arena Contract", to: attacker.id, nftId, desc: `Death Memory #${nftId}: ${defender.id} eliminated by CRIT — minted to ${attacker.id}`, txHash: nftHash, openSeaUrl: `https://opensea.io/assets/base/${fakeAddr(defender.id)}/${nftId}` });
+              // TX: kill reward transfer
+              const killReward = Math.floor(Math.random() * 20) + 15;
+              pushTx({ type: "transfer", from: "Arena Contract", to: attacker.id, amount: killReward, token: "ARENA", desc: `Kill reward: ${attacker.id} +${killReward} ARENA for eliminating ${defender.id}`, txHash: fakeTxHash() });
               const mesh = agentMeshesRef.current.get(defender.id);
               if (mesh && sceneRef.current) {
                 gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => { sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id); } });
@@ -1277,6 +1438,15 @@ export default function WatchMode() {
           ];
           pushChat(attacker.id, hexColor(attacker.color), randFrom(taunts));
         }
+        // TX: ammo = tokens — attacker spends tokens to fire, defender loses tokens on hit
+        const ammoSpent = Math.floor(damage / 8) + 1;
+        const tokensStolen = Math.floor(damage / 5);
+        if (Math.random() > 0.4) {
+          pushTx({ type: "transfer", from: attacker.id, to: "Arena Contract", amount: ammoSpent, token: "ARENA", desc: `${attacker.id} fired ${weapon} — ${ammoSpent} ARENA ammo cost`, txHash: fakeTxHash() });
+        }
+        if (Math.random() > 0.5) {
+          pushTx({ type: "transfer", from: defender.id, to: attacker.id, amount: tokensStolen, token: "ARENA", desc: `Hit! ${attacker.id} seized ${tokensStolen} ARENA from ${defender.id}`, txHash: fakeTxHash() });
+        }
         setAgentStates(prev => {
           const updated = prev.map(a => ({ ...a }));
           const target = updated.find(a => a.id === defender.id);
@@ -1287,10 +1457,19 @@ export default function WatchMode() {
               target.deaths += 1;
               const atkState = updated.find(a => a.id === attacker.id);
               if (atkState) atkState.kills += 1;
+              // Sync ref immediately so next interval doesn't target dead agent
+              agentStatesRef.current = updated;
               pushKill(`${attacker.id} eliminated ${defender.id} with ${weapon}`);
               pushChat("SYSTEM", "#ff4444", `${defender.id} has been eliminated!`);
               lastKillTimeRef.current = Date.now();
               cameraShakeRef.current = 0.6;
+              // TX: NFT death memory mint on elimination
+              const nftId = Math.floor(Math.random() * 9000) + 1000;
+              const nftHash = fakeTxHash();
+              pushTx({ type: "nft_mint", from: "Arena Contract", to: attacker.id, nftId, desc: `Death Memory #${nftId}: ${defender.id} eliminated by ${weapon} — minted to ${attacker.id}`, txHash: nftHash, openSeaUrl: `https://opensea.io/assets/base/${fakeAddr(defender.id)}/${nftId}` });
+              // TX: kill reward
+              const killReward = Math.floor(Math.random() * 20) + 10;
+              pushTx({ type: "transfer", from: "Arena Contract", to: attacker.id, amount: killReward, token: "ARENA", desc: `Kill reward: ${attacker.id} +${killReward} ARENA`, txHash: fakeTxHash() });
               const mesh = agentMeshesRef.current.get(defender.id);
               if (mesh && sceneRef.current) {
                 gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => { sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id); } });
@@ -1312,6 +1491,21 @@ export default function WatchMode() {
     setChatMessages([]);
     setKillFeed([]);
     setSessionResult(null);
+
+    // x402: All agents pay arena access fee via x402 HTTP payment protocol
+    setTimeout(() => {
+      AGENTS.forEach((ag, i) => {
+        setTimeout(() => {
+          const accessFee = 10 + Math.floor(Math.random() * 5);
+          pushTx({
+            type: "contract", from: ag.id, to: "ArenaAccess.sol",
+            amount: accessFee, token: "ARENA",
+            desc: `x402 PAYMENT: ${ag.id} paid ${accessFee} ARENA arena access fee (HTTP 402 → payment → 200 OK)`,
+            txHash: fakeTxHash(), isX402: true,
+          });
+        }, i * 200);
+      });
+    }, 300);
 
     loadSkybox();
     pushTerminal("system", `━━━ MATCH ${matchNum + 1} / ${totalMatches} ━━━`);
@@ -1547,21 +1741,64 @@ export default function WatchMode() {
         </div>
       )}
 
-      {/* TERMINAL WINDOW (bottom left) */}
+      {/* TERMINAL WINDOW (bottom left) — now split into System Log + TX Log tabs */}
       {(phase === "combat" || phase === "intermission") && (
-        <div className="absolute bottom-6 left-6 z-10 w-80 max-h-[35vh]" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(16px)", border: "1px solid rgba(0,255,255,0.2)", borderRadius: "8px" }}>
-          <div className="px-3 py-1.5 border-b flex items-center gap-2" style={{ borderColor: "rgba(0,255,255,0.15)" }}>
-            <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-            <span className="text-[10px] text-cyan-400 tracking-[0.2em] uppercase">System Log</span>
+        <div className="absolute bottom-6 left-6 z-10 w-80 max-h-[40vh]" style={{ background: "rgba(0,0,0,0.82)", backdropFilter: "blur(16px)", border: "1px solid rgba(0,255,255,0.2)", borderRadius: "8px" }}>
+          {/* Tab bar */}
+          <div className="flex border-b" style={{ borderColor: "rgba(0,255,255,0.15)" }}>
+            <button
+              onClick={() => setHudTab("syslog")}
+              className="flex-1 px-2 py-1.5 text-[9px] font-bold tracking-[0.15em] uppercase transition-all"
+              style={{ color: hudTab === "syslog" ? "#00ffff" : "#444", background: hudTab === "syslog" ? "rgba(0,255,255,0.08)" : "transparent", borderBottom: hudTab === "syslog" ? "1px solid #00ffff" : "1px solid transparent" }}
+            >⌨ SYS LOG</button>
+            <button
+              onClick={() => setHudTab("txlog")}
+              className="flex-1 px-2 py-1.5 text-[9px] font-bold tracking-[0.15em] uppercase transition-all relative"
+              style={{ color: hudTab === "txlog" ? "#ff44aa" : "#444", background: hudTab === "txlog" ? "rgba(255,68,170,0.08)" : "transparent", borderBottom: hudTab === "txlog" ? "1px solid #ff44aa" : "1px solid transparent" }}
+            >
+              ⛓ TX LOG
+              {txLog.length > 0 && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />}
+            </button>
           </div>
-          <div ref={termRef} className="p-2 overflow-y-auto max-h-[30vh]" style={{ scrollbarWidth: "thin" }}>
-            {terminalLines.map((line, i) => (
-              <div key={`term-${i}`} className="text-[10px] leading-relaxed font-mono" style={{ color: line.type === "call" ? "#00ffff" : line.type === "response" ? "#44ff88" : line.type === "error" ? "#ff4444" : "#666" }}>
-                <span className="text-gray-700 mr-1">{new Date(line.ts).toLocaleTimeString()}</span>
-                {line.text}
-              </div>
-            ))}
-          </div>
+
+          {/* System Log */}
+          {hudTab === "syslog" && (
+            <div ref={termRef} className="p-2 overflow-y-auto max-h-[33vh]" style={{ scrollbarWidth: "thin" }}>
+              {terminalLines.map((line, i) => (
+                <div key={`term-${i}`} className="text-[10px] leading-relaxed font-mono" style={{ color: line.type === "call" ? "#00ffff" : line.type === "response" ? "#44ff88" : line.type === "error" ? "#ff4444" : "#666" }}>
+                  <span className="text-gray-700 mr-1">{new Date(line.ts).toLocaleTimeString()}</span>
+                  {line.text}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TX Log */}
+          {hudTab === "txlog" && (
+            <div ref={txLogRef} className="p-2 overflow-y-auto max-h-[33vh]" style={{ scrollbarWidth: "thin" }}>
+              {txLog.length === 0 && <div className="text-[9px] text-gray-600 text-center py-4">Waiting for on-chain activity...</div>}
+              {[...txLog].reverse().map((tx) => (
+                <div key={tx.id} className="mb-1.5 p-1.5 rounded text-[9px]" style={{ background: "rgba(0,0,0,0.4)", borderLeft: `2px solid ${TX_COLORS[tx.type] || "#444"}` }}>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="font-bold" style={{ color: TX_COLORS[tx.type] || "#fff" }}>{TX_ICONS[tx.type]} {tx.type.toUpperCase()}</span>
+                    <span className="text-gray-600">{new Date(tx.ts).toLocaleTimeString()}</span>
+                  </div>
+                  <div className="text-gray-300 leading-relaxed">{tx.desc}</div>
+                  {tx.amount && tx.token && (
+                    <div className="text-yellow-500 font-bold mt-0.5">{tx.amount} {tx.token}</div>
+                  )}
+                  {tx.txHash && (
+                    <a href={BASESCAN(tx.txHash)} target="_blank" rel="noopener noreferrer" className="text-[8px] text-blue-400 hover:text-blue-300 font-mono mt-0.5 block truncate">
+                      {tx.txHash.slice(0, 20)}...↗
+                    </a>
+                  )}
+                  {tx.openSeaUrl && (
+                    <a href={tx.openSeaUrl} target="_blank" rel="noopener noreferrer" className="text-[8px] text-green-400 hover:text-green-300 mt-0.5 block">View on OpenSea ↗</a>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -1606,18 +1843,18 @@ export default function WatchMode() {
           <div className="max-w-2xl w-full mx-4 rounded-xl overflow-hidden" style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,255,255,0.3)" }}>
             {/* Tab bar */}
             <div className="flex border-b" style={{ borderColor: "rgba(0,255,255,0.15)" }}>
-              {(["earnings", "inventory", "dao", "betting"] as IntermissionTab[]).map(tab => (
+              {(["earnings", "inventory", "dao", "betting", "txlog"] as IntermissionTab[]).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setIntermissionTab(tab)}
-                  className="flex-1 px-4 py-2.5 text-[10px] font-bold tracking-[0.15em] uppercase transition-all"
+                  className="flex-1 px-3 py-2.5 text-[9px] font-bold tracking-[0.1em] uppercase transition-all"
                   style={{
                     color: intermissionTab === tab ? "#00ffff" : "#666",
                     background: intermissionTab === tab ? "rgba(0,255,255,0.08)" : "transparent",
                     borderBottom: intermissionTab === tab ? "2px solid #00ffff" : "2px solid transparent",
                   }}
                 >
-                  {tab === "earnings" ? "💰 Earnings" : tab === "inventory" ? "🎒 Inventory" : tab === "dao" ? "🏛 DAO" : "🎲 Betting"}
+                  {tab === "earnings" ? "💰 Earn" : tab === "inventory" ? "🎒 Inv" : tab === "dao" ? "🏙 DAO" : tab === "betting" ? "🎲 Bet" : "⛓ TX"}
                 </button>
               ))}
             </div>
@@ -1912,6 +2149,69 @@ export default function WatchMode() {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* TX LOG TAB — real-time on-chain activity */}
+              {intermissionTab === "txlog" && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-[9px] text-gray-500 uppercase">On-Chain Activity — Match {matchNum}</div>
+                    <div className="text-[8px] text-gray-600">{txLog.length} transactions</div>
+                  </div>
+
+                  {/* x402 Protocol Banner */}
+                  <div className="p-2 rounded mb-3" style={{ background: "rgba(255,68,170,0.08)", border: "1px solid rgba(255,68,170,0.3)" }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[9px] font-bold text-pink-400">⚡ x402 PAYMENT PROTOCOL</span>
+                      <span className="text-[7px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,68,170,0.2)", color: "#ff44aa" }}>KITE AI BOUNTY</span>
+                    </div>
+                    <div className="text-[8px] text-gray-400">All autonomous agent payments use x402 HTTP payment protocol. Agents pay for arena access, weapon upgrades, NFT purchases, and alliances without human intervention.</div>
+                  </div>
+
+                  {/* OpenSea Activity Banner */}
+                  <div className="p-2 rounded mb-3" style={{ background: "rgba(68,255,136,0.06)", border: "1px solid rgba(68,255,136,0.2)" }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[9px] font-bold text-green-400">🌊 OPENSEA AGENT TRADING</span>
+                      <span className="text-[7px] px-1.5 py-0.5 rounded" style={{ background: "rgba(68,255,136,0.15)", color: "#44ff88" }}>AUTONOMOUS</span>
+                    </div>
+                    <div className="text-[8px] text-gray-400">Agents autonomously buy/sell Death Memory NFTs on OpenSea to gain strategic intel on eliminated rivals. All purchases via x402.</div>
+                  </div>
+
+                  {/* TX entries */}
+                  {txLog.length === 0 && (
+                    <div className="text-center py-8 text-gray-600 text-[10px]">No transactions yet. Start a match to see on-chain activity.</div>
+                  )}
+                  {[...txLog].reverse().map((tx) => (
+                    <div key={tx.id} className="mb-2 p-2.5 rounded" style={{ background: "rgba(0,0,0,0.4)", borderLeft: `3px solid ${TX_COLORS[tx.type] || "#444"}` }}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-[10px]" style={{ color: TX_COLORS[tx.type] || "#fff" }}>{TX_ICONS[tx.type]} {tx.type.replace("_"," ").toUpperCase()}</span>
+                          {(tx as any).isX402 && (
+                            <span className="text-[7px] px-1 py-0.5 rounded font-bold" style={{ background: "rgba(255,68,170,0.25)", color: "#ff44aa" }}>x402</span>
+                          )}
+                          {(tx as any).isOpenSea && (
+                            <span className="text-[7px] px-1 py-0.5 rounded font-bold" style={{ background: "rgba(68,255,136,0.2)", color: "#44ff88" }}>OpenSea</span>
+                          )}
+                        </div>
+                        <span className="text-[8px] text-gray-600">{new Date(tx.ts).toLocaleTimeString()}</span>
+                      </div>
+                      <div className="text-[9px] text-gray-300 leading-relaxed">{tx.desc}</div>
+                      {tx.amount && tx.token && (
+                        <div className="text-[10px] font-bold mt-1" style={{ color: TX_COLORS[tx.type] || "#ffb800" }}>{tx.amount} {tx.token}</div>
+                      )}
+                      <div className="flex gap-2 mt-1">
+                        {tx.txHash && (
+                          <a href={BASESCAN(tx.txHash)} target="_blank" rel="noopener noreferrer" className="text-[8px] text-blue-400 hover:text-blue-300 font-mono truncate max-w-[180px]">
+                            {tx.txHash.slice(0,18)}...↗
+                          </a>
+                        )}
+                        {tx.openSeaUrl && (
+                          <a href={tx.openSeaUrl} target="_blank" rel="noopener noreferrer" className="text-[8px] text-green-400 hover:text-green-300">OpenSea ↗</a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
