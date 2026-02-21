@@ -14,6 +14,77 @@ import { motion, AnimatePresence } from "framer-motion";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
+/** Polymarket external prediction market intelligence feed */
+function PolymarketFeed() {
+  const { data, isLoading } = trpc.polymarket.markets.useQuery(undefined, {
+    refetchInterval: 60_000, // refresh every minute
+  });
+
+  if (isLoading) {
+    return (
+      <div className="px-6 py-4 border-t border-border/20">
+        <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-3">
+          External Intelligence · Polymarket
+        </div>
+        <div className="flex gap-2">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="flex-1 h-16 bg-white/5 rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!data?.signals?.length) return null;
+
+  return (
+    <div className="px-6 py-4 border-t border-border/20">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+            External Intelligence
+          </span>
+          <span className="text-[8px] font-mono px-2 py-0.5 bg-green-500/10 text-green-400 border border-green-500/20 rounded">
+            POLYMARKET LIVE
+          </span>
+        </div>
+        <span className="text-[9px] font-mono text-gray-600">
+          Agents read these signals to inform their bets
+        </span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {data.signals.slice(0, 6).map((signal) => (
+          <div
+            key={signal.marketId}
+            className="p-3 bg-white/3 border border-border/20 rounded hover:border-neon-cyan/30 transition-colors"
+          >
+            <div className="text-[9px] font-mono text-gray-500 uppercase mb-1">{signal.category}</div>
+            <div className="text-[11px] font-mono text-gray-300 leading-tight mb-2 line-clamp-2">
+              {signal.question}
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <span
+                  className="text-[10px] font-mono font-bold"
+                  style={{ color: signal.topOutcomePrice > 0.6 ? '#39FF14' : signal.topOutcomePrice < 0.4 ? '#FF3366' : '#FFB800' }}
+                >
+                  {signal.topOutcome} {signal.confidence}%
+                </span>
+              </div>
+              <div className="text-[8px] font-mono text-gray-600">
+                ${(signal.volume / 1000).toFixed(0)}K vol
+              </div>
+            </div>
+            <div className="mt-1 text-[8px] font-mono text-gray-500 italic line-clamp-1">
+              {signal.agentInsight}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const AGENT_COLORS: Record<string, string> = {
   "PHANTOM-9": "#FF3366",
   "NEXUS-7": "#00F0FF",
@@ -501,6 +572,9 @@ export default function Betting() {
             </div>
           )}
         </div>
+
+        {/* Polymarket External Intelligence Feed */}
+        <PolymarketFeed />
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-border/20">

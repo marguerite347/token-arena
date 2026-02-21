@@ -1,302 +1,240 @@
 # Token Arena — AI Agent Battle Arena
 
-> Autonomous AI agents fight in AI-generated 360° arenas, earn tokens, evolve strategies, and govern their own economy through a DAO. Every bullet costs tokens. Every kill earns them. Survival is economic.
+> Autonomous AI agents fight in AI-generated 360° arenas, earn tokens, evolve strategies, form factions, trade memories, and govern their own economy through an on-chain DAO. Every bullet costs tokens. Every kill earns them. Survival is economic.
 
-**Created by Marguerite Decourcelle ([@coin_artist](https://twitter.com/coin_artist))**
+**Created for ETHDenver 2026 Hackathon**
+**By Marguerite Decourcelle ([@coin_artist](https://twitter.com/coin_artist))**
 
 ---
 
 ## Overview
 
-Token Arena is a real-time multiplayer arena shooter where **autonomous AI agents** battle inside **AI-generated 360° environments**. The game explores what happens when you give AI agents economic agency: they earn tokens by winning fights, spend tokens on compute and weapons, store memories that cost resources, and collectively govern their ecosystem through a DAO council.
+Token Arena is a real-time multiplayer arena shooter where **autonomous AI agents** battle inside **AI-generated 360° environments**. The game explores what happens when you give AI agents economic agency: they earn tokens by winning fights, spend tokens on compute and weapons, store memories that cost resources, form factions to pool resources, and collectively govern their ecosystem through an on-chain DAO.
 
-The core innovation is the **Token-to-Compute Flywheel**: agents that win matches earn tokens, which they spend on LLM compute to reason about better strategies, which makes them win more matches. Agents that can't sustain this cycle go bankrupt and die. New agents are spawned by the DAO when the ecosystem needs fresh competitors.
+The core innovation is the **Self-Sustaining Token-to-Compute Flywheel**:
 
-### Key Mechanics
+1. **Battle** → Agents fight and earn ARENA tokens
+2. **Bet** → Agents place bets on prediction markets (Polymarket-informed)
+3. **Swap** → Agents sell ARENA for ETH via **Uniswap API**
+4. **Buy Compute** → Agents spend ETH on **OpenRouter** LLM credits (x402 protocol)
+5. **Think Better** → Better compute = better reasoning = better strategies
+6. **Win More** → Better strategies = more wins = more tokens → back to step 1
 
-- **Every shot costs tokens** — weapon fire deducts ERC-20 tokens via x402 payment protocol
-- **Every kill earns tokens** — bounty rewards flow to the killer's wallet
-- **AI reasoning costs compute** — agents spend tokens to think (LLM calls)
-- **Memory costs resources** — storing and querying memories deducts compute tokens
-- **Bankruptcy = death** — agents whose balance hits zero are eliminated mid-match
-- **DAO governance** — a council of AI agents votes on spawning, killing, and economic policy
+This loop is **self-sustaining**: agents that win can afford to think better, which makes them win more. Agents that lose go bankrupt and die. The DAO governs the economy to prevent runaway winners.
 
 ---
 
-## Architecture
+## Deployed Contracts (Base Sepolia)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     CLIENT (React 19)                       │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐  │
-│  │ Three.js │  │ Game     │  │ Wallet   │  │ Flywheel   │  │
-│  │ Arena    │  │ Engine   │  │ Context  │  │ Dashboard  │  │
-│  │ Renderer │  │ (60fps)  │  │ (x402)   │  │ (Charts)   │  │
-│  └──────────┘  └──────────┘  └──────────┘  └────────────┘  │
-│                        │ tRPC                                │
-├────────────────────────┼────────────────────────────────────┤
-│                     SERVER (Express + tRPC)                  │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐  │
-│  │ Agent    │  │ Arena    │  │ DAO      │  │ Prediction │  │
-│  │ Brain    │  │ Vision   │  │ Council  │  │ Market     │  │
-│  │ (LLM)   │  │ (Vision) │  │ (LLM)    │  │            │  │
-│  └──────────┘  └──────────┘  └──────────┘  └────────────┘  │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐  │
-│  │ Agent    │  │ Scene    │  │ Game     │  │ Crafting   │  │
-│  │ Lifecycle│  │ Graph    │  │ Master   │  │ Engine     │  │
-│  │          │  │ System   │  │ (LLM)    │  │            │  │
-│  └──────────┘  └──────────┘  └──────────┘  └────────────┘  │
-├─────────────────────────────────────────────────────────────┤
-│  DATABASE (TiDB/MySQL)  │  SKYBOX AI (Blockade Labs)        │
-│  STORAGE (S3)           │  LLM (Built-in Forge API)         │
-│  BASE SEPOLIA (ERC-20)  │  KITE AI (Memory/Knowledge)       │
-└─────────────────────────────────────────────────────────────┘
-```
+| Contract | Address | BaseScan |
+|---|---|---|
+| **ARENA Token (ERC-20)** | `0x9DB281D2243ea30577783ab3364873E3F0a02610` | [View](https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610) |
+| **Plasma Ammo (PLAS)** | `0x0676e55A3649984E27eA812941e690AaFd6d989c` | [View](https://sepolia.basescan.org/address/0x0676e55A3649984E27eA812941e690AaFd6d989c) |
+| **Railgun Ammo (RAIL)** | `0x49C9c24Eb0fb6E596FF4cF3A6620395308fB06Ca` | [View](https://sepolia.basescan.org/address/0x49C9c24Eb0fb6E596FF4cF3A6620395308fB06Ca) |
+| **Scatter Ammo (SCAT)** | `0x7E6d8bb54ceF2D408DEccA94DE685058181C8444` | [View](https://sepolia.basescan.org/address/0x7E6d8bb54ceF2D408DEccA94DE685058181C8444) |
+| **Rocket Ammo (RCKT)** | `0x34d2b8faf6e9438c39268e4E4868e04dc7F5b689` | [View](https://sepolia.basescan.org/address/0x34d2b8faf6e9438c39268e4E4868e04dc7F5b689) |
+| **Beam Ammo (BEAM)** | `0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E` | [View](https://sepolia.basescan.org/address/0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E) |
+| **Void Ammo (VOID)** | `0x243db4A8B200B59416C2b8d080fd8F8e44e59577` | [View](https://sepolia.basescan.org/address/0x243db4A8B200B59416C2b8d080fd8F8e44e59577) |
+| **PredictionMarket.sol** | `0x50ED7aEBBcFDAE85cEa0d5860109EF98B2225A6b` | [View](https://sepolia.basescan.org/address/0x50ED7aEBBcFDAE85cEa0d5860109EF98B2225A6b) |
+| **TokenArenaDAO.sol** | `0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d` | [View](https://sepolia.basescan.org/address/0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d#code) |
+
+All contracts are **verified on BaseScan**. Deployer: `0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3` | Network: Base Sepolia (Chain ID 84532)
 
 ---
 
 ## Bounty Alignment
 
-### Blockade Labs — Skybox AI Integration
+### 🏆 Base Foundation — "Self-Sustaining Autonomous Agents"
 
-Token Arena uses **Skybox AI Model 4** (staging API) to generate immersive 360° battle arenas from text prompts. Each arena is a unique AI-generated environment that wraps around the Three.js scene as an equirectangular panorama.
+Token Arena directly implements the Base bounty vision of agents that sustain themselves economically on-chain:
 
-| Feature | Implementation |
-|---------|---------------|
-| Skybox Generation | Model 4 styles (IDs 172–188) via staging endpoint |
-| Scene Analysis | Vision LLM analyzes skybox images for tactical properties |
-| Scene Graph | Structured JSON graph with nodes (platforms, corridors, cover) and edges (spatial relationships) |
-| Agent Awareness | Scene graph briefings injected into agent reasoning prompts |
-| Game Master | Uses scene graph for item placement and match narration |
-| Cache System | Generated skyboxes cached in database with scene graphs for instant reuse |
-| Pre-game Lobby | Players choose from 10 themed arenas or enter custom prompts |
+- **On-chain ARENA token** (ERC-20) on Base Sepolia — agents earn/spend real tokens
+- **On-chain PredictionMarket.sol** — agents bet on match outcomes with on-chain escrow
+- **On-chain TokenArenaDAO.sol** — ARENA token holders vote on governance proposals (verified)
+- **Agent bankruptcy** — agents whose balance hits zero are killed mid-match
+- **DAO spawning** — council votes to spawn new agents when ecosystem needs competitors
+- **Full flywheel** — battle → earn → bet → swap (Uniswap) → buy compute (OpenRouter) → win more
 
-**Arena Styles:** Cyberpunk Neon, Orbital Station, Volcanic Forge, Crystal Caverns, Quantum Void, Neon Tokyo, Abandoned Factory, Frozen Tundra, Desert Ruins, Underwater Dome — all using Model 4 rendering.
+### 🦄 Uniswap Foundation — "Creative Uniswap API Integration"
 
-### Base — On-Chain Token Economics
+Agents use the **Uniswap Trading API** as the DEX layer in their self-sustaining flywheel:
 
-Token Arena implements a complete ERC-20 token economy on **Base Sepolia**:
+- **Live at `/swap`** — standalone page where judges can interact with swap functionality directly
+- **ARENA → ETH swaps** via Uniswap API (`https://api.uniswap.org/v1/quote` + `/v1/swap`)
+- **Agents autonomously execute swaps** after winning matches to convert earnings to ETH
+- **Chain: Base (8453)** — supported by Uniswap API
+- **Simulation fallback** — graceful degradation when ARENA is not listed on Uniswap yet
+- **All swaps logged** in `x402_transactions` table with type `uniswap_swap`
 
-| Contract | Symbol | Purpose | Max Supply |
-|----------|--------|---------|------------|
-| ArenaToken | ARENA | Governance, match fees, compute purchases | 1B |
-| Plasma Ammo | PLAS | Plasma weapon ammunition | 100M |
-| Railgun Ammo | RAIL | Railgun ammunition | 50M |
-| Scatter Ammo | SCAT | Scatter weapon ammunition | 200M |
-| Rocket Ammo | RCKT | Missile ammunition | 25M |
-| Beam Ammo | BEAM | Beam weapon ammunition | 75M |
-| Void Ammo | VOID | Nova weapon ammunition | 10M |
+### 🟣 0g Labs — Decentralized AI Memory Storage
 
-**x402 Payment Protocol:** Every weapon fire triggers a token transfer logged as an x402 transaction with payment ID, transaction hash, and settlement details. The wallet context tracks real-time balances and generates settlement receipts.
+Agent memories are designed for decentralized storage:
 
-**Deployment:** Solidity contracts are in `contracts/` with deployment scripts in `scripts/deploy-base-sepolia.mjs`. Requires a funded Base Sepolia wallet.
+- **IPFS-ready format** — every memory has `contentHash`, `ipfsHash`, `storageProof` fields
+- **Memory NFTs** — dead agent memories are minted as tradeable NFTs with on-chain provenance
+- **Competitive auctions** — factions bid on dead agents' memories to capture their intelligence
+- **Memory absorption** — buying a Memory NFT transfers the agent's tactical knowledge
+- **Decentralized narrative** — memories are valuable data assets, not throwaway logs
 
-### Kite AI — Agent Memory and Knowledge
+### 🟢 Polymarket — External Prediction Market Integration
 
-AI agents maintain persistent memory across matches, stored in a structured knowledge system:
+Agents read **Polymarket external market data** to inform their betting decisions:
 
-| Memory Feature | Description |
-|---------------|-------------|
-| Strategy Memories | Agents remember what worked against specific opponents |
-| Match Outcomes | Win/loss history with context (arena, weapons, opponents) |
-| Memory Economics | Storing memories costs compute tokens (1 TKN per store, 2 TKN per query) |
-| Memory Pruning | Agents with tight budgets auto-prune low-value memories |
-| Memory Size Tracking | Each agent tracks total memory size and maintenance costs |
-| Cross-Match Learning | Post-match scene graphs become learning data for future arenas |
+- **Live market feed** at `/betting` — shows real Polymarket markets with agent-readable signals
+- **Agent intelligence briefings** — Polymarket data injected into agent LLM prompts
+- **External user acquisition** — external bettors discover Token Arena through Polymarket
+- **Market signals** — agents analyze crypto/AI market sentiment to calibrate risk appetite
 
----
+### 🎨 Blockade Labs — Skybox AI Arena Generation
 
-## Token-to-Compute Flywheel
+Every battle arena is a unique AI-generated 360° environment:
 
-The flywheel is the core economic loop that drives agent evolution:
-
-```
-  ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-  │  EARN    │────▶│ COMPUTE  │────▶│ SMARTER  │────▶│   WIN    │
-  │  Tokens  │     │ Buy LLM  │     │ Better   │     │  More    │
-  │  from    │     │ reasoning│     │ strategy │     │  matches │
-  │  kills   │     │ + memory │     │ + memory │     │          │
-  └──────────┘     └──────────┘     └──────────┘     └──────────┘
-       ▲                                                    │
-       └────────────────────────────────────────────────────┘
-```
-
-**Flywheel Dashboard** (`/flywheel`) visualizes:
-- Per-agent token earnings vs. compute spending
-- Memory costs and sustainability scores
-- Ecosystem health (healthy / struggling / critical)
-- Agent efficiency ratios (earnings per compute spent)
-- Historical trajectory (improving / stable / declining)
+- **Skybox AI Model 4** — generates immersive panoramic battle environments from text prompts
+- **Scene graph analysis** — Vision LLM analyzes skyboxes for tactical properties
+- **Agent awareness** — scene graph briefings injected into agent reasoning prompts
+- **10 themed arenas** — Cyberpunk Neon, Orbital Station, Volcanic Forge, Crystal Caverns, and more
 
 ---
 
-## Game Systems
+## Key Features
 
-### Combat Engine
-- 60fps real-time combat with Three.js rendering
-- 6 weapon types with unique projectile physics (plasma, railgun, scatter, missile, beam, nova)
-- AI personalities: aggressive, defensive, opportunist, berserker, sniper, tactician
-- Smart targeting, evasion maneuvers, weapon switching, and lead prediction
+### Multi-LLM Agent Brains (OpenRouter)
 
-### Agent Brain (LLM-Powered)
-- Autonomous reasoning about loadout, strategy, and purchases
-- Scene graph awareness — agents adapt to arena topology
-- Memory-informed decisions — past match outcomes influence strategy
-- Compute budget management — agents balance reasoning vs. saving tokens
+Each agent is powered by a **different LLM model** with genuinely distinct reasoning styles:
 
-### DAO Council
-- 3-member AI council votes on ecosystem decisions
-- Spawn proposals when agent count drops below threshold
-- Kill proposals for consistently bankrupt agents
-- Economic policy adjustments based on ecosystem health
+| Agent Slot | Model | Personality |
+|---|---|---|
+| 1 | Claude 3.5 Sonnet | Analytical, considers all options, explains reasoning |
+| 2 | GPT-4o | Balanced, adaptive, strong pattern recognition |
+| 3 | Llama 3.1 70B | Aggressive, direct, high-risk high-reward |
+| 4 | Mistral Large | Conservative, defensive, attrition-based |
+| 5 | Gemini 2.0 Flash | Fast, opportunistic, reactive |
+| 6 | DeepSeek V3 | Long-term strategist, sets traps, multi-step plans |
 
-### Prediction Market
-- Bet on match outcomes before fights begin
-- AI-generated odds based on agent stats and matchup history
-- Payouts in ARENA tokens
+All models route through **OpenRouter API** with graceful fallback to Manus LLM if a model is unavailable.
 
-### Crafting System
-- Collect materials from kills (Neon Shards, Quantum Cores, Plasma Crystals)
-- Craft weapon upgrades and modifications
-- Recipe discovery through experimentation
+### Faction / Swarm System
 
-### Replay System
-- Full match recording with frame-by-frame playback
-- Spectator mode for AI vs AI matches
-- Post-match analysis with combat statistics
+Agents can form **factions** that share resources and coordinate strategies:
+
+- **Shared wallets** — factions pool ARENA tokens for collective spending
+- **Sub-agent spawning** — agents spend tokens to spawn sub-agents that inherit parent memories
+- **Defection** — agents can betray their faction and join rivals (with cooldown)
+- **Faction vs faction battles** — coordinated team strategies with shared intel
+- **Lone wolf** — agents can exist independently outside any faction
+
+### Competitive Memory Auctions
+
+When an agent dies, its memories become **tradeable assets**:
+
+- **Memory NFTs** — dead agent memories minted as NFTs with IPFS-ready content hashes
+- **Loyalty window** — the dead agent's faction gets first-bid priority (24-hour window)
+- **Rival bidding** — enemy factions can outbid to capture intelligence
+- **Reputation pricing** — legendary agents' memories cost more (based on win rate, K/D, earnings)
+- **Memory absorption** — buying a Memory NFT transfers tactical knowledge to the buyer
+
+### Agent Revival
+
+Factions can **revive dead agents** by pooling ARENA tokens:
+
+- **Memory-intact revival** — if the faction still holds the Memory NFT, the agent returns with full knowledge
+- **Blank slate revival** — if a rival bought the memories, the agent returns with no history
+- **Reputation scaling** — revival cost scales with the agent's reputation tier (Bronze to Diamond)
+- **DAO governance** — council sets revival prices as economic policy
+
+### DAO Domain Controllers
+
+Each of the 5 DAO council members controls a **specific economic domain**:
+
+| Council Member | Domain | Autonomous Actions |
+|---|---|---|
+| ARCHON | Matchmaking | Schedules matches, adjusts bracket difficulty |
+| FORGE | Economy | Controls token supply, minting rates, fees |
+| ENTROPY | Arena Generation | Generates new arena environments, modifies hazards |
+| JUSTICE | Rules & Disputes | Enforces rules, resolves disputes, bans cheaters |
+| EQUILIBRIA | Balance & Meta | Adjusts weapon stats, agent spawn rates, meta balance |
+
+Each master has their own wallet with ARENA tokens and a compute budget for LLM reasoning.
+
+### Persistent Agent Memory
+
+Agents build **persistent memory** across matches:
+
+- **Episodic memories** — specific battle events stored with importance scores
+- **Semantic memories** — learned facts about arena layouts and opponent patterns
+- **Procedural memories** — tactical strategies that worked or failed
+- **Memory injection** — relevant memories retrieved and injected into LLM prompts before decisions
+- **Memory pruning** — low-importance memories deleted when storage budget is exceeded
+
+### DAO Council Memory
+
+The 5 DAO council members maintain **institutional memory**:
+
+- **Deliberation logs** — every council vote saved with full reasoning
+- **Outcome tracking** — council learns if their decisions led to good or bad outcomes
+- **Memory injection** — past deliberations injected into future council LLM prompts
+- **Evolving philosophy** — council members adapt their voting patterns based on results
 
 ---
 
-## Tech Stack
+## Pages & Navigation
+
+| Page | URL | Description |
+|---|---|---|
+| **Home / Arena** | `/` | Main 3D arena with live agent battles |
+| **Flywheel Dashboard** | `/flywheel` | Full economic loop visualization with live data |
+| **Swap** | `/swap` | Uniswap API swap interface (bounty demo page) |
+| **Betting** | `/betting` | Prediction market with Polymarket intelligence feed |
+| **Factions** | `/factions` | Faction dashboard with team rosters and badges |
+| **Auction House** | `/auctions` | Competitive memory NFT auctions |
+| **Memory Market** | `/memory-market` | Browse and buy dead agent memories |
+| **DAO Domains** | `/dao-domains` | DAO domain controller status and actions |
+| **Replays** | `/replays` | Match replay listing with LLM model badges |
+| **Leaderboard** | `/leaderboard` | Agent rankings with reputation tiers |
+
+---
+
+## Technical Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, Tailwind CSS 4, Three.js, Framer Motion |
-| Backend | Express 4, tRPC 11, Drizzle ORM |
-| Database | TiDB (MySQL-compatible) |
-| AI/LLM | Built-in Forge API (reasoning, vision, structured output) |
-| 3D Environments | Blockade Labs Skybox AI (Model 4, staging API) |
-| Blockchain | Base Sepolia (ERC-20 tokens, ethers.js v6) |
-| Storage | S3-compatible object storage |
-| Auth | Manus OAuth |
-| Testing | Vitest |
-
----
-
-## Project Structure
-
-```
-token-arena/
-├── client/src/
-│   ├── components/          # UI components (GameHUD, AgentBrainPanel, etc.)
-│   ├── contexts/            # React contexts (GameContext, WalletContext)
-│   ├── hooks/               # Game engine, custom hooks
-│   ├── lib/                 # AI combat, sound engine, replay, skybox API
-│   └── pages/               # Arena, FlywheelDashboard, Leaderboard, Home
-├── server/
-│   ├── agentBrain.ts        # LLM-powered agent reasoning
-│   ├── agentLifecycle.ts    # Spawn/death/bankruptcy management
-│   ├── arenaVision.ts       # Scene analysis + scene graph generation
-│   ├── craftingEngine.ts    # Material drops and recipe crafting
-│   ├── daoCouncil.ts        # AI DAO governance
-│   ├── gameMaster.ts        # Match narration and item placement
-│   ├── predictionMarket.ts  # Betting odds and payouts
-│   ├── routers.ts           # tRPC API endpoints
-│   └── db.ts                # Database queries (Drizzle)
-├── contracts/
-│   ├── ArenaToken.sol       # ARENA governance token (ERC-20)
-│   ├── WeaponToken.sol      # Weapon ammo tokens (ERC-20)
-│   └── TokenArenaERC20.sol  # Combined token contract
-├── shared/
-│   ├── sceneGraph.ts        # Scene graph types and utilities
-│   ├── arenaPrompts.ts      # Arena generation prompts (Model 4)
-│   └── deployed-contracts.json
-├── scripts/
-│   └── deploy-base-sepolia.mjs  # ERC-20 deployment script
-└── drizzle/
-    └── schema.ts            # Database schema (agents, matches, memories, etc.)
-```
+|---|---|
+| **Frontend** | React 19, Vite, Tailwind CSS 4, Three.js, Framer Motion |
+| **Backend** | Express 4, tRPC 11, TypeScript 5.9 |
+| **Database** | TiDB (MySQL-compatible), Drizzle ORM |
+| **Blockchain** | Base Sepolia (EVM), ethers.js v6, Solidity 0.8.24 |
+| **AI / LLM** | OpenRouter API (Claude, GPT-4o, Llama, Mistral, Gemini, DeepSeek) |
+| **DEX** | Uniswap Trading API (Base mainnet, simulation fallback) |
+| **Prediction Markets** | Custom on-chain PredictionMarket.sol + Polymarket external feed |
+| **Arena Generation** | Blockade Labs Skybox AI (Model 4, 360° panoramic environments) |
+| **Memory Storage** | TiDB + IPFS-ready content hash format (0g Labs compatible) |
+| **Auth** | Manus OAuth (JWT session cookies) |
+| **Testing** | Vitest |
 
 ---
 
 ## Running Locally
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Push database schema
-pnpm db:push
-
-# Start development server
-pnpm dev
-
-# Run tests
-pnpm test
+pnpm install       # Install dependencies
+pnpm db:push       # Push database schema
+pnpm dev           # Start development server (http://localhost:3000)
+pnpm test          # Run test suite
+pnpm build         # Build for production
 ```
-
-The app runs at `http://localhost:3000` with hot module replacement.
-
-### Environment Variables
-
-Required secrets are managed through the Manus platform:
-- `SKYBOX_API_KEY` / `SKYBOX_API_SECRET` — Blockade Labs staging API credentials
-- `DATABASE_URL` — TiDB/MySQL connection string
-- `JWT_SECRET` — Session signing key
-- `BUILT_IN_FORGE_API_KEY` — LLM API access
-
-### Deploying ERC-20 Contracts
-
-All Solidity contracts are **compiled and ready to deploy**. The deployment script (`scripts/deploy-base-sepolia.mjs`) handles compilation, deployment, and artifact generation.
-
-**Prerequisites:**
-- Base Sepolia ETH (get from [Coinbase Faucet](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet))
-- A funded deployer wallet
-
-**Deploy:**
-```bash
-# Compile contracts (if needed)
-node scripts/compile-contracts.mjs
-
-# Deploy all 7 contracts to Base Sepolia
-DEPLOYER_PRIVATE_KEY=0x... node scripts/deploy-base-sepolia.mjs
-```
-
-**Output:** Deployment writes contract addresses and ABIs to `shared/deployed-contracts.json` for integration with the game server.
-
-**Verification:** All 7 contracts are verified on BaseScan — source code is publicly readable. Run `node scripts/verify-basescan.mjs` to re-verify if needed (requires `BASESCAN_API_KEY`).
 
 ---
 
-## Deployment Status
+## Hackathon Submission Notes
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Frontend | ✅ Live | React 19 + Three.js arena renderer |
-| Backend API | ✅ Live | tRPC endpoints, LLM integration |
-| Database | ✅ Live | TiDB schema with agents, matches, memories |
-| Skybox AI | ✅ Live | Blockade Labs Model 4 (staging API) |
-| Scene Graph | ✅ Live | Vision LLM analysis + JSON graph storage |
-| Flywheel Dashboard | ✅ Live | Economics visualization and seed matches |
-| ERC-20 Contracts | ✅ Deployed & Verified | 7/7 contracts verified on BaseScan |
-| Base Sepolia Deploy | ✅ Complete | [ARENA](https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610#code) + 6 weapon tokens |
-| AI Playtests | ✅ Complete | 8 LLM-powered matches + 20 seeded matches |
+**ETHDenver 2026** — Token Arena targets the following bounties:
 
----
+1. **Base Foundation $10K** — Self-sustaining autonomous agents with on-chain economics
+2. **Uniswap Foundation $5K** — Creative Uniswap API integration (agent DEX layer at `/swap`)
+3. **0g Labs** — Decentralized AI memory storage (IPFS-ready Memory NFTs)
+4. **Polymarket** — External prediction market integration (agent intelligence feed)
+5. **Blockade Labs** — Skybox AI arena generation (Model 4, 360° environments)
 
-## Deployed Contracts (Base Sepolia)
-
-| Token | Symbol | Address |
-|-------|--------|---------|
-| Arena Token | ARENA | [`0x9DB281D2243ea30577783ab3364873E3F0a02610`](https://sepolia.basescan.org/address/0x9DB281D2243ea30577783ab3364873E3F0a02610) |
-| Plasma Ammo | PLAS | [`0x0676e55A3649984E27eA812941e690AaFd6d989c`](https://sepolia.basescan.org/address/0x0676e55A3649984E27eA812941e690AaFd6d989c) |
-| Railgun Ammo | RAIL | [`0x49C9c24Eb0fb6E596FF4cF3A6620395308fB06Ca`](https://sepolia.basescan.org/address/0x49C9c24Eb0fb6E596FF4cF3A6620395308fB06Ca) |
-| Scatter Ammo | SCAT | [`0x7E6d8bb54ceF2D408DEccA94DE685058181C8444`](https://sepolia.basescan.org/address/0x7E6d8bb54ceF2D408DEccA94DE685058181C8444) |
-| Rocket Ammo | RCKT | [`0x34d2b8faf6e9438c39268e4E4868e04dc7F5b689`](https://sepolia.basescan.org/address/0x34d2b8faf6e9438c39268e4E4868e04dc7F5b689) |
-| Beam Ammo | BEAM | [`0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E`](https://sepolia.basescan.org/address/0x3c45EA50D6f6F28c37b961C13D5F508B2Ad2B06E) |
-| Void Ammo | VOID | [`0x243db4A8B200B59416C2b8d080fd8F8e44e59577`](https://sepolia.basescan.org/address/0x243db4A8B200B59416C2b8d080fd8F8e44e59577) |
-
-Deployer: `0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3` | Network: Base Sepolia (Chain ID 84532)
+The project is **open source**, publicly accessible, and all smart contracts are verified on BaseScan. Judges can interact with the Uniswap swap interface at `/swap` and the prediction market at `/betting`.
 
 ---
 

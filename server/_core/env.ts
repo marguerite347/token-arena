@@ -7,4 +7,12 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  // External API keys
+  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY ?? "",
+  UNISWAP_API_KEY: process.env.UNISWAP_API_KEY ?? "",
+  POLYMARKET_API_KEY: process.env.POLYMARKET_API_KEY ?? "",
+  BASESCAN_API_KEY: process.env.BASESCAN_API_KEY ?? "",
+  DEPLOYER_PRIVATE_KEY: process.env.DEPLOYER_PRIVATE_KEY ?? "",
+  SKYBOX_API_KEY: process.env.SKYBOX_API_KEY ?? "",
+  SKYBOX_API_SECRET: process.env.SKYBOX_API_SECRET ?? "",
 };

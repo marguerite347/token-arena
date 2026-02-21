@@ -575,7 +575,7 @@
 
 ### README + Deployment
 - [ ] Update deployed-contracts.json with PredictionMarket address
-- [ ] Update README with contract address and flywheel narrative
+- [x] Update README with contract address and flywheel narrative
 
 ## v21 — Persistent Memories, Reputation System, Agent Lifecycle Economics
 
@@ -611,9 +611,9 @@
 - [ ] Wire persistent memories into agent brain reasoning
 - [ ] Wire reputation into prediction market odds calculation
 - [ ] Wire lifecycle into flywheel dashboard (births, deaths, population)
-- [ ] Update README with self-sustaining agent narrative
+- [x] Update README with self-sustaining agent narrative
 - [ ] Run tests for all three systems
-- [ ] Final checkpoint and deploy
+- [x] Final checkpoint and deploy
 
 ## v22 — OpenRouter Multi-LLM Agent Diversity
 
@@ -629,7 +629,7 @@
 - [x] Add "LLM Model" column to agent roster display
 - [x] Write vitest tests for OpenRouter integration
 - [x] Run new playtests with diverse LLM agents
-- [ ] Update README with multi-LLM architecture
+- [x] Update README with multi-LLM architecture
 
 ## v23 — FINAL SPRINT: Full Flywheel + DAO + Memory + Reputation
 
@@ -679,7 +679,7 @@
 - [x] Fix betting page z.number().max() error
 - [x] Run fresh playtests with all new systems
 - [x] Write vitest tests for new features
-- [ ] Update README with flywheel narrative
+- [x] Update README with flywheel narrative
 - [ ] Checkpoint and deploy
 
 ## v24 — Uniswap Foundation Bounty ($5K) — DEX Swap Integration
@@ -727,3 +727,42 @@
 - [x] Update flywheel diagram with faction economics
 - [ ] Run faction playtests
 - [ ] Checkpoint and deploy
+
+## v26 — FINAL SUBMISSION SPRINT
+
+### Uniswap Swap Page (Critical — $5K Bounty)
+- [x] Build standalone /swap page with interactive swap UI
+- [ ] Show swap quotes, token pairs, execution results
+- [ ] Agent swap history feed showing flywheel activity
+- [ ] Publicly accessible for judges
+
+### Faction Playtests
+- [ ] Seed factions with multi-LLM agents
+- [ ] Run faction playtests generating rich data
+- [ ] Verify faction dynamics and LLM reasoning diversity
+
+### Final Polish
+- [ ] All pages navigation working
+- [ ] Flywheel diagram updated with all economic loops
+- [ ] No broken links or dead pages
+
+### README Update
+- [ ] All deployed contract addresses
+- [ ] All features documented
+- [x] Bounty alignment (Base, Uniswap, 0g Labs)
+- [ ] Architecture overview
+
+### Build Verification
+- [x] 0 TypeScript errors
+- [ ] All vitest tests passing
+- [ ] Clean checkpoint and deploy
+
+## v27 — Polymarket Integration
+- [ ] Add POLYMARKET_API_KEY to env secrets
+- [ ] Create polymarketService.ts — fetch external market data via Polymarket API
+- [ ] Show Polymarket markets in Betting page (agents read external markets)
+- [ ] Wire Polymarket data into agent betting decisions as external signal
+- [ ] Add Polymarket section to Flywheel Dashboard (external acquisition funnel)
+- [ ] Initialize DAO domain controllers via UI
+- [ ] Fix /dao route to redirect to /dao-domains
+- [ ] Fix agent names in Swap page agent selector

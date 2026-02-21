@@ -1306,6 +1306,27 @@ export const appRouter = router({
         return replenishDomainBudgets(input?.amount ?? 2000);
       }),
   }),
+
+  // ─── Polymarket External Markets ─────────────────────────────────────────────
+  polymarket: router({
+    markets: publicProcedure
+      .input(z.object({ limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => {
+        const { fetchPolymarketMarkets, extractAgentSignals } = await import("./polymarketService");
+        const markets = await fetchPolymarketMarkets(input?.limit ?? 20);
+        const signals = extractAgentSignals(markets);
+        return { markets: markets.slice(0, 10), signals };
+      }),
+    signals: publicProcedure.query(async () => {
+      const { getAgentMarketSignals } = await import("./polymarketService");
+      return getAgentMarketSignals();
+    }),
+    briefing: publicProcedure.query(async () => {
+      const { getMarketSignalBriefing } = await import("./polymarketService");
+      const briefing = await getMarketSignalBriefing();
+      return { briefing };
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
