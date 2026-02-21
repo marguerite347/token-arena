@@ -48,14 +48,6 @@ const COMPLETED_M4_SKYBOXES = [
   { name: "Dark Fantasy Citadel", style: "M4 Dark Fantasy", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/DxBjpLknoJhIaNHR.jpg" },
 ];
 
-// Fallback Model 3 panoramas (used only if M4 staging images are inaccessible)
-const FALLBACK_M3_PANORAMAS = [
-  { name: "Cyberpunk Colosseum", url: "https://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg_A_colossal_cyberpunk_arena_8223941509_14997657.jpg" },
-  { name: "Post-Apocalyptic Wasteland", url: "https://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangular-jpg_In_a_post-apocalyptic_desert_9623416410_14997659.jpg" },
-  { name: "Digital Void Space", url: "https://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular-jpg_A_digital_void_space_9983137796_14997660.jpg" },
-  { name: "Mech Hangar Bay", url: "https://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangular-jpg_An_expansive_hangar_bay_3592434325_14997661.jpg" },
-  { name: "Quantum Arena", url: "https://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangular-jpg_An_otherworldly_arena_pulsates_9142454532_14997662.jpg" },
-];
 
 // ─── Skybox Model 4 arena prompts for real-time generation ──────────────────
 const M4_ARENA_PROMPTS = [

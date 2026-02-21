@@ -1308,3 +1308,9 @@
 - [x] Update COMPLETED_M4_SKYBOXES in WatchMode.tsx with permanent S3/CDN URLs
 - [x] Test skybox loading with new URLs (all 7 HTTP 200)
 - [x] Checkpoint
+
+## v46 — Use M4 Skyboxes as Default (not M3)
+
+- [x] Replace all M3 fallback references with M4 S3 skyboxes as primary default
+- [x] Remove FALLBACK_M3_PANORAMAS entirely (was dead code, never referenced in loading logic)
+- [x] Test skybox loading uses M4 by default (TS clean, no M3 references remain)
