@@ -258,7 +258,7 @@ const initialState: GameState = {
   round: 0,
   isPaused: false,
   skyboxStyles: [],
-  selectedSkyboxStyle: 89,
+  selectedSkyboxStyle: 188, // M4 Cyberpunk — default Model 4 style
   skyboxPrompt: "Futuristic cyberpunk battle arena with neon lights, floating platforms, and holographic displays",
   ecosystemDeaths: 0,
   ecosystemSpawns: 0,

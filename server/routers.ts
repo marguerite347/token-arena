@@ -79,7 +79,7 @@ export const appRouter = router({
     generate: publicProcedure
       .input(z.object({
         prompt: z.string().min(1).max(600),
-        styleId: z.number().default(89),
+        styleId: z.number().default(188), // M4 Cyberpunk — default Model 4 style
         enhancePrompt: z.boolean().default(true),
       }))
       .mutation(async ({ input }) => {
