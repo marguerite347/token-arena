@@ -1155,3 +1155,11 @@
 - [x] Fix "1 error" badge on agent selection screen (ConnectModal + React 19 zustand issue)
 - [x] Skip WalletProvider on /watch route (WatchMode uses its own agent wallet display)
 - [x] WebGL error is sandbox-only (no GPU) — real browsers unaffected, error handling already in place
+
+## TX Log Banner Cleanup
+
+- [x] Remove bounty labels ($5K, $10K, KITE AI BOUNTY) from TX log banners
+- [x] Replace with real deployed contract addresses and on-chain activity info
+- [x] Show all 9 deployed contracts with BaseScan links (ARENA, PredictionMarket, DAO, weapons, deployer)
+- [x] Show all 6 agent smart wallets with BaseScan links
+- [x] Keep protocol names (Uniswap AI SDK, x402, OpenSea, DAO) framed as on-chain activity

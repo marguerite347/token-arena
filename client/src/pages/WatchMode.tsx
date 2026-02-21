@@ -2232,32 +2232,65 @@ export default function WatchMode() {
                     <div className="text-[8px] text-gray-600">{txLog.length} transactions</div>
                   </div>
 
-                  {/* Uniswap AI SDK Banner */}
-                  <div className="p-2.5 rounded mb-3" style={{ background: "linear-gradient(135deg, rgba(255,0,122,0.12), rgba(255,68,170,0.06))", border: "1px solid rgba(255,0,122,0.4)" }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold" style={{ color: "#ff44aa" }}>⚡ UNISWAP AI SDK v1.2.0</span>
-                      <span className="text-[7px] px-1.5 py-0.5 rounded font-bold" style={{ background: "rgba(255,0,122,0.25)", color: "#ff44aa", border: "1px solid rgba(255,0,122,0.4)" }}>$5K BOUNTY</span>
+                  {/* Deployed Contracts on Base */}
+                  <div className="p-2.5 rounded mb-3" style={{ background: "linear-gradient(135deg, rgba(0,240,255,0.08), rgba(0,100,255,0.04))", border: "1px solid rgba(0,240,255,0.3)" }}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[10px] font-bold" style={{ color: "#00f0ff" }}>⛓ DEPLOYED CONTRACTS — BASE MAINNET</span>
+                      <span className="text-[7px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(0,240,255,0.15)", color: "#00f0ff" }}>Chain 8453</span>
                     </div>
-                    <div className="text-[8px] text-gray-300 leading-relaxed mb-1">Agents autonomously plan and execute token swaps using the <a href="https://github.com/Uniswap/uniswap-ai" target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:text-pink-300 underline">Uniswap AI SDK</a> Trading API on Base mainnet.</div>
-                    <div className="text-[7px] text-gray-500 font-mono">Trading API: trade-api.gateway.uniswap.org/v1 • Routing: CLASSIC | DUTCH_V2 | PRIORITY • Chain: Base (8453)</div>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[7px] font-mono">
+                      <div className="flex justify-between"><span className="text-gray-500">ARENA Token</span><a href="https://basescan.org/address/0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b" target="_blank" rel="noopener noreferrer" className="text-cyan-400/80 hover:text-cyan-300">0x50ed...5a6b</a></div>
+                      <div className="flex justify-between"><span className="text-gray-500">PredictionMarket</span><a href="https://basescan.org/address/0xc9315768e9bb10d396f0c0c37dbabfbef5a257b4" target="_blank" rel="noopener noreferrer" className="text-cyan-400/80 hover:text-cyan-300">0xc931...57b4</a></div>
+                      <div className="flex justify-between"><span className="text-gray-500">TokenArenaDAO</span><a href="https://basescan.org/address/0x989362a1098f9193487ef2a136f5e680e5c3b438" target="_blank" rel="noopener noreferrer" className="text-cyan-400/80 hover:text-cyan-300">0x9893...b438</a></div>
+                      <div className="flex justify-between"><span className="text-gray-500">PLAS Weapon</span><a href="https://basescan.org/address/0x0cb7b046b5a1ba636b1cfe9596dbdb356936d99d" target="_blank" rel="noopener noreferrer" className="text-cyan-400/80 hover:text-cyan-300">0x0cb7...d99d</a></div>
+                      <div className="flex justify-between"><span className="text-gray-500">RAIL Weapon</span><a href="https://basescan.org/address/0xcf84590c752de7fd648cf28447a4a4a68a87791c" target="_blank" rel="noopener noreferrer" className="text-cyan-400/80 hover:text-cyan-300">0xcf84...791c</a></div>
+                      <div className="flex justify-between"><span className="text-gray-500">VOID Weapon</span><a href="https://basescan.org/address/0x4afb5bbe53dad291da351ae6ab66230af882f912" target="_blank" rel="noopener noreferrer" className="text-cyan-400/80 hover:text-cyan-300">0x4afb...f912</a></div>
+                      <div className="flex justify-between"><span className="text-gray-500">BEAM Weapon</span><a href="https://basescan.org/address/0x76821c1b2c69545ce9c105c41734ea16ea386d94" target="_blank" rel="noopener noreferrer" className="text-cyan-400/80 hover:text-cyan-300">0x7682...6d94</a></div>
+                      <div className="flex justify-between"><span className="text-gray-500">Deployer</span><a href="https://basescan.org/address/0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3" target="_blank" rel="noopener noreferrer" className="text-cyan-400/80 hover:text-cyan-300">0x0b92...27B3</a></div>
+                    </div>
+                    <div className="text-[7px] text-gray-600 mt-1 font-mono">9 contracts deployed • ERC-8021 builder code: tokenarena</div>
                   </div>
 
-                  {/* x402 Protocol Banner */}
-                  <div className="p-2 rounded mb-3" style={{ background: "rgba(255,136,0,0.08)", border: "1px solid rgba(255,136,0,0.3)" }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] font-bold" style={{ color: "#ff8800" }}>💳 x402 PAYMENT PROTOCOL</span>
-                      <span className="text-[7px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,136,0,0.2)", color: "#ff8800" }}>KITE AI BOUNTY</span>
+                  {/* Agent Wallets */}
+                  <div className="p-2 rounded mb-3" style={{ background: "rgba(255,68,170,0.06)", border: "1px solid rgba(255,68,170,0.25)" }}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[9px] font-bold" style={{ color: "#ff44aa" }}>🤖 AGENT SMART WALLETS — ERC-4337</span>
+                      <span className="text-[7px] px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(255,68,170,0.15)", color: "#ff44aa" }}>AUTONOMOUS</span>
                     </div>
-                    <div className="text-[8px] text-gray-400">All autonomous agent payments use x402 HTTP payment protocol. Agents pay for arena access, weapon upgrades, NFT purchases, and alliances without human intervention.</div>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[7px] font-mono">
+                      {AGENT_SMART_WALLETS.slice(0, 6).map(w => (
+                        <div key={w.agentName} className="flex justify-between">
+                          <span className="text-gray-500">{w.agentName}</span>
+                          <a href={`https://basescan.org/address/${w.walletAddress}`} target="_blank" rel="noopener noreferrer" className="text-pink-400/80 hover:text-pink-300">
+                            {w.walletAddress.slice(0,6)}...{w.walletAddress.slice(-4)}
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-[7px] text-gray-600 mt-1">Each agent owns its wallet • Autonomous token transfers, swaps, and NFT trades</div>
                   </div>
 
-                  {/* OpenSea Activity Banner */}
-                  <div className="p-2 rounded mb-3" style={{ background: "rgba(68,255,136,0.06)", border: "1px solid rgba(68,255,136,0.2)" }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] font-bold text-green-400">🌊 OPENSEA AGENT TRADING</span>
-                      <span className="text-[7px] px-1.5 py-0.5 rounded" style={{ background: "rgba(68,255,136,0.15)", color: "#44ff88" }}>AUTONOMOUS</span>
+                  {/* On-Chain Activity Protocols */}
+                  <div className="p-2 rounded mb-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                    <div className="text-[9px] font-bold text-gray-300 mb-1.5">📡 ON-CHAIN ACTIVITY</div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[7px] px-1.5 py-0.5 rounded font-bold" style={{ background: "rgba(255,0,122,0.2)", color: "#ff44aa" }}>⚡ Uniswap AI SDK</span>
+                        <span className="text-[7px] text-gray-500">Autonomous ARENA → ETH swaps via Trading API (CLASSIC / DUTCH_V2 / PRIORITY)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[7px] px-1.5 py-0.5 rounded font-bold" style={{ background: "rgba(255,136,0,0.2)", color: "#ff8800" }}>💳 x402</span>
+                        <span className="text-[7px] text-gray-500">HTTP payment protocol — arena access, upgrades, alliances, NFT purchases</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[7px] px-1.5 py-0.5 rounded font-bold" style={{ background: "rgba(68,255,136,0.15)", color: "#44ff88" }}>🌊 OpenSea</span>
+                        <span className="text-[7px] text-gray-500">Agents buy/sell Death Memory NFTs to gain strategic intel on rivals</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[7px] px-1.5 py-0.5 rounded font-bold" style={{ background: "rgba(170,68,255,0.15)", color: "#aa44ff" }}>🏦 DAO</span>
+                        <span className="text-[7px] text-gray-500">On-chain governance votes via TokenArenaDAO contract</span>
+                      </div>
                     </div>
-                    <div className="text-[8px] text-gray-400">Agents autonomously buy/sell Death Memory NFTs on OpenSea to gain strategic intel on eliminated rivals. All purchases via x402.</div>
                   </div>
 
                   {/* TX entries */}
