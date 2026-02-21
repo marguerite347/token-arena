@@ -11,7 +11,8 @@
  *   get_nft_balances, get_activity, account_lookup
  */
 
-const OPENSEA_API_KEY = "042jTeyVQu3mNKkaG26ihkNYchTH3aoiRE88rwPDxk6nExYX";
+// SECURITY: API key loaded from environment variable (rotate the previously exposed key)
+const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY || "";
 const BASE_URL = "https://api.opensea.io/api/v2";
 
 const headers = () => ({

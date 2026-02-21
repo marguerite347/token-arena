@@ -15,7 +15,12 @@ const solc = require("solc");
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 
-const BASESCAN_API_KEY = "SGTK888FIYG1H2483B561MBPJ755YG5G2P";
+// SECURITY: API key loaded from environment variable (rotate the previously exposed key)
+const BASESCAN_API_KEY = process.env.BASESCAN_API_KEY;
+if (!BASESCAN_API_KEY) {
+  console.error('❌ BASESCAN_API_KEY environment variable not set');
+  process.exit(1);
+}
 // Base Mainnet API URL
 const API_URL = "https://api.etherscan.io/v2/api?chainid=8453";
 const DEPLOYER = "0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3";

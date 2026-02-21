@@ -7,7 +7,13 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
 import { readFileSync, writeFileSync } from 'fs';
 
-const DEPLOYER_PK = '0x4c472bd1dfef2681cc9ced4d67b32cf6f0411ebe67bac7bb73c0a8ae46620f18';
+// SECURITY: Never hardcode private keys. Use environment variable:
+// DEPLOYER_PRIVATE_KEY=0x... node scripts/deploy-mainnet-remaining.mjs
+const DEPLOYER_PK = process.env.DEPLOYER_PRIVATE_KEY;
+if (!DEPLOYER_PK) {
+  console.error('❌ DEPLOYER_PRIVATE_KEY environment variable not set');
+  process.exit(1);
+}
 const RPC_URL = 'https://mainnet.base.org';
 const DEPLOYER_ADDRESS = '0x0b923f3Cfa9ad1D926bDce8Fd1494534d4DA27B3';
 const ARENA_ADDRESS = '0x50ed7aebbcfdae85cea0d5860109ef98b2225a6b';

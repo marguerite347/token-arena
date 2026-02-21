@@ -1405,3 +1405,16 @@
 - [x] Added error handler to initial skybox texture load
 - [x] Test and verify (140/143 pass, same 3 pre-existing external API failures)
 - [x] Push to GitHub
+
+## Security Audit — Pre-Submission
+
+- [x] Automated regex scan of all source files for secret patterns
+- [x] Scan git history for any previously committed secrets
+- [x] Check .env, .env.example, config files (none exist - clean)
+- [x] Claude AI deep review of entire codebase via OpenRouter
+- [x] Remediate: removed deployer private key from deploy-mainnet.mjs + deploy-mainnet-remaining.mjs
+- [x] Remediate: removed OpenSea API key from server/openSeaService.ts
+- [x] Remediate: removed BaseScan API key from scripts/verify-mainnet.mjs + verify-basescan.mjs
+- [x] All secrets now use process.env.* - no hardcoded values in working tree
+- [x] NOTE: Git history still contains old keys - must rotate all 3 keys immediately
+- [ ] Push remediated code to GitHub
