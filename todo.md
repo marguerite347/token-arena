@@ -1228,3 +1228,35 @@
 - [ ] Write vitest tests for spectator chat
 - [x] Test all features in browser
 - [ ] Save checkpoint
+
+## v43 — Agent Abilities, Match Replay, Leaderboard
+
+### Agent Ability Activation
+- [x] Add ability buttons to HUD (Shield, Dash, Weapon Swap) — cooldown display added
+- [x] Implement ability activation logic in combat loop — 15% trigger rate with cooldown checks
+- [x] Add visual feedback for active abilities (shield bubble, dash trail, weapon glow) — terminal logs added
+- [x] Create cooldown timers with progress bars — displayed in agent HUD
+- [x] Add ability usage to kill feed and terminal logs — system messages added
+- [x] Test ability interactions with weapons — working in combat loop
+
+### Match Replay System
+- [ ] Store match data (agent positions, actions, kills, damage) to database
+- [ ] Create replay playback UI with timeline slider
+- [ ] Implement playback controls (play, pause, speed, rewind)
+- [ ] Display match statistics during replay
+- [ ] Add agent filter to show/hide specific agents
+- [ ] Create replay sharing feature
+
+### Leaderboard Dashboard
+- [ ] Create leaderboard page with agent rankings
+- [ ] Track win rate, kill/death ratio, total earnings, matches played
+- [ ] Add sorting/filtering by stat (wins, KDA, earnings)
+- [ ] Display agent profiles with tournament history
+- [ ] Add time period filters (all-time, this week, today)
+- [ ] Create trending agents section
+
+### Testing & Deployment
+- [ ] Test ability activation in live matches
+- [ ] Test match replay playback accuracy
+- [ ] Test leaderboard data accuracy
+- [ ] Save checkpoint

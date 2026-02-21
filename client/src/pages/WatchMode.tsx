@@ -154,7 +154,8 @@ interface TxEntry {
 interface AgentHUD {
   id: string; name: string; hp: number; maxHp: number; kills: number; deaths: number;
   tokens: number; tokensEarned: number; tokensSpent: number; alive: boolean;
-  shieldActive: boolean; shieldCooldown: number; dodgeCooldown: number;
+  shieldActive: boolean; shieldCooldown: number; dodgeCooldown: number; dashCooldown: number; weaponSwapCooldown: number; abilityActive: boolean;
+  lastAbilityUsed?: string; // 'shield' | 'dash' | 'weaponSwap'
 }
 interface TermLine { type: "call" | "response" | "system" | "error"; text: string; ts: number; }
 interface ChatMsg { sender: string; color: string; text: string; ts: number; }
@@ -1296,7 +1297,7 @@ export default function WatchMode() {
     setAgentStates(AGENTS.map(a => ({
       id: a.id, name: a.id, hp: 100, maxHp: 100, kills: 0, deaths: 0,
       tokens: 100, tokensEarned: 0, tokensSpent: 0, alive: true,
-      shieldActive: false, shieldCooldown: 0, dodgeCooldown: 0,
+      shieldActive: false, shieldCooldown: 0, dodgeCooldown: 0, dashCooldown: 0, weaponSwapCooldown: 0, abilityActive: false,
     })));
   }, [selectedAgent]);
 
@@ -1461,6 +1462,40 @@ export default function WatchMode() {
       let defender = randFrom(aliveAgents);
       while (defender.id === attacker.id) defender = randFrom(aliveAgents);
 
+      // Check for ability activation (15% chance per combat tick)
+      const attackerState = currentStates.find(s => s.id === attacker.id);
+      const defenderState = currentStates.find(s => s.id === defender.id);
+      
+      if (Math.random() < 0.15 && attackerState) {
+        // 40% shield, 35% dash, 25% weapon swap
+        const abilityRoll = Math.random();
+        if (abilityRoll < 0.40 && attackerState.shieldCooldown <= 0) {
+          // SHIELD ABILITY
+          setAgentStates(prev => prev.map(a => a.id === attacker.id ? { ...a, shieldActive: true, shieldCooldown: 18, lastAbilityUsed: 'shield' } : a));
+          pushTerminal("system", `⚔ ${attacker.id} ACTIVATED SHIELD (18s cooldown)`);
+          pushChat(attacker.id, hexColor(attacker.color), "Shield online!");
+          setTimeout(() => setAgentStates(prev => prev.map(a => a.id === attacker.id ? { ...a, shieldActive: false } : a)), 2000);
+        } else if (abilityRoll < 0.75 && attackerState.dashCooldown <= 0) {
+          // DASH ABILITY
+          setAgentStates(prev => prev.map(a => a.id === attacker.id ? { ...a, dashCooldown: 15, lastAbilityUsed: 'dash' } : a));
+          pushTerminal("system", `⚡ ${attacker.id} DASHED (15s cooldown)`);
+          pushChat(attacker.id, hexColor(attacker.color), "Tactical dash!");
+        } else if (attackerState.weaponSwapCooldown <= 0) {
+          // WEAPON SWAP ABILITY
+          setAgentStates(prev => prev.map(a => a.id === attacker.id ? { ...a, weaponSwapCooldown: 12, lastAbilityUsed: 'weaponSwap' } : a));
+          pushTerminal("system", `🔫 ${attacker.id} SWAPPED WEAPON (12s cooldown)`);
+          pushChat(attacker.id, hexColor(attacker.color), "Switching tactics!");
+        }
+      }
+      
+      // Decrement cooldowns each tick
+      setAgentStates(prev => prev.map(a => ({
+        ...a,
+        shieldCooldown: Math.max(0, a.shieldCooldown - 0.05),
+        dashCooldown: Math.max(0, a.dashCooldown - 0.05),
+        weaponSwapCooldown: Math.max(0, a.weaponSwapCooldown - 0.05),
+      })));
+
       const weapons = Object.keys(WEAPON_COLORS);
       const weapon = randFrom(weapons);
       const baseDamage = Math.floor(Math.random() * 35) + 20;
@@ -1474,7 +1509,6 @@ export default function WatchMode() {
 
       const roll = Math.random();
       const currentScene = sceneRef.current;
-      const attackerState = currentStates.find(s => s.id === attacker.id);
 
       if (roll < 0.15) {
         // MISS
@@ -1718,7 +1752,7 @@ export default function WatchMode() {
     setAgentStates(AGENTS.map(a => ({
       id: a.id, name: a.id, hp: 100, maxHp: 100, kills: 0, deaths: 0,
       tokens: tokenHistory[tokenHistory.length - 1] || 100, tokensEarned: 0, tokensSpent: 0, alive: true,
-      shieldActive: false, shieldCooldown: 0, dodgeCooldown: 0, dashCooldown: 0, weaponSwapCooldown: 0, abilityActive: false, abilityActive: false,
+      shieldActive: false, shieldCooldown: 0, dodgeCooldown: 0, dashCooldown: 0, weaponSwapCooldown: 0, abilityActive: false,
     })));
     setIsRunning(false);
     startMatch();
@@ -1938,11 +1972,27 @@ export default function WatchMode() {
                   <div className="h-full rounded-full transition-all duration-300" style={{ width: `${(a.hp / a.maxHp) * 100}%`, background: colorHex, boxShadow: `0 0 6px ${colorHex}` }} />
                 </div>
                 {isMyAgent && (
-                  <div className="flex items-center justify-between mt-1 text-[9px]">
-                    <span className="text-yellow-500">◆ {a.tokens}</span>
-                    <span className="text-green-400">+{a.tokensEarned}</span>
-                    <span className="text-red-400">-{a.tokensSpent}</span>
-                  </div>
+                  <>
+                    <div className="flex items-center justify-between mt-1 text-[9px]">
+                      <span className="text-yellow-500">◆ {a.tokens}</span>
+                      <span className="text-green-400">+{a.tokensEarned}</span>
+                      <span className="text-red-400">-{a.tokensSpent}</span>
+                    </div>
+                    <div className="mt-2 space-y-1">
+                      <div className="flex items-center justify-between text-[8px]">
+                        <span className="text-cyan-400">Shield</span>
+                        <span className="text-cyan-300">{a.shieldCooldown > 0 ? a.shieldCooldown.toFixed(1) : 'Ready'}s</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[8px]">
+                        <span className="text-yellow-400">Dash</span>
+                        <span className="text-yellow-300">{a.dashCooldown > 0 ? a.dashCooldown.toFixed(1) : 'Ready'}s</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[8px]">
+                        <span className="text-purple-400">Swap</span>
+                        <span className="text-purple-300">{a.weaponSwapCooldown > 0 ? a.weaponSwapCooldown.toFixed(1) : 'Ready'}s</span>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             );
