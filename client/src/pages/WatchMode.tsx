@@ -37,13 +37,13 @@ import gsap from "gsap";
 import { AGENT_SMART_WALLETS, ACTIVE_EXPLORER } from "@shared/web3";
 
 // ─── CDN fallback panoramas (used when real-time generation unavailable) ────
+// High-quality Skybox AI Model 3 backups (used if production API generation fails)
 const FALLBACK_PANORAMAS = [
-  { name: "Cyberpunk Arena", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gyluRUvZGNaXfxyf.jpg" },
-  { name: "Neon Brutalism", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/sNuAtMqlxnNqsqEE.jpg" },
-  { name: "Mech Hangar", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gOkcBobLWwNqWJlr.jpg" },
-  { name: "Crypto Wasteland", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/dRjHDiDQqVzLFNjG.jpg" },
-  { name: "SciFi Battleground", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/tVCUBUdNNPwxMTvN.jpg" },
-  { name: "UE Render Arena", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/ybRsYGSbEaljmdEq.jpg" },
+  { name: "Cyberpunk Colosseum", url: "https://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg_A_colossal_cyberpunk_arena_8223941509_14997657.jpg" },
+  { name: "Post-Apocalyptic Wasteland", url: "https://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangular-jpg_In_a_post-apocalyptic_desert_9623416410_14997659.jpg" },
+  { name: "Digital Void Space", url: "https://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular-jpg_A_digital_void_space_9983137796_14997660.jpg" },
+  { name: "Mech Hangar Bay", url: "https://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangular-jpg_An_expansive_hangar_bay_3592434325_14997661.jpg" },
+  { name: "Quantum Arena", url: "https://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangular-jpg_An_otherworldly_arena_pulsates_9142454532_14997662.jpg" },
 ];
 
 // ─── Skybox Model 4 arena prompts for real-time generation ──────────────────
@@ -744,9 +744,8 @@ export default function WatchMode() {
                 return;
               }
               try {
-                const res = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ id: data.id }))}`);
-                const json = await res.json();
-                const result = json?.result?.data;
+                // Use tRPC client directly for polling
+                const result = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ id: data.id }))}`).then(r => r.json()).then(j => j?.result?.data);
                 if (result?.status === "complete" && result?.fileUrl) {
                   if (skyboxPollIntervalRef.current) clearInterval(skyboxPollIntervalRef.current);
                   setNextSkyboxUrl(result.fileUrl);
@@ -755,7 +754,9 @@ export default function WatchMode() {
                   setSkyboxGenerating(false);
                   pushTerminal("system", `[SKYBOX] "${arenaPrompt.name}" generated! Ready for next match.`);
                 }
-              } catch { /* retry */ }
+              } catch (err) {
+                console.error("[Skybox Poll]", err);
+              }
             }, 3000);
           }
         },
@@ -1459,7 +1460,22 @@ export default function WatchMode() {
         const state = currentStates.find(s => s.id === a.id);
         return state?.alive !== false;
       });
-      if (aliveAgents.length < 2) return;
+      
+      // Early winner detection: end match if only 1 agent alive
+      if (aliveAgents.length < 2) {
+        if (combatIntervalRef.current) {
+          clearInterval(combatIntervalRef.current);
+          combatIntervalRef.current = null;
+        }
+        if (moveIntervalRef.current) {
+          clearInterval(moveIntervalRef.current);
+          moveIntervalRef.current = null;
+        }
+        // Finish combat immediately with current state
+        const data = { agents: currentStates, winner: aliveAgents[0]?.id || "DRAW" };
+        finishCombat(data);
+        return;
+      }
 
       const attacker = randFrom(aliveAgents);
       let defender = randFrom(aliveAgents);
