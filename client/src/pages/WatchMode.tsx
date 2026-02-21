@@ -1032,70 +1032,32 @@ export default function WatchMode() {
     const skyGeo = new THREE.SphereGeometry(100, 64, 64);
     skyGeo.scale(-1, 1, 1);
     
-    // Create default neon grid texture (cyberpunk aesthetic)
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d')!;
+    // Load a random M4 skybox immediately as the initial background
+    // This ensures the title/agent-selection screen shows high-quality art from the start
+    const initialM4 = COMPLETED_M4_SKYBOXES[Math.floor(Math.random() * COMPLETED_M4_SKYBOXES.length)];
+    const initialProxyUrl = `/api/skybox-proxy?url=${encodeURIComponent(initialM4.url)}`;
     
-    // Dark background with slight gradient
-    const gradient = ctx.createLinearGradient(0, 0, 512, 512);
-    gradient.addColorStop(0, '#0a0a1a');
-    gradient.addColorStop(0.5, '#0f0f2e');
-    gradient.addColorStop(1, '#0a0a1a');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 512, 512);
-    
-    // Neon green grid lines
-    ctx.strokeStyle = '#00ff88';
-    ctx.globalAlpha = 0.3;
-    ctx.lineWidth = 1;
-    const gridSize = 32;
-    for (let i = 0; i <= 512; i += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i, 512);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, i);
-      ctx.lineTo(512, i);
-      ctx.stroke();
-    }
-    
-    // Brighter neon lines at larger intervals
-    ctx.strokeStyle = '#00ffff';
-    ctx.globalAlpha = 0.5;
-    ctx.lineWidth = 2;
-    const largeGridSize = 128;
-    for (let i = 0; i <= 512; i += largeGridSize) {
-      ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i, 512);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, i);
-      ctx.lineTo(512, i);
-      ctx.stroke();
-    }
-    
-    // Add some glow effect with radial gradient
-    ctx.globalAlpha = 0.15;
-    const radialGrad = ctx.createRadialGradient(256, 256, 0, 256, 256, 512);
-    radialGrad.addColorStop(0, '#ff00ff');
-    radialGrad.addColorStop(1, 'transparent');
-    ctx.fillStyle = radialGrad;
-    ctx.fillRect(0, 0, 512, 512);
-    
-    const defaultTexture = new THREE.CanvasTexture(canvas);
-    defaultTexture.mapping = THREE.EquirectangularReflectionMapping;
-    
-    const skyMat = new THREE.MeshBasicMaterial({ map: defaultTexture, side: THREE.FrontSide });
+    // Start with a dark placeholder material, then swap in the M4 texture once loaded
+    const skyMat = new THREE.MeshBasicMaterial({ color: 0x0a0a1a, side: THREE.FrontSide });
     const skySphere = new THREE.Mesh(skyGeo, skyMat);
     skySphere.renderOrder = -1;
     skySphere.frustumCulled = false;
     skyMat.fog = false;
     scene.add(skySphere);
     skyboxSphereRef.current = skySphere;
+
+    // Immediately load the M4 skybox texture for the title/agent-selection screen
+    const initLoader = new THREE.TextureLoader();
+    initLoader.crossOrigin = "anonymous";
+    initLoader.load(initialProxyUrl, (tex) => {
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      skyMat.map = tex;
+      skyMat.color.set(0xffffff); // Reset color so texture shows through
+      skyMat.needsUpdate = true;
+      scene.environment = tex;
+      setArenaName(`${initialM4.name} (${initialM4.style})`);
+    });
 
     // Lighting
     scene.add(new THREE.AmbientLight(0x334466, 0.8));

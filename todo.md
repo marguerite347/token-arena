@@ -1323,3 +1323,10 @@
 - [x] Added skyboxFloat CSS animation for subtle background pan effect
 - [x] Removed all private-us-east-1.manuscdn.com URLs from codebase (0 remaining)
 - [x] Test and verify M4 art is visible (screenshot confirmed)
+
+## v48 — Replace M3 Backgrounds on Title & Agent Selection Pages
+
+- [x] Find all remaining M3/old skybox image references in codebase (procedural neon grid in WatchMode.tsx scene init)
+- [x] Replace title/agent-selection screen: removed procedural canvas grid, now loads random M4 skybox immediately on scene init
+- [x] TS compiles cleanly (0 errors)
+- [ ] Push to GitHub
