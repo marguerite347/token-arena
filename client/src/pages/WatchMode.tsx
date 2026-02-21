@@ -1359,7 +1359,8 @@ export default function WatchMode() {
               ? candidates[Math.floor(Math.random() * candidates.length)]
               : 0;
             
-            const nextChangeAt = globalMoveTickRef.current + 4 + Math.floor(Math.random() * 3);
+            // Increase to 8-12 ticks so agents have time to reach the platform
+            const nextChangeAt = globalMoveTickRef.current + 8 + Math.floor(Math.random() * 5);
             targetData = { idx: newTargetIdx, nextChangeAt };
             agentTargetPlatformRef.current.set(agent.id, targetData);
           }
@@ -1380,7 +1381,8 @@ export default function WatchMode() {
                         agent.personality === "evasive" ? 1.5 :
                         agent.personality === "chaotic" ? 1.8 :
                         agent.personality === "defensive" ? 0.8 : 1.0;
-          const step = Math.min(dist, speed);
+          // Increase step significantly so agents can actually reach distant platforms
+          const step = Math.min(dist, speed * 2.5);
           if (dist > 0.1) {
             newX = mesh.position.x + (dx / dist) * step;
             newZ = mesh.position.z + (dz / dist) * step;
