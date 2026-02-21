@@ -10,6 +10,7 @@
  */
 
 import { invokeLLM } from "./_core/llm";
+import { invokeAgentLLM, getAgentModel, getAgentModelKey } from "./openRouterLLM";
 import { getDb, getAgentIdentities, updateAgentStats, logX402Transaction, saveMatch, upsertLeaderboardEntry, saveAgentMemory, saveAgentDecision } from "./db";
 import { recordComputeSpend, recordFee } from "./daoCouncil";
 import { ARENA_PROMPTS } from "../shared/arenaPrompts";
@@ -35,6 +36,8 @@ interface CombatAgent {
   damageTaken: number;
   shotsFired: number;
   shotsHit: number;
+  llmModel?: string;
+  llmLabel?: string;
 }
 
 interface CombatLogEntry {
@@ -63,6 +66,8 @@ interface PlaytestMatchResult {
     tokensSpent: number;
     survived: boolean;
     decision?: string;
+    llmModel?: string;
+    llmIcon?: string;
   }>;
   combatLog: CombatLogEntry[];
   winner: string;
@@ -139,13 +144,34 @@ async function getAgentDecision(agent: CombatAgent, arena: string, opponentName:
   action: string;
   reasoning: string;
   memory: string;
+  llmUsed: string;
 }> {
+  const responseFormat = {
+    type: "json_schema" as const,
+    json_schema: {
+      name: "tactical_decision",
+      strict: true,
+      schema: {
+        type: "object",
+        properties: {
+          action: { type: "string", description: "Tactical plan" },
+          reasoning: { type: "string", description: "2-3 sentences of tactical reasoning" },
+          memory: { type: "string", description: "A lesson to remember from this situation" },
+        },
+        required: ["action", "reasoning", "memory"],
+        additionalProperties: false,
+      },
+    },
+  };
+
   try {
-    const result = await invokeLLM({
-      messages: [
+    // Use OpenRouter to route to the agent's assigned LLM
+    const { result, modelConfig, usedFallback } = await invokeAgentLLM(
+      agent.agentId,
+      [
         {
           role: "system",
-          content: "You are an autonomous AI combat agent making a tactical decision before a match. Return JSON with: action (string), reasoning (string, 2-3 sentences), memory (string, a lesson to remember).",
+          content: "You are an autonomous AI combat agent making a tactical decision before a match. You pay for your own compute with tokens you earn. Return JSON with: action (string), reasoning (string, 2-3 sentences), memory (string, a lesson to remember).",
         },
         {
           role: "user",
@@ -157,28 +183,15 @@ Kills so far: ${agent.kills}. Deaths: ${agent.deaths}.
 What's your tactical plan for this fight? Consider the arena environment and your opponent.`,
         },
       ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "tactical_decision",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              action: { type: "string", description: "Tactical plan" },
-              reasoning: { type: "string", description: "2-3 sentences of tactical reasoning" },
-              memory: { type: "string", description: "A lesson to remember from this situation" },
-            },
-            required: ["action", "reasoning", "memory"],
-            additionalProperties: false,
-          },
-        },
-      },
-    });
+      responseFormat,
+    );
 
     const content = result.choices[0]?.message?.content;
+    const llmUsed = modelConfig.displayName + (usedFallback ? " (fallback)" : "");
     if (typeof content === "string") {
-      return JSON.parse(content);
+      const parsed = JSON.parse(content);
+      console.log(`[AIPlaytest] ${agent.name} reasoned via ${llmUsed}: ${parsed.action}`);
+      return { ...parsed, llmUsed };
     }
   } catch (e: any) {
     console.error(`[AIPlaytest] LLM decision failed for ${agent.name}:`, e.message);
@@ -188,6 +201,7 @@ What's your tactical plan for this fight? Consider the arena environment and you
     action: "aggressive_push",
     reasoning: `${agent.name} decides to push aggressively with ${agent.primaryWeapon}, leveraging superior firepower.`,
     memory: `Arena ${arena} requires adaptive positioning.`,
+    llmUsed: "heuristic",
   };
 }
 
@@ -202,6 +216,9 @@ async function runPlaytestMatch(
   const combatLog: CombatLogEntry[] = [];
 
   // Initialize combat agents
+  const model1 = getAgentModel(agent1Data.agentId);
+  const model2 = getAgentModel(agent2Data.agentId);
+
   const agent1: CombatAgent = {
     ...agent1Data,
     hp: 100 + Math.floor(agent1Data.armor / 2),
@@ -212,6 +229,8 @@ async function runPlaytestMatch(
     damageTaken: 0,
     shotsFired: 0,
     shotsHit: 0,
+    llmModel: getAgentModelKey(agent1Data.agentId),
+    llmLabel: model1.label,
   };
 
   const agent2: CombatAgent = {
@@ -224,6 +243,8 @@ async function runPlaytestMatch(
     damageTaken: 0,
     shotsFired: 0,
     shotsHit: 0,
+    llmModel: getAgentModelKey(agent2Data.agentId),
+    llmLabel: model2.label,
   };
 
   // Log match start
@@ -236,8 +257,8 @@ async function runPlaytestMatch(
   });
 
   // Pre-match LLM decisions (if enabled)
-  let decision1 = { action: "aggressive", reasoning: "Default aggressive strategy", memory: "No specific lesson" };
-  let decision2 = { action: "defensive", reasoning: "Default defensive strategy", memory: "No specific lesson" };
+  let decision1 = { action: "aggressive", reasoning: "Default aggressive strategy", memory: "No specific lesson", llmUsed: "heuristic" };
+  let decision2 = { action: "defensive", reasoning: "Default defensive strategy", memory: "No specific lesson", llmUsed: "heuristic" };
 
   if (useLLM) {
     try {
@@ -375,13 +396,14 @@ async function runPlaytestMatch(
     weaponUsed: agent1Won ? agent1.primaryWeapon : agent2.primaryWeapon,
     agentData: {
       agents: [
-        { id: agent1.agentId, name: agent1.name, kills: agent1.kills, deaths: agent1.deaths, damage: agent1.damageDealt, won: agent1Won },
-        { id: agent2.agentId, name: agent2.name, kills: agent2.kills, deaths: agent2.deaths, damage: agent2.damageDealt, won: !agent1Won },
+        { id: agent1.agentId, name: agent1.name, kills: agent1.kills, deaths: agent1.deaths, damage: agent1.damageDealt, won: agent1Won, llmModel: agent1.llmLabel || "unknown" },
+        { id: agent2.agentId, name: agent2.name, kills: agent2.kills, deaths: agent2.deaths, damage: agent2.damageDealt, won: !agent1Won, llmModel: agent2.llmLabel || "unknown" },
       ],
       combatLogLength: combatLog.length,
       arena: arena.name,
       winner,
       decisions: { [agent1.name]: decision1.reasoning, [agent2.name]: decision2.reasoning },
+      llmModels: { [agent1.name]: decision1.llmUsed, [agent2.name]: decision2.llmUsed },
     },
     entryFee: entryFee * 2,
   });
@@ -607,6 +629,8 @@ async function runPlaytestMatch(
         tokensSpent: agent1Spent,
         survived: agent1.hp > 0,
         decision: decision1.reasoning,
+        llmModel: agent1.llmLabel || decision1.llmUsed || "Manus LLM",
+        llmIcon: agent1.llmModel ? getAgentModel(agent1.agentId).icon : "🤖",
       },
       {
         agentId: agent2.agentId,
@@ -618,6 +642,8 @@ async function runPlaytestMatch(
         tokensSpent: agent2Spent,
         survived: agent2.hp > 0,
         decision: decision2.reasoning,
+        llmModel: agent2.llmLabel || decision2.llmUsed || "Manus LLM",
+        llmIcon: agent2.llmModel ? getAgentModel(agent2.agentId).icon : "🤖",
       },
     ],
     combatLog,

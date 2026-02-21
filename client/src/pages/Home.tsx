@@ -55,6 +55,15 @@ export default function Home() {
             <button onClick={() => navigate("/flywheel")} className="text-xs font-mono text-muted-foreground hover:text-neon-cyan transition-colors">
               FLYWHEEL
             </button>
+            <button onClick={() => navigate("/factions")} className="text-xs font-mono text-muted-foreground hover:text-neon-magenta transition-colors">
+              FACTIONS
+            </button>
+            <button onClick={() => navigate("/auctions")} className="text-xs font-mono text-muted-foreground hover:text-neon-amber transition-colors">
+              AUCTIONS
+            </button>
+            <button onClick={() => navigate("/dao-domains")} className="text-xs font-mono text-muted-foreground hover:text-neon-green transition-colors">
+              DAO
+            </button>
             <button onClick={() => navigate("/demo")} className="text-xs font-mono text-muted-foreground hover:text-neon-green transition-colors">
               BOUNTIES
             </button>

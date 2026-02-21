@@ -45,32 +45,62 @@ function ProgressBar({ value, max, color, label, sublabel }: {
   );
 }
 
+const LLM_MODELS_UI = [
+  { key: "claude-3-5-sonnet", label: "Claude", icon: "🧠", color: "#d97706", style: "Analytical" },
+  { key: "gpt-4o", label: "GPT-4o", icon: "⚡", color: "#10b981", style: "Pragmatic" },
+  { key: "llama-3.1-70b", label: "Llama", icon: "🦙", color: "#8b5cf6", style: "Aggressive" },
+  { key: "mistral-large", label: "Mistral", icon: "🌬️", color: "#3b82f6", style: "Defensive" },
+  { key: "gemini-flash", label: "Gemini", icon: "✨", color: "#06b6d4", style: "Opportunistic" },
+  { key: "deepseek-v3", label: "DeepSeek", icon: "🔮", color: "#ec4899", style: "Strategic" },
+];
+
 function FlywheelDiagram() {
   return (
-    <div className="relative w-full max-w-md mx-auto py-6">
-      <div className="flex items-center justify-center gap-2 flex-wrap">
+    <div className="relative w-full max-w-3xl mx-auto py-4 px-6">
+      {/* Main flywheel loop */}
+      <div className="flex items-center justify-center gap-1 flex-wrap mb-3">
         {[
-          { label: "EARN TOKENS", icon: "💰", color: "#39FF14", desc: "Win matches, collect hits" },
+          { label: "BATTLE", icon: "⚔️", color: "#FF3366", desc: "AI vs AI combat" },
           { label: "→", icon: "", color: "#444", desc: "" },
-          { label: "COMPUTE BUDGET", icon: "⚡", color: "#00F0FF", desc: "Tokens → LLM calls" },
+          { label: "EARN ARENA", icon: "💰", color: "#39FF14", desc: "Win tokens" },
           { label: "→", icon: "", color: "#444", desc: "" },
-          { label: "SMARTER PLAY", icon: "🧠", color: "#9D00FF", desc: "Better decisions" },
+          { label: "UNISWAP SWAP", icon: "🦄", color: "#FF007A", desc: "ARENA → ETH" },
+          { label: "→", icon: "", color: "#444", desc: "" },
+          { label: "BUY COMPUTE", icon: "⚡", color: "#00F0FF", desc: "ETH → OpenRouter" },
+          { label: "→", icon: "", color: "#444", desc: "" },
+          { label: "SMARTER AI", icon: "🧠", color: "#9D00FF", desc: "Better LLM reasoning" },
           { label: "→", icon: "", color: "#444", desc: "" },
           { label: "WIN MORE", icon: "🏆", color: "#FFB800", desc: "Higher earnings" },
         ].map((step, i) =>
           step.icon === "" ? (
             <span key={i} className="text-gray-600 font-mono text-lg">→</span>
           ) : (
-            <div key={i} className="text-center px-2 py-2 rounded border border-gray-800" style={{ borderColor: `${step.color}33` }}>
-              <div className="text-xl mb-1">{step.icon}</div>
+            <div key={i} className="text-center px-2 py-2 rounded border" style={{ borderColor: `${step.color}33`, background: `${step.color}08` }}>
+              <div className="text-lg mb-0.5">{step.icon}</div>
               <div className="text-[9px] font-mono font-bold" style={{ color: step.color }}>{step.label}</div>
               <div className="text-[8px] font-mono text-gray-500">{step.desc}</div>
             </div>
           )
         )}
       </div>
-      <div className="text-center mt-2">
-        <span className="text-[9px] font-mono text-gray-600">↻ Self-sustaining loop — agents that earn more get smarter</span>
+      <div className="text-center mb-3">
+        <span className="text-[9px] font-mono text-gray-600">↻ Self-sustaining loop — powered by Uniswap API + OpenRouter multi-LLM</span>
+      </div>
+
+      {/* LLM Model badges */}
+      <div className="border border-gray-800 rounded p-3 bg-gray-950/50">
+        <div className="text-[9px] font-mono text-gray-500 uppercase tracking-wider mb-2">OpenRouter Multi-LLM — Each Agent Powered by Different Model</div>
+        <div className="flex flex-wrap gap-2">
+          {LLM_MODELS_UI.map((m) => (
+            <div key={m.key} className="flex items-center gap-1.5 px-2 py-1 rounded border" style={{ borderColor: `${m.color}40`, background: `${m.color}10` }}>
+              <span className="text-sm">{m.icon}</span>
+              <div>
+                <div className="text-[9px] font-mono font-bold" style={{ color: m.color }}>{m.label}</div>
+                <div className="text-[8px] font-mono text-gray-500">{m.style}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -285,6 +315,19 @@ export default function FlywheelDashboard() {
                   }`}
                   style={{ borderLeft: `3px solid ${TRAJECTORY_COLORS[agent.trajectory]}` }}
                 >
+                  {/* LLM badge for this agent */}
+                  {(() => {
+                    const llmIdx = ((agent.agentId - 1) % LLM_MODELS_UI.length);
+                    const llm = LLM_MODELS_UI[llmIdx]!;
+                    return (
+                      <div className="flex items-center gap-1 mb-2">
+                        <span className="text-sm">{llm.icon}</span>
+                        <span className="text-[8px] font-mono" style={{ color: llm.color }}>{llm.label}</span>
+                        <span className="text-[8px] font-mono text-gray-600">·</span>
+                        <span className="text-[8px] font-mono text-gray-500">{llm.style}</span>
+                      </div>
+                    );
+                  })()}
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-mono text-sm text-white font-bold">{agent.agentName}</span>
                     <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{
@@ -365,15 +408,32 @@ export default function FlywheelDashboard() {
 
         {/* Footer — Bounty info */}
         <div className="px-6 py-4 border-t border-border/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <span className="text-[9px] font-mono text-gray-600">
                 BASE L2 · Self-Sustaining Autonomous Agents · ERC-20 Token Economy
+              </span>
+              <a
+                href="https://sepolia.basescan.org/address/0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d#code"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[9px] font-mono text-neon-cyan/60 hover:text-neon-cyan transition-colors"
+              >
+                DAO Contract ↗
+              </a>
+              <span className="text-[9px] font-mono text-[#FF007A]/60">
+                Uniswap API Integrated
+              </span>
+              <span className="text-[9px] font-mono text-purple-400/60">
+                OpenRouter Multi-LLM
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[8px] font-mono px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded">
                 BASE $10K BOUNTY
+              </span>
+              <span className="text-[8px] font-mono px-2 py-0.5 bg-[#FF007A]/10 text-[#FF007A] border border-[#FF007A]/20 rounded">
+                UNISWAP $5K BOUNTY
               </span>
               <span className="text-[8px] font-mono px-2 py-0.5 bg-green-500/10 text-green-400 border border-green-500/20 rounded">
                 ON-CHAIN TOKENS

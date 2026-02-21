@@ -1,15 +1,23 @@
 /**
  * Agent Brain — LLM-powered autonomous decision-making engine
- * 
+ *
  * Each AI agent uses this to:
  * 1. Analyze their match performance history
  * 2. Reason about resource allocation (what to buy/craft/trade)
  * 3. Adapt loadout strategy based on win/loss patterns
  * 4. Learn from past decisions and their outcomes
  * 5. Maintain self-sustaining economics (earn > spend)
+ *
+ * v22: Each agent is powered by a DIFFERENT LLM via OpenRouter
+ *      (Claude, GPT-4o, Llama, Mistral, Gemini, DeepSeek)
+ *      with genuinely distinct reasoning styles.
+ *
+ * v23: Persistent cross-match memories are retrieved and injected
+ *      into the reasoning prompt so agents learn over time.
  */
 
 import { invokeLLM } from "./_core/llm";
+import { invokeAgentLLM, getAgentModel, getAgentModelKey, type LLMModelConfig } from "./openRouterLLM";
 import {
   getAgentById, getAgentMemories, saveAgentMemory, saveAgentDecision,
   getAgentDecisionHistory, getAgentInventoryItems, getAvailableRecipes,
@@ -32,6 +40,8 @@ export interface AgentPerformance {
   inventory: Array<{ name: string; type: string; quantity: number }>;
   memories: Array<{ type: string; content: string; confidence: number; successRate: number }>;
   arenaContext?: string; // Scene analysis briefing from Arena Vision
+  llmModel?: string; // Which LLM powers this agent
+  llmModelConfig?: LLMModelConfig;
 }
 
 export interface AgentDecisionResult {
@@ -41,11 +51,12 @@ export interface AgentDecisionResult {
   cost: number;
   confidence: number;
   newMemory?: string;
+  llmModel?: string; // Which LLM made this decision
 }
 
 /**
  * Have an agent reason about what to do after a match.
- * Uses LLM to analyze performance and make autonomous decisions.
+ * Uses the agent's assigned LLM via OpenRouter for genuinely diverse reasoning.
  */
 export async function agentReason(perf: AgentPerformance): Promise<AgentDecisionResult> {
   const winRate = perf.recentMatches.length > 0
@@ -58,9 +69,29 @@ export async function agentReason(perf: AgentPerformance): Promise<AgentDecision
     ? perf.recentMatches.reduce((s, m) => s + (m.tokensEarned - m.tokensSpent), 0) / perf.recentMatches.length
     : 0;
 
-  const memorySummary = perf.memories.length > 0
-    ? perf.memories.map(m => `[${m.type}] ${m.content} (confidence: ${m.confidence.toFixed(2)}, success: ${m.successRate.toFixed(2)})`).join("\n")
-    : "No memories yet — this is a fresh agent.";
+  // ─── Persistent Memory Briefing ──────────────────────────────
+  // Inject cross-match memories so agents learn over time
+  let memoryBriefing = "";
+  if (perf.memories.length > 0) {
+    const strategyMems = perf.memories.filter(m => m.type === "strategy" && m.confidence > 0.5);
+    const failureMems = perf.memories.filter(m => m.type === "failure" && m.confidence > 0.3);
+    const economyMems = perf.memories.filter(m => m.type === "economy");
+
+    if (strategyMems.length > 0) {
+      memoryBriefing += "\nSTRATEGIES THAT WORKED:\n" +
+        strategyMems.slice(0, 5).map(m => `  • ${m.content} (confidence: ${m.confidence.toFixed(2)})`).join("\n");
+    }
+    if (failureMems.length > 0) {
+      memoryBriefing += "\nSTRATEGIES THAT FAILED:\n" +
+        failureMems.slice(0, 3).map(m => `  • ${m.content} (confidence: ${m.confidence.toFixed(2)})`).join("\n");
+    }
+    if (economyMems.length > 0) {
+      memoryBriefing += "\nECONOMIC LESSONS:\n" +
+        economyMems.slice(0, 3).map(m => `  • ${m.content}`).join("\n");
+    }
+  } else {
+    memoryBriefing = "\nNo memories yet — this is a fresh agent. Learn from this match.";
+  }
 
   const inventorySummary = perf.inventory.length > 0
     ? perf.inventory.map(i => `${i.name} (${i.type}) x${i.quantity}`).join(", ")
@@ -71,12 +102,15 @@ export async function agentReason(perf: AgentPerformance): Promise<AgentDecision
   ).join("\n");
 
   const arenaSection = perf.arenaContext
-    ? `\n${perf.arenaContext}\n\nIMPORTANT: Adapt your weapon and strategy choices to the arena environment above. If the arena favors close combat, prioritize scatter/plasma. If it favors sniping, prioritize railgun/beam. If it has many ambush spots, consider void/stealth.\n`
+    ? `\n${perf.arenaContext}\n\nIMPORTANT: Adapt your weapon and strategy choices to the arena environment above.\n`
     : "";
+
+  const modelConfig = perf.llmModelConfig || getAgentModel(perf.agentId);
 
   const prompt = `You are ${perf.agentName}, an autonomous AI combat agent in Token Arena.
 You have an ERC-4337 smart wallet on Base L2 and make your own financial decisions.
 Your goal is to be SELF-SUSTAINING: earn more tokens than you spend over time.
+You pay for your own compute (LLM reasoning) with tokens you earn in battle.
 ${arenaSection}
 CURRENT STATE:
 - Token Balance: ${perf.totalTokenBalance} ARENA
@@ -89,8 +123,8 @@ CURRENT STATE:
 RECENT MATCHES:
 ${recentMatchSummary || "No matches yet"}
 
-YOUR MEMORIES (learned from experience):
-${memorySummary}
+CROSS-MATCH MEMORIES (learned from past experience):
+${memoryBriefing}
 
 AVAILABLE ACTIONS:
 1. buy_weapon <weapon_name> — Buy a new weapon (plasma:20, railgun:40, scatter:30, rocket:50, beam:25, void:45)
@@ -107,6 +141,7 @@ DECISION RULES:
 - If avg token net is negative, you're not sustainable — fix this
 - If you have materials, consider crafting for profit
 - Always explain your reasoning clearly
+- REMEMBER: you pay for compute with tokens. Every decision costs you. Be efficient.
 
 Respond with EXACTLY this JSON format:
 {
@@ -115,40 +150,46 @@ Respond with EXACTLY this JSON format:
   "reasoning": "<2-3 sentences explaining your thinking>",
   "cost": <number>,
   "confidence": <0.0-1.0>,
-  "newMemory": "<optional: a lesson learned from recent matches>"
+  "newMemory": "<a lesson learned from recent matches>"
 }`;
 
+  const responseFormat = {
+    type: "json_schema" as const,
+    json_schema: {
+      name: "agent_decision",
+      strict: true,
+      schema: {
+        type: "object",
+        properties: {
+          action: { type: "string", description: "The action to take", enum: ["buy_weapon", "change_loadout", "craft", "trade", "save_tokens", "buy_consumable", "buy_armor"] },
+          target: { type: "string", description: "Specific target of the action" },
+          reasoning: { type: "string", description: "2-3 sentences explaining the reasoning" },
+          cost: { type: "number", description: "Token cost of this action" },
+          confidence: { type: "number", description: "Confidence level 0-1" },
+          newMemory: { type: "string", description: "A lesson learned from recent matches" },
+        },
+        required: ["action", "target", "reasoning", "cost", "confidence", "newMemory"],
+        additionalProperties: false,
+      },
+    },
+  };
+
   try {
-    const result = await invokeLLM({
-      messages: [
+    // Use OpenRouter to route to the agent's assigned LLM
+    const { result, modelConfig: usedModel, usedFallback } = await invokeAgentLLM(
+      perf.agentId,
+      [
         { role: "system", content: "You are an autonomous AI agent making strategic decisions in a combat arena game. Respond only with valid JSON." },
         { role: "user", content: prompt },
       ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "agent_decision",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              action: { type: "string", description: "The action to take", enum: ["buy_weapon", "change_loadout", "craft", "trade", "save_tokens", "buy_consumable", "buy_armor"] },
-              target: { type: "string", description: "Specific target of the action" },
-              reasoning: { type: "string", description: "2-3 sentences explaining the reasoning" },
-              cost: { type: "number", description: "Token cost of this action" },
-              confidence: { type: "number", description: "Confidence level 0-1" },
-              newMemory: { type: "string", description: "A lesson learned from recent matches" },
-            },
-            required: ["action", "target", "reasoning", "cost", "confidence", "newMemory"],
-            additionalProperties: false,
-          },
-        },
-      },
-    });
+      responseFormat,
+    );
 
     const content = result.choices[0]?.message?.content;
     if (typeof content === "string") {
       const parsed = JSON.parse(content) as AgentDecisionResult;
+      parsed.llmModel = usedModel.label + (usedFallback ? " (fallback)" : "");
+      console.log(`[AgentBrain] ${perf.agentName} reasoned via ${usedModel.displayName}${usedFallback ? " (fallback)" : ""}: ${parsed.action} → ${parsed.target}`);
       return parsed;
     }
   } catch (e: any) {
@@ -164,6 +205,7 @@ Respond with EXACTLY this JSON format:
       cost: 0,
       confidence: 0.9,
       newMemory: "Low token balance requires conservation mode.",
+      llmModel: "heuristic",
     };
   }
 
@@ -175,6 +217,7 @@ Respond with EXACTLY this JSON format:
       cost: 0,
       confidence: 0.7,
       newMemory: `${perf.currentLoadout.primary}/${perf.currentLoadout.secondary} loadout underperforming with ${(winRate * 100).toFixed(0)}% win rate.`,
+      llmModel: "heuristic",
     };
   }
 
@@ -184,6 +227,7 @@ Respond with EXACTLY this JSON format:
     reasoning: "Maintaining a balanced approach. Health packs provide good survivability value per token spent.",
     cost: 15,
     confidence: 0.6,
+    llmModel: "heuristic",
   };
 }
 
@@ -232,13 +276,13 @@ export async function executeAgentDecision(agentId: number, decision: AgentDecis
 }
 
 /**
- * Build agent performance data from database
+ * Build agent performance data from database — includes persistent memories
  */
 export async function buildAgentPerformance(agentId: number): Promise<AgentPerformance | null> {
   const agent = await getAgentById(agentId);
   if (!agent) return null;
 
-  const memories = await getAgentMemories(agentId, 10);
+  const memories = await getAgentMemories(agentId, 20); // Fetch more memories for cross-match learning
 
   // Deduct memory query cost — agents pay to access their memories
   if (memories.length > 0) {
@@ -279,6 +323,8 @@ export async function buildAgentPerformance(agentId: number): Promise<AgentPerfo
     weaponUsed: agent.primaryWeapon ?? "plasma",
   }));
 
+  const modelConfig = getAgentModel(agentId);
+
   return {
     agentId: agent.agentId,
     agentName: agent.name,
@@ -300,5 +346,7 @@ export async function buildAgentPerformance(agentId: number): Promise<AgentPerfo
       confidence: m.confidence,
       successRate: m.successRate,
     })),
+    llmModel: getAgentModelKey(agentId),
+    llmModelConfig: modelConfig,
   };
 }

@@ -16,6 +16,10 @@ import Replay from "./pages/Replay";
 import FlywheelDashboard from "./pages/FlywheelDashboard";
 import Betting from "./pages/Betting";
 import Replays from "./pages/Replays";
+import MemoryMarket from "./pages/MemoryMarket";
+import Factions from "./pages/Factions";
+import AuctionHouse from "./pages/AuctionHouse";
+import DAODomains from "./pages/DAODomains";
 import { GameProvider } from "./contexts/GameContext";
 
 function Router() {
@@ -32,6 +36,10 @@ function Router() {
       <Route path="/betting" component={Betting} />
       <Route path="/replays" component={Replays} />
       <Route path="/replay/:id" component={Replay} />
+      <Route path="/memory-market" component={MemoryMarket} />
+      <Route path="/factions" component={Factions} />
+      <Route path="/auctions" component={AuctionHouse} />
+      <Route path="/dao-domains" component={DAODomains} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

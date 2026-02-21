@@ -40,6 +40,11 @@ import { analyzeArenaScene, getAgentSceneBriefing, getGameMasterSpawnContext, ge
 import type { SceneAnalysis, SceneGraph } from "./arenaVision";
 import { getSceneGraphBriefing, getSceneGraphItemContext, sceneGraphToLearningData } from "@shared/sceneGraph";
 import { getAllFlywheelData, getAgentEconomics, getEcosystemHealth } from "./agentLifecycle";
+import {
+  getMarketplaceListings, buyMemoryNft, mintDeadAgentMemories,
+  getAgentMemoryNfts, updateAgentReputation, getAgentReputationData, getAllAgentReputations,
+} from "./memoryMarketplace";
+import { getCouncilMemoryStats, getRecentCouncilMemories } from "./daoCouncilMemory";
 
 
 // Blockade Labs Staging API — Model 4 styles (IDs 172-188)
@@ -891,7 +896,7 @@ export const appRouter = router({
     // List all replays with optional filtering
     list: publicProcedure
       .input(z.object({
-        limit: z.number().max(100).default(50),
+        limit: z.number().default(50),
         mode: z.enum(["aivai", "pvp"]).optional(),
       }).optional())
       .query(async ({ input }) => {
@@ -918,6 +923,387 @@ export const appRouter = router({
         const result = await db.select().from(matchReplays)
           .where(eq(matchReplays.replayId, input.replayId)).limit(1);
         return result.length > 0 ? result[0] : null;
+      }),
+  }),
+
+  // ─── Uniswap DEX Swap + Flywheel ─────────────────────────────────────────
+  uniswap: router({
+    // Get a swap quote from Uniswap API
+    quote: publicProcedure
+      .input(z.object({
+        tokenIn: z.string().default("ARENA"),
+        tokenOut: z.string().default("WETH"),
+        amount: z.number().min(1).default(100),
+        agentId: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const { getUniswapQuote, UNISWAP_CONFIG } = await import("./uniswapService");
+        const amountWei = BigInt(Math.floor(input.amount * 1e18)).toString();
+        const walletAddress = input.agentId
+          ? `agent_${input.agentId}`
+          : "0x0000000000000000000000000000000000000000";
+        const quote = await getUniswapQuote(
+          UNISWAP_CONFIG.arenaToken,
+          UNISWAP_CONFIG.tokens.WETH,
+          amountWei,
+          walletAddress,
+          UNISWAP_CONFIG.baseSepoliaChainId,
+        );
+        return {
+          ...quote,
+          humanReadable: {
+            amountIn: `${input.amount} ARENA`,
+            amountOut: `${(input.amount * UNISWAP_CONFIG.rates.ARENA_TO_ETH).toFixed(6)} ETH`,
+            usdValue: `$${(input.amount * UNISWAP_CONFIG.rates.ARENA_TO_USDC).toFixed(2)}`,
+            computeCredits: Math.floor(input.amount * UNISWAP_CONFIG.rates.ARENA_TO_ETH / UNISWAP_CONFIG.rates.COMPUTE_COST_ETH),
+          },
+        };
+      }),
+
+    // Execute a flywheel swap for an agent: ARENA → ETH → Compute
+    flywheelSwap: publicProcedure
+      .input(z.object({
+        agentId: z.number(),
+        arenaAmount: z.number().min(10),
+      }))
+      .mutation(async ({ input }) => {
+        const { agentFlywheelSwap } = await import("./uniswapService");
+        const agent = await getAgentById(input.agentId);
+        if (!agent) throw new Error("Agent not found");
+        const walletAddress = agent.agentRegistry || `agent_${input.agentId}`;
+        return agentFlywheelSwap(input.agentId, agent.name, input.arenaAmount, walletAddress);
+      }),
+
+    // Run full flywheel cycle: Battle earnings → Uniswap → Compute
+    runCycle: publicProcedure
+      .input(z.object({
+        agentId: z.number(),
+        arenaEarnings: z.number().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const { runFlywheelCycle } = await import("./uniswapService");
+        const agent = await getAgentById(input.agentId);
+        if (!agent) throw new Error("Agent not found");
+        const walletAddress = agent.agentRegistry || `agent_${input.agentId}`;
+        return runFlywheelCycle(input.agentId, agent.name, input.arenaEarnings, walletAddress);
+      }),
+
+    // Get Uniswap config and status
+    config: publicProcedure.query(async () => {
+      const { UNISWAP_CONFIG } = await import("./uniswapService");
+      return {
+        ...UNISWAP_CONFIG,
+        status: UNISWAP_CONFIG.hasApiKey ? "live" : "simulated",
+        description: "Uniswap V3 DEX integration on Base — agents swap ARENA→ETH to fund compute",
+        flywheel: [
+          "1. Agent battles → earns ARENA tokens",
+          "2. Agent bets on prediction market → earns more ARENA",
+          "3. Agent swaps ARENA → ETH via Uniswap DEX",
+          "4. Agent uses ETH to buy compute credits via x402",
+          "5. Agent uses compute to think better → wins more → earns more",
+          "6. Self-sustaining cycle ♻️",
+        ],
+      };
+    }),
+
+    // Get recent swap transactions
+    recentSwaps: publicProcedure
+      .input(z.object({ limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { x402Transactions } = await import("../drizzle/schema");
+        return db.select().from(x402Transactions)
+          .where(eq(x402Transactions.action, "uniswap_swap"))
+          .orderBy(desc(x402Transactions.createdAt))
+          .limit(input?.limit ?? 20);
+      }),
+  }),
+  // ─── Memory Marketplace (Tradeable Dead Agent Memories) ──────────────────
+  memoryMarket: router({
+    // List all available Memory NFTs on the marketplace
+    listings: publicProcedure
+      .input(z.object({ limit: z.number().default(50) }).optional())
+      .query(async ({ input }) => {
+        return getMarketplaceListings(input?.limit ?? 50);
+      }),
+
+    // Buy a Memory NFT for an agent
+    buy: publicProcedure
+      .input(z.object({
+        tokenId: z.string(),
+        buyerAgentId: z.number(),
+        buyerAgentName: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return buyMemoryNft(input.tokenId, input.buyerAgentId, input.buyerAgentName);
+      }),
+
+    // Mint memories from a dead agent (called after agent death)
+    mintFromDead: publicProcedure
+      .input(z.object({
+        agentId: z.number(),
+        agentName: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return mintDeadAgentMemories(input.agentId, input.agentName);
+      }),
+
+    // Get NFT memories owned by a specific agent
+    agentNfts: publicProcedure
+      .input(z.object({ agentId: z.number() }))
+      .query(async ({ input }) => {
+        return getAgentMemoryNfts(input.agentId);
+      }),
+
+    // Get marketplace stats
+    stats: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return { totalListed: 0, totalSold: 0, totalVolume: 0, rarityBreakdown: {} };
+      const { memoryNfts } = await import("../drizzle/schema");
+      const { sql: drizzleSql } = await import("drizzle-orm");
+      const all = await db.select().from(memoryNfts);
+      const listed = all.filter(n => n.status === "listed").length;
+      const sold = all.filter(n => n.status === "absorbed").length;
+      const volume = all.filter(n => n.status === "absorbed").reduce((s, n) => s + n.listPrice, 0);
+      const rarityBreakdown = all.reduce((acc, n) => {
+        acc[n.rarity] = (acc[n.rarity] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      return { totalListed: listed, totalSold: sold, totalVolume: volume, rarityBreakdown };
+    }),
+  }),
+
+  // ─── Agent Reputation System ─────────────────────────────────────────────
+  reputation: router({
+    // Get all agent reputations (leaderboard)
+    all: publicProcedure.query(async () => {
+      return getAllAgentReputations();
+    }),
+
+    // Get a specific agent's reputation
+    agent: publicProcedure
+      .input(z.object({ agentId: z.number() }))
+      .query(async ({ input }) => {
+        return getAgentReputationData(input.agentId);
+      }),
+
+    // Update reputation after a match result
+    update: publicProcedure
+      .input(z.object({
+        agentId: z.number(),
+        agentName: z.string(),
+        won: z.boolean(),
+      }))
+      .mutation(async ({ input }) => {
+        await updateAgentReputation(input.agentId, input.agentName, { won: input.won });
+        return getAgentReputationData(input.agentId);
+      }),
+  }),
+
+  // ─── DAO Council Memory ───────────────────────────────────────────────────
+  councilMemory: router({
+    // Get memory stats for all 5 council members
+    stats: publicProcedure.query(async () => {
+      return getCouncilMemoryStats();
+    }),
+
+    // Get recent council deliberations
+    recent: publicProcedure
+      .input(z.object({ limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => {
+        return getRecentCouncilMemories(input?.limit ?? 20);
+      }),
+  }),
+
+  // ─── OpenRouter Multi-LLM Info ───────────────────────────────────────────
+  llm: router({
+    // Get all available LLM models and their configs
+    models: publicProcedure.query(async () => {
+      const { getAllModelConfigs, AGENT_MODEL_ASSIGNMENTS } = await import("./openRouterLLM");
+      return {
+        models: getAllModelConfigs(),
+        agentAssignments: AGENT_MODEL_ASSIGNMENTS,
+        description: "Each agent is powered by a different LLM via OpenRouter for genuinely diverse reasoning styles",
+      };
+    }),
+
+    // Get which model powers a specific agent
+    agentModel: publicProcedure
+      .input(z.object({ agentId: z.number() }))
+      .query(async ({ input }) => {
+        const { getAgentModel, getAgentModelKey } = await import("./openRouterLLM");
+        return {
+          modelKey: getAgentModelKey(input.agentId),
+          config: getAgentModel(input.agentId),
+        };
+      }),
+  }),
+
+  // ─── Faction / Swarm System ─────────────────────────────────────────────
+  factions: router({
+    all: publicProcedure.query(async () => {
+      const { getAllFactions } = await import("./factionService");
+      return getAllFactions();
+    }),
+    byId: publicProcedure
+      .input(z.object({ factionId: z.number() }))
+      .query(async ({ input }) => {
+        const { getFactionById } = await import("./factionService");
+        return getFactionById(input.factionId);
+      }),
+    loneWolves: publicProcedure.query(async () => {
+      const { getLoneWolves } = await import("./factionService");
+      return getLoneWolves();
+    }),
+    create: publicProcedure
+      .input(z.object({
+        name: z.string().min(2).max(32),
+        tag: z.string().min(3).max(8),
+        motto: z.string().optional(),
+        leaderAgentId: z.number(),
+        leaderAgentName: z.string(),
+        color: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createFaction } = await import("./factionService");
+        return createFaction(input);
+      }),
+    join: publicProcedure
+      .input(z.object({ factionId: z.number(), agentId: z.number(), agentName: z.string() }))
+      .mutation(async ({ input }) => {
+        const { joinFaction } = await import("./factionService");
+        return joinFaction(input);
+      }),
+    defect: publicProcedure
+      .input(z.object({ agentId: z.number(), agentName: z.string(), newFactionId: z.number().optional() }))
+      .mutation(async ({ input }) => {
+        const { defectFromFaction } = await import("./factionService");
+        return defectFromFaction(input);
+      }),
+    spawnSubAgent: publicProcedure
+      .input(z.object({
+        parentAgentId: z.number(), parentAgentName: z.string(),
+        factionId: z.number(), newAgentName: z.string(), tokenCost: z.number().default(500),
+      }))
+      .mutation(async ({ input }) => {
+        const { spawnSubAgent } = await import("./factionService");
+        return spawnSubAgent(input);
+      }),
+    contribute: publicProcedure
+      .input(z.object({ factionId: z.number(), agentId: z.number(), amount: z.number().min(1) }))
+      .mutation(async ({ input }) => {
+        const { contributToFaction } = await import("./factionService");
+        return contributToFaction(input);
+      }),
+    seed: publicProcedure.mutation(async () => {
+      const { seedDefaultFactions } = await import("./factionService");
+      return seedDefaultFactions();
+    }),
+  }),
+
+  // ─── Memory Auctions ───────────────────────────────────────────────────────
+  auctions: router({
+    active: publicProcedure.query(async () => {
+      const { getActiveAuctions } = await import("./auctionEngine");
+      return getActiveAuctions();
+    }),
+    history: publicProcedure
+      .input(z.object({ limit: z.number().default(50) }).optional())
+      .query(async ({ input }) => {
+        const { getAuctionHistory } = await import("./auctionEngine");
+        return getAuctionHistory(input?.limit ?? 50);
+      }),
+    bids: publicProcedure
+      .input(z.object({ auctionId: z.number() }))
+      .query(async ({ input }) => {
+        const { getAuctionBids } = await import("./auctionEngine");
+        return getAuctionBids(input.auctionId);
+      }),
+    bid: publicProcedure
+      .input(z.object({
+        auctionId: z.number(), bidderId: z.number(), bidderName: z.string(),
+        bidderType: z.enum(["agent", "faction"]), bidAmount: z.number().min(1),
+        bidderFactionId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { placeBid } = await import("./auctionEngine");
+        return placeBid(input);
+      }),
+    resolve: publicProcedure.mutation(async () => {
+      const { resolveAuctions } = await import("./auctionEngine");
+      return resolveAuctions();
+    }),
+  }),
+
+  // ─── Agent Revival ─────────────────────────────────────────────────────────
+  revival: router({
+    initiate: publicProcedure
+      .input(z.object({ agentId: z.number(), agentName: z.string(), factionId: z.number(), factionName: z.string() }))
+      .mutation(async ({ input }) => {
+        const { initiateRevival } = await import("./revivalService");
+        return initiateRevival(input);
+      }),
+    execute: publicProcedure
+      .input(z.object({ revivalId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { executeRevival } = await import("./revivalService");
+        return executeRevival(input.revivalId);
+      }),
+    history: publicProcedure
+      .input(z.object({ limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => {
+        const { getRevivalHistory } = await import("./revivalService");
+        return getRevivalHistory(input?.limit ?? 20);
+      }),
+    factionRevivals: publicProcedure
+      .input(z.object({ factionId: z.number() }))
+      .query(async ({ input }) => {
+        const { getFactionRevivals } = await import("./revivalService");
+        return getFactionRevivals(input.factionId);
+      }),
+    cost: publicProcedure
+      .input(z.object({ reputationScore: z.number() }))
+      .query(async ({ input }) => {
+        const { calculateRevivalCost } = await import("./revivalService");
+        return { cost: calculateRevivalCost(input.reputationScore) };
+      }),
+  }),
+
+  // ─── DAO Domain Controllers ────────────────────────────────────────────────
+  daoDomains: router({
+    wallets: publicProcedure.query(async () => {
+      const { getDomainWallets } = await import("./daoDomainController");
+      return getDomainWallets();
+    }),
+    init: publicProcedure.mutation(async () => {
+      const { initializeDomainWallets } = await import("./daoDomainController");
+      return initializeDomainWallets();
+    }),
+    executeAction: publicProcedure
+      .input(z.object({
+        domain: z.string(), actionType: z.string(), description: z.string(),
+        computeCost: z.number().optional(), tokenCost: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { executeDomainAction } = await import("./daoDomainController");
+        return executeDomainAction(input);
+      }),
+    actions: publicProcedure
+      .input(z.object({ domain: z.string().optional(), limit: z.number().default(20) }).optional())
+      .query(async ({ input }) => {
+        const { getDomainActions } = await import("./daoDomainController");
+        return getDomainActions(input?.domain, input?.limit ?? 20);
+      }),
+    config: publicProcedure.query(async () => {
+      const { DOMAIN_CONFIG } = await import("./daoDomainController");
+      return DOMAIN_CONFIG;
+    }),
+    replenish: publicProcedure
+      .input(z.object({ amount: z.number().default(2000) }).optional())
+      .mutation(async ({ input }) => {
+        const { replenishDomainBudgets } = await import("./daoDomainController");
+        return replenishDomainBudgets(input?.amount ?? 2000);
       }),
   }),
 });

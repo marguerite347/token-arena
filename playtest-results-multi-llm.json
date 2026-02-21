@@ -1,0 +1,1591 @@
+{
+  "runAt": "2026-02-21T00:07:25.376Z",
+  "description": "Multi-LLM playtest — each agent powered by different OpenRouter model",
+  "agentModelAssignments": {
+    "1": {
+      "name": "PHANTOM",
+      "model": "Claude 3.5 Sonnet",
+      "style": "Analytical"
+    },
+    "2": {
+      "name": "NEXUS-7",
+      "model": "GPT-4o",
+      "style": "Pragmatic"
+    },
+    "3": {
+      "name": "TITAN",
+      "model": "Llama 3.1 70B",
+      "style": "Aggressive"
+    },
+    "4": {
+      "name": "CIPHER",
+      "model": "Mistral Large",
+      "style": "Defensive"
+    },
+    "5": {
+      "name": "AURORA",
+      "model": "Gemini Flash 1.5",
+      "style": "Opportunistic"
+    },
+    "6": {
+      "name": "WRAITH",
+      "model": "DeepSeek V3",
+      "style": "Strategic"
+    }
+  },
+  "matchesPlayed": 3,
+  "results": [
+    {
+      "matchId": 210004,
+      "arena": "Neon Colosseum",
+      "duration": 69,
+      "replayId": "replay-1771632435979-kapopp",
+      "agents": [
+        {
+          "agentId": 6,
+          "name": "WRAITH",
+          "kills": 2,
+          "deaths": 1,
+          "damageDealt": 258,
+          "tokensEarned": 149,
+          "tokensSpent": 104,
+          "survived": true,
+          "decision": "The Neon Colosseum favors verticality and mobility. Titans excel in close-quarters combat but struggle with agile, ranged opponents. By taking high ground and activating cloaking, I can control engagement distance and force Titan into predictable movement patterns. This sets up opportunities for ambush tactics and prolonged harassment to whittle down Titan's resources.",
+          "llmModel": "DeepSeek",
+          "llmIcon": "🔮"
+        },
+        {
+          "agentId": 3,
+          "name": "TITAN",
+          "kills": 1,
+          "deaths": 2,
+          "damageDealt": 164,
+          "tokensEarned": 15,
+          "tokensSpent": 150,
+          "survived": false,
+          "decision": "The Neon Colosseum's narrow corridors and open areas favor a fast-paced, high-damage playstyle. WRAITH is a stealthy opponent, but I can negate their advantage with swift, aggressive movements and precise rocket/scatter fire. By taking the initiative, I can dictate the pace of the match and force WRAITH to react to me.",
+          "llmModel": "Llama",
+          "llmIcon": "🦙"
+        }
+      ],
+      "combatLog": [
+        {
+          "tick": 0,
+          "timestamp": 1771632432370,
+          "type": "spawn",
+          "actor": "SYSTEM",
+          "detail": "Match begins in Neon Colosseum! WRAITH vs TITAN"
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771632435780,
+          "type": "decision",
+          "actor": "WRAITH",
+          "detail": "WRAITH: \"The Neon Colosseum favors verticality and mobility. Titans excel in close-quarters combat but struggle with agile, ranged opponents. By taking high ground and activating cloaking, I can control engagement distance and force Titan into predictable movement patterns. This sets up opportunities for ambush tactics and prolonged harassment to whittle down Titan's resources.\""
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771632435780,
+          "type": "decision",
+          "actor": "TITAN",
+          "detail": "TITAN: \"The Neon Colosseum's narrow corridors and open areas favor a fast-paced, high-damage playstyle. WRAITH is a stealthy opponent, but I can negate their advantage with swift, aggressive movements and precise rocket/scatter fire. By taking the initiative, I can dictate the pace of the match and force WRAITH to react to me.\""
+        },
+        {
+          "tick": 1,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (154/160 HP)"
+        },
+        {
+          "tick": 2,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (146/160 HP)"
+        },
+        {
+          "tick": 4,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (138/160 HP)"
+        },
+        {
+          "tick": 6,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (130/160 HP)"
+        },
+        {
+          "tick": 6,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "TITAN",
+          "target": "WRAITH",
+          "weapon": "rocket",
+          "damage": 32,
+          "detail": "TITAN hits WRAITH with rocket for 32 damage (88/120 HP)"
+        },
+        {
+          "tick": 7,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (122/160 HP)"
+        },
+        {
+          "tick": 8,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (116/160 HP)"
+        },
+        {
+          "tick": 12,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (110/160 HP)"
+        },
+        {
+          "tick": 14,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (104/160 HP)"
+        },
+        {
+          "tick": 17,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (98/160 HP)"
+        },
+        {
+          "tick": 19,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (90/160 HP)"
+        },
+        {
+          "tick": 20,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (84/160 HP)"
+        },
+        {
+          "tick": 21,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (78/160 HP)"
+        },
+        {
+          "tick": 21,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "TITAN",
+          "target": "WRAITH",
+          "weapon": "scatter",
+          "damage": 20,
+          "detail": "TITAN hits WRAITH with scatter for 20 damage (68/120 HP)"
+        },
+        {
+          "tick": 22,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (72/160 HP)"
+        },
+        {
+          "tick": 24,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "TITAN",
+          "target": "WRAITH",
+          "weapon": "scatter",
+          "damage": 20,
+          "detail": "TITAN hits WRAITH with scatter for 20 damage (48/120 HP)"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (64/160 HP)"
+        },
+        {
+          "tick": 27,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (56/160 HP)"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (50/160 HP)"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (42/160 HP)"
+        },
+        {
+          "tick": 33,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (36/160 HP)"
+        },
+        {
+          "tick": 36,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (30/160 HP)"
+        },
+        {
+          "tick": 37,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (22/160 HP)"
+        },
+        {
+          "tick": 39,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (14/160 HP)"
+        },
+        {
+          "tick": 40,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (8/160 HP)"
+        },
+        {
+          "tick": 41,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (0/160 HP)"
+        },
+        {
+          "tick": 41,
+          "timestamp": 1771632435780,
+          "type": "kill",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "detail": "WRAITH ELIMINATES TITAN with plasma!"
+        },
+        {
+          "tick": 41,
+          "timestamp": 1771632435780,
+          "type": "spawn",
+          "actor": "TITAN",
+          "detail": "TITAN respawns with 96 HP"
+        },
+        {
+          "tick": 42,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (88/160 HP)"
+        },
+        {
+          "tick": 42,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "TITAN",
+          "target": "WRAITH",
+          "weapon": "rocket",
+          "damage": 32,
+          "detail": "TITAN hits WRAITH with rocket for 32 damage (16/120 HP)"
+        },
+        {
+          "tick": 43,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (80/160 HP)"
+        },
+        {
+          "tick": 43,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "TITAN",
+          "target": "WRAITH",
+          "weapon": "scatter",
+          "damage": 20,
+          "detail": "TITAN hits WRAITH with scatter for 20 damage (-4/120 HP)"
+        },
+        {
+          "tick": 43,
+          "timestamp": 1771632435780,
+          "type": "kill",
+          "actor": "TITAN",
+          "target": "WRAITH",
+          "weapon": "scatter",
+          "detail": "TITAN ELIMINATES WRAITH with scatter!"
+        },
+        {
+          "tick": 43,
+          "timestamp": 1771632435780,
+          "type": "spawn",
+          "actor": "WRAITH",
+          "detail": "WRAITH respawns with 72 HP"
+        },
+        {
+          "tick": 46,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (72/160 HP)"
+        },
+        {
+          "tick": 47,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (66/160 HP)"
+        },
+        {
+          "tick": 48,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (58/160 HP)"
+        },
+        {
+          "tick": 49,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (52/160 HP)"
+        },
+        {
+          "tick": 51,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (44/160 HP)"
+        },
+        {
+          "tick": 51,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "TITAN",
+          "target": "WRAITH",
+          "weapon": "scatter",
+          "damage": 20,
+          "detail": "TITAN hits WRAITH with scatter for 20 damage (52/120 HP)"
+        },
+        {
+          "tick": 53,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (38/160 HP)"
+        },
+        {
+          "tick": 55,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (32/160 HP)"
+        },
+        {
+          "tick": 59,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (26/160 HP)"
+        },
+        {
+          "tick": 60,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (18/160 HP)"
+        },
+        {
+          "tick": 61,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "plasma",
+          "damage": 8,
+          "detail": "WRAITH hits TITAN with plasma for 8 damage (10/160 HP)"
+        },
+        {
+          "tick": 61,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "TITAN",
+          "target": "WRAITH",
+          "weapon": "scatter",
+          "damage": 20,
+          "detail": "TITAN hits WRAITH with scatter for 20 damage (32/120 HP)"
+        },
+        {
+          "tick": 62,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (4/160 HP)"
+        },
+        {
+          "tick": 69,
+          "timestamp": 1771632435780,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "damage": 6,
+          "detail": "WRAITH hits TITAN with beam for 6 damage (-2/160 HP)"
+        },
+        {
+          "tick": 69,
+          "timestamp": 1771632435780,
+          "type": "kill",
+          "actor": "WRAITH",
+          "target": "TITAN",
+          "weapon": "beam",
+          "detail": "WRAITH ELIMINATES TITAN with beam!"
+        },
+        {
+          "tick": 77,
+          "timestamp": 1771632435780,
+          "type": "economy",
+          "actor": "WRAITH",
+          "detail": "WRAITH: earned 149 ARENA, spent 104 ARENA (ammo: 94, entry: 10)"
+        },
+        {
+          "tick": 77,
+          "timestamp": 1771632435780,
+          "type": "economy",
+          "actor": "TITAN",
+          "detail": "TITAN: earned 15 ARENA, spent 150 ARENA (ammo: 140, entry: 10)"
+        },
+        {
+          "tick": 77,
+          "timestamp": 1771632435953,
+          "type": "memory",
+          "actor": "WRAITH",
+          "detail": "WRAITH remembers: \"Against heavy opponents, maintain spatial control through vertical advantage and use cloaking to dictate engagement terms.\""
+        },
+        {
+          "tick": 77,
+          "timestamp": 1771632435953,
+          "type": "memory",
+          "actor": "TITAN",
+          "detail": "TITAN remembers: \"In the Neon Colosseum, control of the central areas is key. Prioritize map control to funnel opponents into kill zones.\""
+        }
+      ],
+      "winner": "WRAITH"
+    },
+    {
+      "matchId": 210005,
+      "arena": "Neon Brutalism",
+      "duration": 45,
+      "replayId": "replay-1771632440759-l1byq4",
+      "agents": [
+        {
+          "agentId": 5,
+          "name": "AURORA",
+          "kills": 1,
+          "deaths": 2,
+          "damageDealt": 196,
+          "tokensEarned": 11,
+          "tokensSpent": 50,
+          "survived": false,
+          "decision": "Neon Brutalism implies a dense, urban environment, favoring both long-range railgun shots from elevated positions and close-quarters plasma engagements. By securing a strong defensive position early, I can leverage the railgun's power and force CIPHER to approach, where my plasma can then be devastating. This strategy allows me to control the engagement distance and gather information on CIPHER's movement patterns.",
+          "llmModel": "Gemini",
+          "llmIcon": "✨"
+        },
+        {
+          "agentId": 4,
+          "name": "CIPHER",
+          "kills": 2,
+          "deaths": 1,
+          "damageDealt": 219,
+          "tokensEarned": 87,
+          "tokensSpent": 262,
+          "survived": true,
+          "decision": "The Neon Brutalism arena's verticality and cover favor a defensive, attrition-based strategy. By holding the central atrium, I can limit AURORA's movement options while using the void/beam's range to chip away at their HP without exposing myself to unnecessary risk. This approach minimizes token expenditure on compute and conserves HP for prolonged engagement.",
+          "llmModel": "Mistral",
+          "llmIcon": "🌬️"
+        }
+      ],
+      "combatLog": [
+        {
+          "tick": 0,
+          "timestamp": 1771632436002,
+          "type": "spawn",
+          "actor": "SYSTEM",
+          "detail": "Match begins in Neon Brutalism! AURORA vs CIPHER"
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771632440615,
+          "type": "decision",
+          "actor": "AURORA",
+          "detail": "AURORA: \"Neon Brutalism implies a dense, urban environment, favoring both long-range railgun shots from elevated positions and close-quarters plasma engagements. By securing a strong defensive position early, I can leverage the railgun's power and force CIPHER to approach, where my plasma can then be devastating. This strategy allows me to control the engagement distance and gather information on CIPHER's movement patterns.\""
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771632440615,
+          "type": "decision",
+          "actor": "CIPHER",
+          "detail": "CIPHER: \"The Neon Brutalism arena's verticality and cover favor a defensive, attrition-based strategy. By holding the central atrium, I can limit AURORA's movement options while using the void/beam's range to chip away at their HP without exposing myself to unnecessary risk. This approach minimizes token expenditure on compute and conserves HP for prolonged engagement.\""
+        },
+        {
+          "tick": 1,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (119/130 HP)"
+        },
+        {
+          "tick": 1,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (127/135 HP)"
+        },
+        {
+          "tick": 4,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (119/135 HP)"
+        },
+        {
+          "tick": 5,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (108/130 HP)"
+        },
+        {
+          "tick": 6,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (111/135 HP)"
+        },
+        {
+          "tick": 8,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "void",
+          "damage": 33,
+          "detail": "CIPHER hits AURORA with void for 33 damage (78/135 HP)"
+        },
+        {
+          "tick": 9,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (70/135 HP)"
+        },
+        {
+          "tick": 11,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (62/135 HP)"
+        },
+        {
+          "tick": 13,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (54/135 HP)"
+        },
+        {
+          "tick": 14,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (97/130 HP)"
+        },
+        {
+          "tick": 14,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (46/135 HP)"
+        },
+        {
+          "tick": 16,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (86/130 HP)"
+        },
+        {
+          "tick": 16,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (38/135 HP)"
+        },
+        {
+          "tick": 19,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (75/130 HP)"
+        },
+        {
+          "tick": 20,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (64/130 HP)"
+        },
+        {
+          "tick": 21,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (30/135 HP)"
+        },
+        {
+          "tick": 22,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (22/135 HP)"
+        },
+        {
+          "tick": 25,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (53/130 HP)"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (14/135 HP)"
+        },
+        {
+          "tick": 28,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (42/130 HP)"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (31/130 HP)"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (6/135 HP)"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (20/130 HP)"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (-2/135 HP)"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771632440615,
+          "type": "kill",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "detail": "CIPHER ELIMINATES AURORA with beam!"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771632440615,
+          "type": "spawn",
+          "actor": "AURORA",
+          "detail": "AURORA respawns with 81 HP"
+        },
+        {
+          "tick": 33,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (9/130 HP)"
+        },
+        {
+          "tick": 34,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (-2/130 HP)"
+        },
+        {
+          "tick": 34,
+          "timestamp": 1771632440615,
+          "type": "kill",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "detail": "AURORA ELIMINATES CIPHER with plasma!"
+        },
+        {
+          "tick": 34,
+          "timestamp": 1771632440615,
+          "type": "spawn",
+          "actor": "CIPHER",
+          "detail": "CIPHER respawns with 78 HP"
+        },
+        {
+          "tick": 35,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (67/130 HP)"
+        },
+        {
+          "tick": 35,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (73/135 HP)"
+        },
+        {
+          "tick": 36,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (56/130 HP)"
+        },
+        {
+          "tick": 37,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "CIPHER hits AURORA with beam for 8 damage (65/135 HP)"
+        },
+        {
+          "tick": 40,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "void",
+          "damage": 33,
+          "detail": "CIPHER hits AURORA with void for 33 damage (32/135 HP)"
+        },
+        {
+          "tick": 44,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "railgun",
+          "damage": 31,
+          "detail": "AURORA hits CIPHER with railgun for 31 damage (25/130 HP)"
+        },
+        {
+          "tick": 45,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "CIPHER",
+          "weapon": "plasma",
+          "damage": 11,
+          "detail": "AURORA hits CIPHER with plasma for 11 damage (14/130 HP)"
+        },
+        {
+          "tick": 45,
+          "timestamp": 1771632440615,
+          "type": "attack",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "void",
+          "damage": 33,
+          "detail": "CIPHER hits AURORA with void for 33 damage (-1/135 HP)"
+        },
+        {
+          "tick": 45,
+          "timestamp": 1771632440615,
+          "type": "kill",
+          "actor": "CIPHER",
+          "target": "AURORA",
+          "weapon": "void",
+          "detail": "CIPHER ELIMINATES AURORA with void!"
+        },
+        {
+          "tick": 114,
+          "timestamp": 1771632440615,
+          "type": "economy",
+          "actor": "AURORA",
+          "detail": "AURORA: earned 11 ARENA, spent 50 ARENA (ammo: 40, entry: 10)"
+        },
+        {
+          "tick": 114,
+          "timestamp": 1771632440615,
+          "type": "economy",
+          "actor": "CIPHER",
+          "detail": "CIPHER: earned 87 ARENA, spent 262 ARENA (ammo: 252, entry: 10)"
+        },
+        {
+          "tick": 114,
+          "timestamp": 1771632440741,
+          "type": "memory",
+          "actor": "AURORA",
+          "detail": "AURORA remembers: \"Always prioritize map control and advantageous positioning in complex arenas to dictate engagement terms, especially when armed with both long and short-range weapons.\""
+        },
+        {
+          "tick": 114,
+          "timestamp": 1771632440741,
+          "type": "memory",
+          "actor": "CIPHER",
+          "detail": "CIPHER remembers: \"In high-cover arenas, controlling chokepoints and forcing the opponent to engage on your terms reduces risk and maximizes resource efficiency. Patience and positioning often decide battles before the first shot is fired.\""
+        }
+      ],
+      "winner": "CIPHER"
+    },
+    {
+      "matchId": 210006,
+      "arena": "Neon Colosseum",
+      "duration": 44,
+      "replayId": "replay-1771632445325-q9zbvg",
+      "agents": [
+        {
+          "agentId": 5,
+          "name": "AURORA",
+          "kills": 2,
+          "deaths": 1,
+          "damageDealt": 192,
+          "tokensEarned": 174,
+          "tokensSpent": 58,
+          "survived": true,
+          "decision": "The Neon Colosseum likely offers verticality and cover, which I can exploit with the railgun's precision to deny Wraith open movement. If Wraith closes the distance, the plasma weapon will provide sustained damage and make flanking maneuvers riskier. This dual approach allows me to control engagement ranges.",
+          "llmModel": "Gemini",
+          "llmIcon": "✨"
+        },
+        {
+          "agentId": 6,
+          "name": "WRAITH",
+          "kills": 1,
+          "deaths": 2,
+          "damageDealt": 202,
+          "tokensEarned": 34,
+          "tokensSpent": 64,
+          "survived": false,
+          "decision": "Neon Colosseum's enclosed layout favors stealth and ambush tactics. Aurora likely relies on mobility and mid-range attacks. I'll position myself near a high-visibility choke point, using plasma/beam to punish predictable movements. Toning down aggression early will bait Aurora into overextending.",
+          "llmModel": "DeepSeek",
+          "llmIcon": "🔮"
+        }
+      ],
+      "combatLog": [
+        {
+          "tick": 0,
+          "timestamp": 1771632440776,
+          "type": "spawn",
+          "actor": "SYSTEM",
+          "detail": "Match begins in Neon Colosseum! AURORA vs WRAITH"
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771632445144,
+          "type": "decision",
+          "actor": "AURORA",
+          "detail": "AURORA: \"The Neon Colosseum likely offers verticality and cover, which I can exploit with the railgun's precision to deny Wraith open movement. If Wraith closes the distance, the plasma weapon will provide sustained damage and make flanking maneuvers riskier. This dual approach allows me to control engagement ranges.\""
+        },
+        {
+          "tick": 0,
+          "timestamp": 1771632445144,
+          "type": "decision",
+          "actor": "WRAITH",
+          "detail": "WRAITH: \"Neon Colosseum's enclosed layout favors stealth and ambush tactics. Aurora likely relies on mobility and mid-range attacks. I'll position myself near a high-visibility choke point, using plasma/beam to punish predictable movements. Toning down aggression early will bait Aurora into overextending.\""
+        },
+        {
+          "tick": 1,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (125/135 HP)"
+        },
+        {
+          "tick": 2,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (108/120 HP)"
+        },
+        {
+          "tick": 3,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (96/120 HP)"
+        },
+        {
+          "tick": 4,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "WRAITH hits AURORA with beam for 8 damage (117/135 HP)"
+        },
+        {
+          "tick": 6,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (84/120 HP)"
+        },
+        {
+          "tick": 6,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (107/135 HP)"
+        },
+        {
+          "tick": 8,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (97/135 HP)"
+        },
+        {
+          "tick": 10,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "WRAITH hits AURORA with beam for 8 damage (89/135 HP)"
+        },
+        {
+          "tick": 12,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (72/120 HP)"
+        },
+        {
+          "tick": 12,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "WRAITH hits AURORA with beam for 8 damage (81/135 HP)"
+        },
+        {
+          "tick": 14,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (60/120 HP)"
+        },
+        {
+          "tick": 14,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "WRAITH hits AURORA with beam for 8 damage (73/135 HP)"
+        },
+        {
+          "tick": 15,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (48/120 HP)"
+        },
+        {
+          "tick": 15,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "WRAITH hits AURORA with beam for 8 damage (65/135 HP)"
+        },
+        {
+          "tick": 17,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (36/120 HP)"
+        },
+        {
+          "tick": 17,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (55/135 HP)"
+        },
+        {
+          "tick": 18,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (45/135 HP)"
+        },
+        {
+          "tick": 19,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (24/120 HP)"
+        },
+        {
+          "tick": 19,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "WRAITH hits AURORA with beam for 8 damage (37/135 HP)"
+        },
+        {
+          "tick": 20,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (12/120 HP)"
+        },
+        {
+          "tick": 20,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (27/135 HP)"
+        },
+        {
+          "tick": 21,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "WRAITH hits AURORA with beam for 8 damage (19/135 HP)"
+        },
+        {
+          "tick": 23,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "WRAITH hits AURORA with beam for 8 damage (11/135 HP)"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (0/120 HP)"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771632445144,
+          "type": "kill",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "detail": "AURORA ELIMINATES WRAITH with plasma!"
+        },
+        {
+          "tick": 26,
+          "timestamp": 1771632445144,
+          "type": "spawn",
+          "actor": "WRAITH",
+          "detail": "WRAITH respawns with 72 HP"
+        },
+        {
+          "tick": 27,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (60/120 HP)"
+        },
+        {
+          "tick": 29,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "beam",
+          "damage": 8,
+          "detail": "WRAITH hits AURORA with beam for 8 damage (3/135 HP)"
+        },
+        {
+          "tick": 30,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (48/120 HP)"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (-7/135 HP)"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771632445144,
+          "type": "kill",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "detail": "WRAITH ELIMINATES AURORA with plasma!"
+        },
+        {
+          "tick": 31,
+          "timestamp": 1771632445144,
+          "type": "spawn",
+          "actor": "AURORA",
+          "detail": "AURORA respawns with 81 HP"
+        },
+        {
+          "tick": 33,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (71/135 HP)"
+        },
+        {
+          "tick": 38,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (36/120 HP)"
+        },
+        {
+          "tick": 38,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (61/135 HP)"
+        },
+        {
+          "tick": 40,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (51/135 HP)"
+        },
+        {
+          "tick": 41,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (24/120 HP)"
+        },
+        {
+          "tick": 41,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (41/135 HP)"
+        },
+        {
+          "tick": 42,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (12/120 HP)"
+        },
+        {
+          "tick": 42,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (31/135 HP)"
+        },
+        {
+          "tick": 43,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "WRAITH",
+          "target": "AURORA",
+          "weapon": "plasma",
+          "damage": 10,
+          "detail": "WRAITH hits AURORA with plasma for 10 damage (21/135 HP)"
+        },
+        {
+          "tick": 44,
+          "timestamp": 1771632445144,
+          "type": "attack",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "damage": 12,
+          "detail": "AURORA hits WRAITH with plasma for 12 damage (0/120 HP)"
+        },
+        {
+          "tick": 44,
+          "timestamp": 1771632445144,
+          "type": "kill",
+          "actor": "AURORA",
+          "target": "WRAITH",
+          "weapon": "plasma",
+          "detail": "AURORA ELIMINATES WRAITH with plasma!"
+        },
+        {
+          "tick": 78,
+          "timestamp": 1771632445144,
+          "type": "economy",
+          "actor": "AURORA",
+          "detail": "AURORA: earned 174 ARENA, spent 58 ARENA (ammo: 48, entry: 10)"
+        },
+        {
+          "tick": 78,
+          "timestamp": 1771632445144,
+          "type": "economy",
+          "actor": "WRAITH",
+          "detail": "WRAITH: earned 34 ARENA, spent 64 ARENA (ammo: 54, entry: 10)"
+        },
+        {
+          "tick": 78,
+          "timestamp": 1771632445301,
+          "type": "memory",
+          "actor": "AURORA",
+          "detail": "AURORA remembers: \"Always adapt weapon usage to the current engagement range and opponent's tactics, leveraging arena features for advantage.\""
+        },
+        {
+          "tick": 78,
+          "timestamp": 1771632445301,
+          "type": "memory",
+          "actor": "WRAITH",
+          "detail": "WRAITH remembers: \"Neon environments amplify predictability; opponents often fall into visual habit loops. Exploit this by controlling key sightlines.\""
+        }
+      ],
+      "winner": "AURORA"
+    }
+  ],
+  "summary": {
+    "totalKills": 9,
+    "totalTokensEarned": 470,
+    "totalTokensSpent": 688,
+    "mvp": "WRAITH",
+    "bestKD": "CIPHER",
+    "arenaBreakdown": {
+      "Neon Colosseum": 2,
+      "Neon Brutalism": 1
+    }
+  }
+}

@@ -552,7 +552,7 @@
 - [ ] Market creation, bet placement, resolution, payout logic
 - [ ] House rake (5%) feeds back to DAO treasury / agent compute fund
 - [ ] Compile and deploy to Base Sepolia
-- [ ] Verify on BaseScan
+- [x] Verify on BaseScan
 
 ### Flywheel Integration
 - [ ] Prediction market rake feeds into flywheel as "betting_revenue" stream
@@ -614,3 +614,116 @@
 - [ ] Update README with self-sustaining agent narrative
 - [ ] Run tests for all three systems
 - [ ] Final checkpoint and deploy
+
+## v22 — OpenRouter Multi-LLM Agent Diversity
+
+### OpenRouter Integration
+- [x] Add OPENROUTER_API_KEY to env.ts
+- [x] Create openRouterLLM.ts service that routes to OpenRouter API
+- [x] Support multiple models: Claude 3.5 Sonnet, GPT-4o, Llama 3.1 70B, Mistral Large, Gemini Flash, DeepSeek V3
+- [x] Each model gets a distinct personality/reasoning style description
+- [x] Assign one LLM model per agent (stored in agentIdentities.llmModel field)
+- [x] Wire model selection into agentBrain.ts and aiPlaytest.ts decision calls
+- [x] Add schema migration: llmModel column on agent_identities table
+- [x] Show LLM model badge on agent cards in UI (Flywheel Dashboard, Arena)
+- [x] Add "LLM Model" column to agent roster display
+- [x] Write vitest tests for OpenRouter integration
+- [x] Run new playtests with diverse LLM agents
+- [ ] Update README with multi-LLM architecture
+
+## v23 — FINAL SPRINT: Full Flywheel + DAO + Memory + Reputation
+
+### Full Self-Sustaining Flywheel Loop (Base $10K Bounty)
+- [x] DEX simulation: agents sell ARENA for ETH/USDC (Uniswap API + simulation fallback)
+- [x] x402 compute purchasing: agents buy OpenRouter compute credits with ETH
+- [x] Wire flywheel: battle→earn→bet→sell→buy compute→think better→win more
+- [x] Flywheel Dashboard shows complete loop with all 6 stages
+- [x] Log all flywheel transactions in x402_transactions table
+
+### DAO Council Memory (Quick Win)
+- [x] Persist council deliberations and outcomes to DB
+- [x] Council members recall past decisions in future deliberations
+- [x] Inject past deliberation summaries into council LLM prompts
+
+### On-Chain DAO Contract
+- [x] Write DAO.sol governance contract (ARENA token voting)
+- [x] Deploy to Base Sepolia (0x0Cb7B046b5A1Ba636B1cfE9596DBDB356936d99d)
+- [x] Verify on BaseScan
+
+### Persistent Agent Memories in Brain
+- [x] Wire memory retrieval into agent brain reasoning loop
+- [x] Query relevant memories before agent decisions
+- [x] Inject memory briefing into LLM prompt
+- [ ] Memory confidence scoring and pruning
+
+### Tradeable Memory NFTs
+- [x] Memory marketplace: dead agent memories become buyable
+- [x] Memory minting mechanics (convert agentMemory to tradeable assets)
+- [x] Memory absorption (agents gain knowledge from purchased memories)
+- [x] Memory pricing based on agent reputation and quality
+
+### Reputation System
+- [x] Calculate reputation from win rate, K/D, earnings, economic success
+- [x] Show reputation on agent profiles and leaderboard
+- [ ] Reputation influences prediction market odds
+- [x] Reputation badges/tiers (bronze/silver/gold/diamond)
+
+### OpenRouter Multi-LLM (already started)
+- [x] Wire OpenRouter into agentBrain.ts decision calls
+- [x] Wire OpenRouter into aiPlaytest.ts combat decisions
+- [x] Show LLM model badge on agent cards in UI
+- [x] Test with real playtests
+
+### Final Polish
+- [x] Fix Replays page import error
+- [x] Fix betting page z.number().max() error
+- [x] Run fresh playtests with all new systems
+- [x] Write vitest tests for new features
+- [ ] Update README with flywheel narrative
+- [ ] Checkpoint and deploy
+
+## v24 — Uniswap Foundation Bounty ($5K) — DEX Swap Integration
+
+### Uniswap API Integration
+- [x] Research Uniswap API docs (swap endpoints, quote, approval)
+- [x] Create uniswapService.ts — server-side swap execution via Uniswap API
+- [x] Implement ARENA→ETH swap flow (quote → approve → execute)
+- [x] Log all swaps in x402_transactions table with type "uniswap_swap"
+- [x] Wire Uniswap swaps into agent flywheel loop (battle→earn→swap→buy compute)
+- [ ] Add Uniswap swap UI component showing agent swap activity
+- [x] Update Flywheel Dashboard to show Uniswap as the DEX layer
+- [ ] Add /swap page or integrate into flywheel for judges to interact with
+- [ ] Ensure publicly accessible URL for judges
+
+## v25 — Faction/Swarm System, Auctions, Revival, DAO Domains
+
+### Faction/Swarm System
+- [x] Schema: factions table (name, wallet, shared_balance, leader_agent_id)
+- [x] Schema: faction_members table (faction_id, agent_id, role, joined_at)
+- [x] Backend: createFaction, joinFaction, defectFaction, spawnSubAgent
+- [x] Backend: faction resource pooling and intel sharing
+- [ ] Backend: faction vs faction battle mode
+- [x] UI: Factions dashboard with team rosters and badges
+
+### Competitive Memory Auctions
+- [x] Schema: memory_auctions table (nft_id, starting_price, current_bid, ends_at)
+- [x] Backend: startAuction, placeBid, resolveAuction
+- [x] Backend: faction loyalty mechanic (home faction first dibs)
+- [x] Backend: reputation-based pricing
+- [x] UI: Auction house with live bidding
+
+### Agent Revival
+- [x] Schema: agent_revivals table (agent_id, faction_id, cost, has_memories)
+- [x] Backend: reviveAgent with memory check
+- [x] Backend: revival cost scaling by reputation
+- [ ] UI: Revival panel in faction dashboard
+
+### DAO Domain Controllers
+- [x] Schema: dao_domain_wallets (council_member_id, domain, wallet_balance)
+- [x] Backend: domain-specific autonomous actions per master
+- [x] UI: DAO domain controller view
+
+### Integration
+- [x] Update flywheel diagram with faction economics
+- [ ] Run faction playtests
+- [ ] Checkpoint and deploy

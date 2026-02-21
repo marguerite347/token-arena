@@ -23,6 +23,8 @@ import {
   computeLedger,
 } from "../drizzle/schema";
 import { eq, desc, sql } from "drizzle-orm";
+import { buildCouncilMemberMemoryBriefing, saveCouncilMemory } from "./daoCouncilMemory";
+import { mintDeadAgentMemories, updateAgentReputation } from "./memoryMarketplace";
 
 // ─── Council Member Definitions ─────────────────────────────
 export const COUNCIL_MEMBERS = [
@@ -253,6 +255,15 @@ export async function killAgent(agentId: number, reason: string): Promise<{
     await recordFee("death_tax", deathTax, `Death tax from agent ${agent.name} (${reason})`, agentId);
   }
 
+  // Mint dead agent's memories as tradeable NFTs on the marketplace
+  mintDeadAgentMemories(agentId, agent.name)
+    .then(nfts => {
+      if (nfts.length > 0) {
+        console.log(`[DAO] Minted ${nfts.length} Memory NFTs from dead agent ${agent.name}`);
+      }
+    })
+    .catch(err => console.warn(`[DAO] Memory minting failed for ${agent.name}:`, err.message));
+
   return { deathTax, assetsRecovered: remainingTokens };
 }
 
@@ -393,9 +404,13 @@ Current state: Treasury balance: ${treasury.balance} ARENA. Alive agents: ${aliv
   const votes: Array<{ member: string; philosophy: string; vote: string; reasoning: string }> = [];
 
   for (const member of COUNCIL_MEMBERS) {
+    // Inject institutional memory — council members recall past decisions
+    const memoryBriefing = await buildCouncilMemberMemoryBriefing(member.name, proposalType)
+      .catch(() => "");
+
     const voteResponse = await invokeLLM({
       messages: [
-        { role: "system", content: member.personality },
+        { role: "system", content: member.personality + memoryBriefing },
         {
           role: "user",
           content: `PROPOSAL: "${proposal.title}"\n${proposal.description}\nParameters: ${JSON.stringify(proposal.parameters)}\n\nTreasury: ${treasury.balance} ARENA. Alive agents: ${aliveAgents}.\n\nVote FOR or AGAINST and explain your reasoning in 2-3 sentences. Return JSON with: vote ("for" or "against"), reasoning (string).`,
@@ -470,6 +485,23 @@ Current state: Treasury balance: ${treasury.balance} ARENA. Alive agents: ${aliv
           reasoning: vote.reasoning,
         });
       }
+    }
+  }
+
+  // Persist council memories — each member remembers this deliberation for future votes
+  for (const vote of votes) {
+    const member = COUNCIL_MEMBERS.find(m => m.name === vote.member);
+    if (member) {
+      saveCouncilMemory(
+        vote.member,
+        vote.philosophy,
+        proposalType,
+        proposal.title,
+        vote.vote as "for" | "against",
+        vote.reasoning,
+        result,
+        proposalId > 0 ? proposalId : undefined,
+      ).catch(err => console.warn(`[CouncilMemory] Failed to save memory for ${vote.member}:`, err.message));
     }
   }
 

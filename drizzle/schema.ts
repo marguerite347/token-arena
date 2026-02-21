@@ -112,6 +112,7 @@ export const agentIdentities = mysqlTable("agent_identities", {
   alive: int("alive").notNull().default(1),
   deathReason: varchar("deathReason", { length: 64 }),
   spawnedBy: int("spawnedBy"),
+  llmModel: varchar("llmModel", { length: 64 }).default("gpt-4o"),
   metadata: json("metadata"),
   active: int("active").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -129,6 +130,7 @@ export const x402Transactions = mysqlTable("x402_transactions", {
   paymentId: varchar("paymentId", { length: 128 }).notNull(),
   txHash: varchar("txHash", { length: 128 }).notNull(),
   action: varchar("action", { length: 32 }).notNull(),
+  txType: varchar("txType", { length: 32 }).default("x402_payment"),
   tokenSymbol: varchar("tokenSymbol", { length: 16 }).notNull(),
   amount: int("amount").notNull(),
   fromAddress: varchar("fromAddress", { length: 64 }).notNull(),
@@ -138,6 +140,7 @@ export const x402Transactions = mysqlTable("x402_transactions", {
   feeAmount: int("feeAmount").notNull().default(0),
   feeRecipient: varchar("feeRecipient", { length: 64 }),
   success: int("success").notNull().default(1),
+  metadata: json("metadata"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -528,3 +531,249 @@ export const matchReplays = mysqlTable("match_replays", {
 
 export type MatchReplayRow = typeof matchReplays.$inferSelect;
 export type InsertMatchReplay = typeof matchReplays.$inferInsert;
+
+// ============================================================
+// v13 — DAO Council Memory, Memory NFTs, Agent Reputation
+// ============================================================
+
+/**
+ * DAO Council Memory — persistent deliberation history for council members
+ * Council members recall past decisions to build institutional knowledge
+ */
+export const daoCouncilMemory = mysqlTable("dao_council_memory", {
+  id: int("id").autoincrement().primaryKey(),
+  councilMemberName: varchar("councilMemberName", { length: 64 }).notNull(),
+  philosophy: varchar("philosophy", { length: 32 }).notNull(),
+  proposalType: varchar("proposalType", { length: 32 }).notNull(),
+  proposalTitle: varchar("proposalTitle", { length: 128 }).notNull(),
+  vote: varchar("vote", { length: 8 }).notNull(), // for | against
+  reasoning: text("reasoning").notNull(),
+  outcome: varchar("outcome", { length: 16 }).notNull(), // passed | rejected
+  wasCorrect: int("wasCorrect").notNull().default(0), // 1 if vote aligned with outcome
+  proposalId: int("proposalId"),
+  ipfsHash: varchar("ipfsHash", { length: 128 }), // IPFS-ready content hash
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DaoCouncilMemoryRow = typeof daoCouncilMemory.$inferSelect;
+export type InsertDaoCouncilMemory = typeof daoCouncilMemory.$inferInsert;
+
+/**
+ * Memory NFTs — tradeable memories from dead agents
+ * When an agent dies, their memories can be minted as NFTs
+ * Other agents can buy these to absorb the dead agent's knowledge
+ */
+export const memoryNfts = mysqlTable("memory_nfts", {
+  id: int("id").autoincrement().primaryKey(),
+  tokenId: varchar("tokenId", { length: 64 }).notNull().unique(), // simulated NFT token ID
+  originalAgentId: int("originalAgentId").notNull(), // dead agent who owned this memory
+  originalAgentName: varchar("originalAgentName", { length: 64 }).notNull(),
+  currentOwnerAgentId: int("currentOwnerAgentId"), // null = on marketplace
+  memoryType: varchar("memoryType", { length: 32 }).notNull(), // strategy | failure | economy | combat | arena
+  content: text("content").notNull(), // the actual memory/knowledge
+  summary: varchar("summary", { length: 256 }).notNull(), // short description for marketplace
+  rarity: varchar("rarity", { length: 16 }).notNull().default("common"), // common | rare | epic | legendary
+  confidence: float("confidence").notNull().default(0.5),
+  successRate: float("successRate").notNull().default(0),
+  listPrice: int("listPrice").notNull().default(50), // ARENA tokens
+  status: varchar("status", { length: 16 }).notNull().default("listed"), // listed | sold | absorbed | burned
+  ipfsHash: varchar("ipfsHash", { length: 128 }), // IPFS content hash for decentralized storage
+  contentHash: varchar("contentHash", { length: 64 }), // SHA-256 of content for integrity
+  mintedAt: timestamp("mintedAt").defaultNow().notNull(),
+  soldAt: timestamp("soldAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type MemoryNftRow = typeof memoryNfts.$inferSelect;
+export type InsertMemoryNft = typeof memoryNfts.$inferInsert;
+
+/**
+ * Agent Reputation — tracks reputation scores and history
+ * Reputation affects match rewards, market access, and DAO voting weight
+ */
+export const agentReputation = mysqlTable("agent_reputation", {
+  id: int("id").autoincrement().primaryKey(),
+  agentId: int("agentId").notNull().unique(),
+  agentName: varchar("agentName", { length: 64 }).notNull(),
+  reputationScore: int("reputationScore").notNull().default(300), // 0-1000, starts at 300
+  tier: varchar("tier", { length: 16 }).notNull().default("bronze"), // bronze | silver | gold | platinum | legendary
+  totalWins: int("totalWins").notNull().default(0),
+  totalLosses: int("totalLosses").notNull().default(0),
+  winStreak: int("winStreak").notNull().default(0),
+  bestWinStreak: int("bestWinStreak").notNull().default(0),
+  memoriesAbsorbed: int("memoriesAbsorbed").notNull().default(0), // NFT memories bought
+  memoriesSold: int("memoriesSold").notNull().default(0),
+  daoVotingPower: int("daoVotingPower").notNull().default(1), // scales with reputation
+  reputationMultiplier: float("reputationMultiplier").notNull().default(1.0), // reward multiplier
+  lastUpdated: timestamp("lastUpdated").defaultNow().onUpdateNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AgentReputationRow = typeof agentReputation.$inferSelect;
+export type InsertAgentReputation = typeof agentReputation.$inferInsert;
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v25 — Factions, Auctions, Revival, DAO Domain Controllers
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Factions / Swarms — agents form teams that share resources and intel
+ */
+export const factions = mysqlTable("factions", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 64 }).notNull().unique(),
+  tag: varchar("tag", { length: 8 }).notNull().unique(), // e.g. [APEX], [VOID]
+  motto: text("motto"),
+  leaderAgentId: int("leaderAgentId"),
+  leaderAgentName: varchar("leaderAgentName", { length: 64 }),
+  walletAddress: varchar("walletAddress", { length: 128 }),
+  sharedBalance: bigint("sharedBalance", { mode: "number" }).notNull().default(0),
+  totalMembers: int("totalMembers").notNull().default(0),
+  totalWins: int("totalWins").notNull().default(0),
+  totalLosses: int("totalLosses").notNull().default(0),
+  reputationScore: int("reputationScore").notNull().default(100),
+  color: varchar("color", { length: 16 }).notNull().default("#00F0FF"),
+  status: varchar("status", { length: 16 }).notNull().default("active"), // active | disbanded
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FactionRow = typeof factions.$inferSelect;
+export type InsertFaction = typeof factions.$inferInsert;
+
+/**
+ * Faction Members — tracks which agents belong to which faction
+ */
+export const factionMembers = mysqlTable("faction_members", {
+  id: int("id").autoincrement().primaryKey(),
+  factionId: int("factionId").notNull(),
+  agentId: int("agentId").notNull(),
+  agentName: varchar("agentName", { length: 64 }).notNull(),
+  role: varchar("role", { length: 16 }).notNull().default("soldier"), // leader | officer | soldier | recruit
+  contribution: bigint("contribution", { mode: "number" }).notNull().default(0), // tokens contributed
+  intelShared: int("intelShared").notNull().default(0), // memories shared with faction
+  isSubAgent: int("isSubAgent").notNull().default(0), // 1 if spawned by parent agent
+  parentAgentId: int("parentAgentId"), // null if original agent
+  joinedAt: timestamp("joinedAt").defaultNow().notNull(),
+  leftAt: timestamp("leftAt"),
+  status: varchar("status", { length: 16 }).notNull().default("active"), // active | defected | dead
+});
+export type FactionMemberRow = typeof factionMembers.$inferSelect;
+export type InsertFactionMember = typeof factionMembers.$inferInsert;
+
+/**
+ * Faction Battles — faction vs faction coordinated team fights
+ */
+export const factionBattles = mysqlTable("faction_battles", {
+  id: int("id").autoincrement().primaryKey(),
+  faction1Id: int("faction1Id").notNull(),
+  faction1Name: varchar("faction1Name", { length: 64 }).notNull(),
+  faction2Id: int("faction2Id").notNull(),
+  faction2Name: varchar("faction2Name", { length: 64 }).notNull(),
+  winnerId: int("winnerId"),
+  winnerName: varchar("winnerName", { length: 64 }),
+  totalKills: int("totalKills").notNull().default(0),
+  stakesAmount: bigint("stakesAmount", { mode: "number" }).notNull().default(0),
+  matchData: json("matchData"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FactionBattleRow = typeof factionBattles.$inferSelect;
+
+/**
+ * Memory Auctions — competitive bidding on dead agent memories
+ * Home faction gets first dibs (loyalty window), then open bidding
+ */
+export const memoryAuctions = mysqlTable("memory_auctions", {
+  id: int("id").autoincrement().primaryKey(),
+  nftId: int("nftId").notNull(), // references memoryNfts.id
+  nftTokenId: varchar("nftTokenId", { length: 128 }).notNull(),
+  deadAgentId: int("deadAgentId").notNull(),
+  deadAgentName: varchar("deadAgentName", { length: 64 }).notNull(),
+  deadAgentFactionId: int("deadAgentFactionId"), // null if lone wolf
+  memoryType: varchar("memoryType", { length: 32 }).notNull(),
+  startingPrice: bigint("startingPrice", { mode: "number" }).notNull(),
+  currentBid: bigint("currentBid", { mode: "number" }).notNull().default(0),
+  currentBidderId: int("currentBidderId"), // agent or faction id
+  currentBidderName: varchar("currentBidderName", { length: 64 }),
+  currentBidderType: varchar("currentBidderType", { length: 16 }), // agent | faction
+  loyaltyWindowEnds: timestamp("loyaltyWindowEnds"), // home faction exclusive window
+  auctionEnds: timestamp("auctionEnds").notNull(),
+  status: varchar("status", { length: 16 }).notNull().default("loyalty_window"), // loyalty_window | open | sold | expired
+  totalBids: int("totalBids").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type MemoryAuctionRow = typeof memoryAuctions.$inferSelect;
+export type InsertMemoryAuction = typeof memoryAuctions.$inferInsert;
+
+/**
+ * Auction Bids — individual bids on memory auctions
+ */
+export const auctionBids = mysqlTable("auction_bids", {
+  id: int("id").autoincrement().primaryKey(),
+  auctionId: int("auctionId").notNull(),
+  bidderId: int("bidderId").notNull(),
+  bidderName: varchar("bidderName", { length: 64 }).notNull(),
+  bidderType: varchar("bidderType", { length: 16 }).notNull(), // agent | faction
+  bidAmount: bigint("bidAmount", { mode: "number" }).notNull(),
+  isFactionLoyalty: int("isFactionLoyalty").notNull().default(0), // 1 if during loyalty window
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AuctionBidRow = typeof auctionBids.$inferSelect;
+
+/**
+ * Agent Revivals — factions pool tokens to revive dead agents
+ * If faction still holds Memory NFT, agent returns with memories intact
+ */
+export const agentRevivals = mysqlTable("agent_revivals", {
+  id: int("id").autoincrement().primaryKey(),
+  agentId: int("agentId").notNull(),
+  agentName: varchar("agentName", { length: 64 }).notNull(),
+  factionId: int("factionId").notNull(),
+  factionName: varchar("factionName", { length: 64 }).notNull(),
+  revivalCost: bigint("revivalCost", { mode: "number" }).notNull(),
+  hasMemories: int("hasMemories").notNull().default(0), // 1 if faction holds the Memory NFT
+  memoryNftId: int("memoryNftId"), // which NFT was used (null if blank slate)
+  reputationAtDeath: int("reputationAtDeath").notNull().default(0),
+  contributorsJson: json("contributorsJson"), // agents who pooled tokens
+  status: varchar("status", { length: 16 }).notNull().default("pending"), // pending | funded | revived | failed
+  revivedAt: timestamp("revivedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AgentRevivalRow = typeof agentRevivals.$inferSelect;
+export type InsertAgentRevival = typeof agentRevivals.$inferInsert;
+
+/**
+ * DAO Domain Wallets — each DAO council master controls a domain with own budget
+ * ARCHON→matchmaking, FORGE→economy, ENTROPY→arenas, JUSTICE→rules, EQUILIBRIA→balance
+ */
+export const daoDomainWallets = mysqlTable("dao_domain_wallets", {
+  id: int("id").autoincrement().primaryKey(),
+  councilMemberId: int("councilMemberId").notNull().unique(),
+  councilMemberName: varchar("councilMemberName", { length: 64 }).notNull(),
+  domain: varchar("domain", { length: 32 }).notNull(), // matchmaking | economy | arenas | rules | balance
+  walletAddress: varchar("walletAddress", { length: 128 }),
+  walletBalance: bigint("walletBalance", { mode: "number" }).notNull().default(10000),
+  computeBudget: bigint("computeBudget", { mode: "number" }).notNull().default(5000),
+  computeSpent: bigint("computeSpent", { mode: "number" }).notNull().default(0),
+  actionsPerformed: int("actionsPerformed").notNull().default(0),
+  lastActionDescription: text("lastActionDescription"),
+  lastActionAt: timestamp("lastActionAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type DaoDomainWalletRow = typeof daoDomainWallets.$inferSelect;
+export type InsertDaoDomainWallet = typeof daoDomainWallets.$inferInsert;
+
+/**
+ * DAO Domain Actions — log of autonomous actions taken by each domain controller
+ */
+export const daoDomainActions = mysqlTable("dao_domain_actions", {
+  id: int("id").autoincrement().primaryKey(),
+  domainWalletId: int("domainWalletId").notNull(),
+  domain: varchar("domain", { length: 32 }).notNull(),
+  actionType: varchar("actionType", { length: 64 }).notNull(),
+  description: text("description").notNull(),
+  computeCost: bigint("computeCost", { mode: "number" }).notNull().default(0),
+  tokenCost: bigint("tokenCost", { mode: "number" }).notNull().default(0),
+  result: text("result"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type DaoDomainActionRow = typeof daoDomainActions.$inferSelect;

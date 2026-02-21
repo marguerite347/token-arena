@@ -1,0 +1,1 @@
+ALTER TABLE `agent_identities` ADD `llmModel` varchar(64) DEFAULT 'gpt-4o';

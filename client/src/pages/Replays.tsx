@@ -9,6 +9,18 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
 
+const AGENT_LLM_MAP: Record<string, { icon: string; label: string; color: string }> = {
+  "NEXUS-7": { icon: "⚡", label: "GPT-4o", color: "#10b981" },
+  "PHANTOM": { icon: "🧠", label: "Claude", color: "#d97706" },
+  "TITAN": { icon: "🦙", label: "Llama", color: "#8b5cf6" },
+  "CIPHER": { icon: "🌬️", label: "Mistral", color: "#3b82f6" },
+  "AURORA": { icon: "✨", label: "Gemini", color: "#06b6d4" },
+  "WRAITH": { icon: "🔮", label: "DeepSeek", color: "#ec4899" },
+  "ECHO": { icon: "🧠", label: "Claude", color: "#d97706" },
+  "VIPER": { icon: "⚡", label: "GPT-4o", color: "#10b981" },
+  "SENTINEL": { icon: "🌬️", label: "Mistral", color: "#3b82f6" },
+};
+
 interface ReplayCard {
   id: number;
   replayId: string;
@@ -143,18 +155,26 @@ export default function Replays() {
                     </div>
                   </div>
 
-                  {/* Agents */}
+                  {/* Agents with LLM badges */}
                   <div className="mb-3 pb-3 border-b border-gray-800">
                     <div className="text-[8px] font-mono text-gray-600 uppercase mb-1">Participants</div>
-                    <div className="flex flex-wrap gap-1">
-                      {replay.agents?.map((agent: any, idx: number) => (
-                        <span
-                          key={idx}
-                          className="text-[9px] font-mono px-1.5 py-0.5 bg-gray-800 text-gray-300 border border-gray-700"
-                        >
-                          {agent.name}
-                        </span>
-                      ))}
+                    <div className="flex flex-wrap gap-1.5">
+                      {replay.agents?.map((agent: any, idx: number) => {
+                        const llm = AGENT_LLM_MAP[agent.name];
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 bg-gray-900 border"
+                            style={{ borderColor: llm ? `${llm.color}40` : "#374151" }}
+                          >
+                            {llm && <span className="text-xs">{llm.icon}</span>}
+                            <span className="text-gray-300">{agent.name}</span>
+                            {llm && (
+                              <span className="text-[8px]" style={{ color: llm.color }}>{llm.label}</span>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
