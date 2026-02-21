@@ -1,0 +1,8 @@
+{
+  "query": "SELECT DISTINCT skybox_style_id, skybox_style_name, COUNT(*) as cnt FROM skybox_cache GROUP BY skybox_style_id, skybox_style_name ORDER BY cnt DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT DISTINCT skybox_style_id, skybox_style_name, COUNT(*) as cnt FROM skybox_cache GROUP BY skybox_style_id, skybox_style_name ORDER BY cnt DESC",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'skybox_style_id' in 'group statement'"
+  ]
+}

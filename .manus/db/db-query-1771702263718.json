@@ -1,0 +1,23 @@
+{
+  "query": "SELECT * FROM skybox_cache LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT * FROM skybox_cache LIMIT 1",
+  "rows": [
+    {
+      "id": "1",
+      "prompt": "Futuristic cyberpunk battle arena with neon lights, floating platforms, expansive view and holographic displays",
+      "styleId": "35",
+      "skyboxId": "14997553",
+      "fileUrl": "NULL",
+      "thumbUrl": "NULL",
+      "depthMapUrl": "NULL",
+      "status": "pending",
+      "createdAt": "2026-02-20 18:04:03",
+      "sceneAnalysis": "NULL",
+      "sceneGraph": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tprompt\tstyleId\tskyboxId\tfileUrl\tthumbUrl\tdepthMapUrl\tstatus\tcreatedAt\tsceneAnalysis\tsceneGraph\n1\tFuturistic cyberpunk battle arena with neon lights, floating platforms, expansive view and holographic displays\t35\t14997553\tNULL\tNULL\tNULL\tpending\t2026-02-20 18:04:03\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

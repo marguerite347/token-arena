@@ -1338,4 +1338,13 @@
 - [x] Fix: Added 'or' import to drizzle-orm; both getRandomCachedSkybox and getCachedSkyboxByStyleId now return M4
 - [x] Verified: 239 M4 entries, 0 M3 entries, all endpoints return M4 only
 - [x] Tests: 140/143 pass (3 pre-existing external API failures)
+- [x] Push to GitHub (5fd588f)
+
+## v50 — Fix Persistent M3 Background in Three.js Canvas
+
+- [x] Visually verified all 7 COMPLETED_M4_SKYBOXES images
+- [x] Identified images 2 (Dark Citadel Arena) and 7 (Dark Fantasy Citadel) as M3-style painted/illustrated art
+- [x] Removed both M3 Dark Fantasy entries from COMPLETED_M4_SKYBOXES (now 5 confirmed M4 images)
+- [x] Verified DB cache has 239 entries across styleIds 177,178,185,186,188 (all M4 styles, no M3)
+- [x] Verified static pages (Home, Shop, Demo) use confirmed M4 images
 - [ ] Push to GitHub

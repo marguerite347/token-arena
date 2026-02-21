@@ -40,12 +40,10 @@ import { AGENT_SMART_WALLETS, ACTIVE_EXPLORER } from "@shared/web3";
 // These were successfully generated via the staging API and are ready to use
 const COMPLETED_M4_SKYBOXES = [
   { name: "Quantum Computing Lab", style: "M4 Scifi Render A", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gqKCKZfzZwQkVTLk.jpg" },
-  { name: "Dark Citadel Arena", style: "M4 Dark Fantasy", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/FpWdOaRWQbLrlpOk.jpg" },
   { name: "Digital Void Chamber", style: "M4 UE Render", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/ZKYjtULxRbKctHFh.jpg" },
   { name: "Cyber Void Arena", style: "M4 UE Render", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/DRHxtlvwfRpwnNgg.jpg" },
   { name: "Post-Apocalyptic Pit", style: "M4 Scifi Render B", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/uRIDteJKcvkSurxb.jpg" },
   { name: "Void Space Arena", style: "M4 UE Render", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/qryzPOHnxfcHcJcf.jpg" },
-  { name: "Dark Fantasy Citadel", style: "M4 Dark Fantasy", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/DxBjpLknoJhIaNHR.jpg" },
 ];
 
 

@@ -1,0 +1,30 @@
+{
+  "query": "SELECT DISTINCT styleId, COUNT(*) as cnt FROM skybox_cache WHERE status IN ('complete', 'completed') GROUP BY styleId ORDER BY cnt DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT DISTINCT styleId, COUNT(*) as cnt FROM skybox_cache WHERE status IN ('complete', 'completed') GROUP BY styleId ORDER BY cnt DESC",
+  "rows": [
+    {
+      "styleId": "186",
+      "cnt": "48"
+    },
+    {
+      "styleId": "177",
+      "cnt": "48"
+    },
+    {
+      "styleId": "178",
+      "cnt": "48"
+    },
+    {
+      "styleId": "188",
+      "cnt": "48"
+    },
+    {
+      "styleId": "185",
+      "cnt": "47"
+    }
+  ],
+  "messages": [],
+  "stdout": "styleId\tcnt\n186\t48\n177\t48\n178\t48\n188\t48\n185\t47\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}
