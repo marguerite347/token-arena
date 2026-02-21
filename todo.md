@@ -1121,3 +1121,17 @@
 - [ ] tRPC endpoint: memory.getGated (returns teaser or full based on ownership)
 - [ ] tRPC endpoint: memory.unlock (simulate purchase, grant access)
 - [ ] Memory NFT cards in Watch Mode death overlay
+
+## v40.1 — Agent Smart Wallets (Base $10K Bounty)
+
+### Deterministic Agent Wallets
+- [x] Generate deterministic wallet address per agent using viem
+- [x] Each agent has unique on-chain Base mainnet address
+- [x] Create shared agentWallets.ts with all agent wallet configs
+- [x] Show wallet address in agent selection screen
+- [x] Show wallet address + balance in intermission earnings tab
+- [x] Show wallet address in agent HUD during combat
+- [x] All TX log entries use real agent wallet addresses
+- [x] Agent wallet funding TX at match start
+- [x] Write vitest tests for agent wallets (9 tests passing)
+- [x] Checkpoint and deliver

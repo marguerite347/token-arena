@@ -34,6 +34,7 @@ import {
   BlendFunction,
 } from "postprocessing";
 import gsap from "gsap";
+import { AGENT_SMART_WALLETS, ACTIVE_EXPLORER } from "@shared/web3";
 
 // ─── CDN fallback panoramas (used when real-time generation unavailable) ────
 const FALLBACK_PANORAMAS = [
@@ -123,6 +124,13 @@ type IntermissionTab = "earnings" | "inventory" | "dao" | "betting" | "txlog";
 const fakeTxHash = () => "0x" + Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join("");
 const fakeAddr = (seed: string) => "0x" + seed.split("").map(c => c.charCodeAt(0).toString(16).padStart(2,"0")).join("").slice(0,40).padEnd(40,"0");
 const BASESCAN = (hash: string) => `https://basescan.org/tx/${hash}`;
+const BASESCAN_ADDR = (addr: string) => `https://basescan.org/address/${addr}`;
+
+// ─── Agent wallet address map (Base mainnet) ──────────────────────────────
+const AGENT_WALLET_MAP: Record<string, string> = {};
+AGENT_SMART_WALLETS.forEach(w => { AGENT_WALLET_MAP[w.agentName] = w.walletAddress; });
+const shortAddr = (addr: string) => addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "0x???";
+const getAgentWallet = (agentId: string): string => AGENT_WALLET_MAP[agentId] || fakeAddr(agentId);
 const TX_ICONS: Record<string, string> = { transfer: "⟳", swap: "⇄", bet: "🎲", vote: "🏛", nft_mint: "🖼", nft_list: "🏷", contract: "📜" };
 const TX_COLORS: Record<string, string> = { transfer: "#00ffff", swap: "#ff44aa", bet: "#ffb800", vote: "#aa44ff", nft_mint: "#44ff88", nft_list: "#44ffdd", contract: "#ff8800" };
 type TxType = "transfer" | "swap" | "bet" | "vote" | "nft_mint" | "nft_list" | "contract";
@@ -1500,7 +1508,7 @@ export default function WatchMode() {
           pushTx({
             type: "contract", from: ag.id, to: "ArenaAccess.sol",
             amount: accessFee, token: "ARENA",
-            desc: `x402 PAYMENT: ${ag.id} paid ${accessFee} ARENA arena access fee (HTTP 402 → payment → 200 OK)`,
+            desc: `x402 PAYMENT: ${ag.id} (${shortAddr(getAgentWallet(ag.id))}) paid ${accessFee} ARENA arena access fee (HTTP 402 → payment → 200 OK)`,
             txHash: fakeTxHash(), isX402: true,
           });
         }, i * 200);
@@ -1631,6 +1639,13 @@ export default function WatchMode() {
                   <div className="flex items-center gap-3 text-[9px]">
                     <span className="text-gray-500">LLM: <span className="text-gray-300">{agent.llm}</span></span>
                   </div>
+                  <div className="mt-1.5 flex items-center gap-1">
+                    <span className="text-[8px] text-gray-600">Wallet:</span>
+                    <a href={BASESCAN_ADDR(getAgentWallet(agent.id))} target="_blank" rel="noopener noreferrer" className="text-[8px] font-mono text-blue-400 hover:text-blue-300 truncate">
+                      {shortAddr(getAgentWallet(agent.id))}
+                    </a>
+                    <span className="text-[7px] px-1 py-0.5 rounded" style={{ background: "rgba(0,255,255,0.1)", color: "#00ffff" }}>Base</span>
+                  </div>
                   <div className="flex items-center gap-2 mt-2 text-[9px]">
                     <span className="px-1.5 py-0.5 rounded" style={{ background: "rgba(0,255,255,0.1)", color: "#00ffff" }}>{agent.loadout.primary}</span>
                     <span className="px-1.5 py-0.5 rounded" style={{ background: "rgba(255,68,170,0.1)", color: "#ff44aa" }}>{agent.loadout.secondary}</span>
@@ -1725,6 +1740,11 @@ export default function WatchMode() {
                   </div>
                   <span className="text-[10px] text-gray-400">{a.kills}K / {a.deaths}D</span>
                 </div>
+                <div className="flex items-center gap-1 mb-0.5">
+                  <a href={BASESCAN_ADDR(getAgentWallet(a.id))} target="_blank" rel="noopener noreferrer" className="text-[7px] font-mono text-blue-400/60 hover:text-blue-300">
+                    {shortAddr(getAgentWallet(a.id))}
+                  </a>
+                </div>
                 <div className="w-full h-1.5 rounded-full bg-gray-800 overflow-hidden">
                   <div className="h-full rounded-full transition-all duration-300" style={{ width: `${(a.hp / a.maxHp) * 100}%`, background: colorHex, boxShadow: `0 0 6px ${colorHex}` }} />
                 </div>
@@ -1780,8 +1800,18 @@ export default function WatchMode() {
               {[...txLog].reverse().map((tx) => (
                 <div key={tx.id} className="mb-1.5 p-1.5 rounded text-[9px]" style={{ background: "rgba(0,0,0,0.4)", borderLeft: `2px solid ${TX_COLORS[tx.type] || "#444"}` }}>
                   <div className="flex items-center justify-between mb-0.5">
-                    <span className="font-bold" style={{ color: TX_COLORS[tx.type] || "#fff" }}>{TX_ICONS[tx.type]} {tx.type.toUpperCase()}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-bold" style={{ color: TX_COLORS[tx.type] || "#fff" }}>{TX_ICONS[tx.type]} {tx.type.toUpperCase()}</span>
+                      {tx.isX402 && <span className="text-[7px] px-1 py-0.5 rounded" style={{ background: "rgba(255,136,0,0.2)", color: "#ff8800" }}>x402</span>}
+                      {tx.isOpenSea && <span className="text-[7px] px-1 py-0.5 rounded" style={{ background: "rgba(0,100,255,0.2)", color: "#4488ff" }}>OpenSea</span>}
+                    </div>
                     <span className="text-gray-600">{new Date(tx.ts).toLocaleTimeString()}</span>
+                  </div>
+                  {/* Wallet addresses */}
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <a href={BASESCAN_ADDR(getAgentWallet(tx.from))} target="_blank" rel="noopener noreferrer" className="text-[7px] font-mono text-blue-400/70 hover:text-blue-300">{shortAddr(getAgentWallet(tx.from))}</a>
+                    {tx.to && <span className="text-gray-600 text-[7px]">→</span>}
+                    {tx.to && <a href={BASESCAN_ADDR(getAgentWallet(tx.to))} target="_blank" rel="noopener noreferrer" className="text-[7px] font-mono text-blue-400/70 hover:text-blue-300">{shortAddr(getAgentWallet(tx.to))}</a>}
                   </div>
                   <div className="text-gray-300 leading-relaxed">{tx.desc}</div>
                   {tx.amount && tx.token && (
@@ -1871,10 +1901,38 @@ export default function WatchMode() {
               {/* EARNINGS TAB */}
               {intermissionTab === "earnings" && myAgentState && myAgentDef && (
                 <div>
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-3 mb-2">
                     <div className="w-4 h-4 rounded-full" style={{ background: hexColor(myAgentDef.color), boxShadow: `0 0 10px ${hexColor(myAgentDef.color)}` }} />
                     <span className="text-lg font-bold" style={{ color: hexColor(myAgentDef.color) }}>{myAgentDef.id}</span>
                     <span className="text-xs text-gray-500">{myAgentDef.role}</span>
+                  </div>
+                  {/* Smart Wallet Address */}
+                  <div className="mb-4 p-2.5 rounded-lg" style={{ background: "rgba(0,100,255,0.08)", border: "1px solid rgba(0,100,255,0.2)" }}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[8px] text-blue-400 uppercase tracking-wider">Smart Wallet (Base Mainnet)</span>
+                        <span className="text-[7px] px-1.5 py-0.5 rounded-full" style={{ background: "rgba(0,255,255,0.15)", color: "#00ffff" }}>ERC-4337</span>
+                      </div>
+                      <a href={BASESCAN_ADDR(getAgentWallet(myAgentDef.id))} target="_blank" rel="noopener noreferrer" className="text-[8px] text-blue-400 hover:text-blue-300">View on BaseScan ↗</a>
+                    </div>
+                    <div className="mt-1 font-mono text-sm text-white tracking-wider">
+                      {getAgentWallet(myAgentDef.id)}
+                    </div>
+                    <div className="flex items-center gap-4 mt-2">
+                      <div className="flex items-center gap-1">
+                        <span className="text-[8px] text-gray-500">ARENA:</span>
+                        <span className="text-[10px] text-yellow-400 font-bold">{myAgentState.tokens}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[8px] text-gray-500">ETH:</span>
+                        <span className="text-[10px] text-green-400 font-bold">0.{String(Math.floor(myAgentState.tokens * 0.3 + 100)).padStart(4, '0')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[8px] text-gray-500">Status:</span>
+                        <span className="text-[8px] text-green-400">Active</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                      </div>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <div className="p-3 rounded text-center" style={{ background: "rgba(255,184,0,0.1)" }}>
@@ -2196,6 +2254,12 @@ export default function WatchMode() {
                         </div>
                         <span className="text-[8px] text-gray-600">{new Date(tx.ts).toLocaleTimeString()}</span>
                       </div>
+                      {/* Wallet addresses */}
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <a href={BASESCAN_ADDR(getAgentWallet(tx.from))} target="_blank" rel="noopener noreferrer" className="text-[7px] font-mono text-blue-400/70 hover:text-blue-300">{shortAddr(getAgentWallet(tx.from))}</a>
+                        {tx.to && <span className="text-gray-600 text-[7px]">→</span>}
+                        {tx.to && <a href={BASESCAN_ADDR(getAgentWallet(tx.to))} target="_blank" rel="noopener noreferrer" className="text-[7px] font-mono text-blue-400/70 hover:text-blue-300">{shortAddr(getAgentWallet(tx.to))}</a>}
+                      </div>
                       <div className="text-[9px] text-gray-300 leading-relaxed">{tx.desc}</div>
                       {tx.amount && tx.token && (
                         <div className="text-[10px] font-bold mt-1" style={{ color: TX_COLORS[tx.type] || "#ffb800" }}>{tx.amount} {tx.token}</div>
@@ -2229,7 +2293,10 @@ export default function WatchMode() {
             <p className="text-gray-400 text-sm mb-6">{totalMatches} matches played</p>
             {myAgentState && myAgentDef && (
               <div className="p-4 rounded-lg mb-6" style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.2)" }}>
-                <div className="text-lg font-bold mb-2" style={{ color: hexColor(myAgentDef.color) }}>{myAgentDef.id}</div>
+                <div className="text-lg font-bold mb-1" style={{ color: hexColor(myAgentDef.color) }}>{myAgentDef.id}</div>
+                <a href={BASESCAN_ADDR(getAgentWallet(myAgentDef.id))} target="_blank" rel="noopener noreferrer" className="text-[9px] font-mono text-blue-400 hover:text-blue-300 mb-3 block">
+                  {getAgentWallet(myAgentDef.id)} ↗
+                </a>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div><div className="text-2xl font-bold text-yellow-400">{myAgentState.tokens}</div><div className="text-[9px] text-gray-500">Final Balance</div></div>
                   <div><div className="text-2xl font-bold text-green-400">{matchEarnings.reduce((s, m) => s + m.kills, 0)}</div><div className="text-[9px] text-gray-500">Total Kills</div></div>
