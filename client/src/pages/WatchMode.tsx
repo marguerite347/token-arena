@@ -1043,10 +1043,68 @@ export default function WatchMode() {
     controls.autoRotateSpeed = 0.3;
     controlsRef.current = controls;
 
-    // Skybox Sphere
+    // Skybox Sphere with default cyberpunk neon grid
     const skyGeo = new THREE.SphereGeometry(100, 64, 64);
     skyGeo.scale(-1, 1, 1);
-    const skyMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.FrontSide });
+    
+    // Create default neon grid texture (cyberpunk aesthetic)
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d')!;
+    
+    // Dark background with slight gradient
+    const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+    gradient.addColorStop(0, '#0a0a1a');
+    gradient.addColorStop(0.5, '#0f0f2e');
+    gradient.addColorStop(1, '#0a0a1a');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 512, 512);
+    
+    // Neon green grid lines
+    ctx.strokeStyle = '#00ff88';
+    ctx.globalAlpha = 0.3;
+    ctx.lineWidth = 1;
+    const gridSize = 32;
+    for (let i = 0; i <= 512; i += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, 512);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(512, i);
+      ctx.stroke();
+    }
+    
+    // Brighter neon lines at larger intervals
+    ctx.strokeStyle = '#00ffff';
+    ctx.globalAlpha = 0.5;
+    ctx.lineWidth = 2;
+    const largeGridSize = 128;
+    for (let i = 0; i <= 512; i += largeGridSize) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, 512);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(512, i);
+      ctx.stroke();
+    }
+    
+    // Add some glow effect with radial gradient
+    ctx.globalAlpha = 0.15;
+    const radialGrad = ctx.createRadialGradient(256, 256, 0, 256, 256, 512);
+    radialGrad.addColorStop(0, '#ff00ff');
+    radialGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = radialGrad;
+    ctx.fillRect(0, 0, 512, 512);
+    
+    const defaultTexture = new THREE.CanvasTexture(canvas);
+    defaultTexture.mapping = THREE.EquirectangularReflectionMapping;
+    
+    const skyMat = new THREE.MeshBasicMaterial({ map: defaultTexture, side: THREE.FrontSide });
     const skySphere = new THREE.Mesh(skyGeo, skyMat);
     skySphere.renderOrder = -1;
     skySphere.frustumCulled = false;
@@ -1068,20 +1126,46 @@ export default function WatchMode() {
     scene.add(pCyan, pPink, pPurple);
     pointLightsRef.current = [pCyan, pPink, pPurple];
 
-    // Arena floor grid
+    // Arena floor grid (neon cyan)
     const gridHelper = new THREE.GridHelper(20, 40, 0x00ffff, 0x112233);
     gridHelper.material.transparent = true;
-    (gridHelper.material as THREE.Material).opacity = 0.15;
+    (gridHelper.material as THREE.Material).opacity = 0.2;
     scene.add(gridHelper);
+    
+    // Additional neon grid lines for extra cyberpunk feel
+    const lineGeo = new THREE.BufferGeometry();
+    const linePositions = [];
+    const gridSpacing = 1;
+    const gridRange = 10;
+    for (let i = -gridRange; i <= gridRange; i += gridSpacing) {
+      // X-axis lines
+      linePositions.push(i, 0, -gridRange);
+      linePositions.push(i, 0, gridRange);
+      // Z-axis lines
+      linePositions.push(-gridRange, 0, i);
+      linePositions.push(gridRange, 0, i);
+    }
+    lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(linePositions), 3));
+    const lineMat = new THREE.LineBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0.1 });
+    const gridLines = new THREE.LineSegments(lineGeo, lineMat);
+    scene.add(gridLines);
 
-    // Arena boundary ring
+    // Arena boundary ring (neon cyan)
     const ringGeo = new THREE.TorusGeometry(7, 0.03, 8, 64);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.4 });
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.6, emissive: 0x00ffff, emissiveIntensity: 0.3 });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = Math.PI / 2;
     ring.position.y = 0.01;
     scene.add(ring);
     arenaRingRef.current = ring;
+    
+    // Outer neon ring (magenta accent)
+    const outerRingGeo = new THREE.TorusGeometry(8, 0.02, 8, 64);
+    const outerRingMat = new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.3, emissive: 0xff00ff, emissiveIntensity: 0.2 });
+    const outerRing = new THREE.Mesh(outerRingGeo, outerRingMat);
+    outerRing.rotation.x = Math.PI / 2;
+    outerRing.position.y = 0.02;
+    scene.add(outerRing);
 
     // Arena platforms (Roblox RIVALS style)
     platformsRef.current = createArenaPlatforms(scene);
