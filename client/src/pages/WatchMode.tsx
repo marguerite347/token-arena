@@ -754,10 +754,10 @@ export default function WatchMode() {
           pollCount++;
 
           try {
-            // Direct fetch to avoid tRPC query caching issues
-            const pollRes = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ id: generation.id }))}`);
+            // Direct fetch to avoid tRPC query caching issues — must wrap in {json: ...} for superjson
+            const pollRes = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ json: { id: generation.id } }))}`);
             const pollJson = await pollRes.json();
-            const result = pollJson?.result?.data;
+            const result = pollJson?.result?.data?.json || pollJson?.result?.data;
 
             if (result?.status === "complete" && result?.fileUrl) {
               setNextSkyboxUrl(result.fileUrl);
@@ -846,9 +846,9 @@ export default function WatchMode() {
       setSkyboxLoaded(true);
       pushTerminal("system", `[SKYBOX] Loaded: ${chosenName}`);
     }, undefined, (err: any) => {
-      console.error("[Skybox] Load failed:", err);
+      console.warn("[Skybox] Load failed, keeping current background:", err);
       setSkyboxLoaded(true);
-      // Keep default neon grid visible as fallback
+      // Keep current background visible as fallback
     });
   }, [nextSkyboxUrl, nextSkyboxName, pushTerminal]);
 
@@ -1110,6 +1110,9 @@ export default function WatchMode() {
       skyMat.needsUpdate = true;
       scene.environment = tex;
       setArenaName(`${initialM4.name} (${initialM4.style})`);
+    }, undefined, () => {
+      // Silently handle initial skybox load failure — dark background remains as fallback
+      console.warn('[Skybox] Initial M4 texture load failed, keeping dark background');
     });
 
     // Lighting

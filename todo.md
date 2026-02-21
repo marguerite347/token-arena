@@ -1397,3 +1397,11 @@
 - [x] Tests: 140/143 pass (3 pre-existing external API failures)
 - [x] Save checkpoint
 - [x] Push to GitHub
+
+## Bug Fix — "1 error" badge on Agent Selection Screen
+
+- [x] Investigate error from browser console logs (skybox.poll BAD_REQUEST + skybox texture load console.error)
+- [x] Fix root cause: wrapped poll input in {json: ...} for superjson, downgraded skybox load errors to console.warn
+- [x] Added error handler to initial skybox texture load
+- [x] Test and verify (140/143 pass, same 3 pre-existing external API failures)
+- [x] Push to GitHub
