@@ -1277,13 +1277,15 @@ export default function WatchMode() {
     shieldMeshesRef.current.forEach((m) => m.parent?.remove(m));
     shieldMeshesRef.current.clear();
 
+    // Spawn agents ON specific platforms so they're visibly elevated from the start
+    const walkable = PLATFORM_CONFIGS.filter(p => p.w >= 0.5 && p.d >= 0.5);
     AGENTS.forEach((agent, i) => {
       const mesh = createAgentMesh(agent.shape, agent.color, agent.emissive, agent.scale);
-      const angle = (i / AGENTS.length) * Math.PI * 2;
-      const radius = 4;
-      const spawnX = Math.cos(angle) * radius;
-      const spawnZ = Math.sin(angle) * radius;
-      const groundY = getGroundHeight(spawnX, spawnZ);
+      // Each agent spawns on a different platform
+      const spawnPlat = walkable[i % walkable.length];
+      const spawnX = spawnPlat.x + (Math.random() - 0.5) * spawnPlat.w * 0.4;
+      const spawnZ = spawnPlat.z + (Math.random() - 0.5) * spawnPlat.d * 0.4;
+      const groundY = spawnPlat.y + spawnPlat.h / 2; // top of platform
       mesh.position.set(spawnX, groundY, spawnZ);
       mesh.lookAt(0, 0, 0);
       const label = createNameLabel(agent.id, agent.color);
@@ -1309,8 +1311,16 @@ export default function WatchMode() {
     })));
   }, [selectedAgent]);
 
-  // ─── Agent movement patterns ──────────────────────────────────────────
+  // ─── Platform-aware agent movement ────────────────────────────────────
+  // Agents intentionally target platforms — they pick a platform to move toward,
+  // jump up onto it, fight from elevated positions, then jump down to pursue enemies.
+  const agentTargetPlatformRef = useRef<Map<string, number>>(new Map());
+  const agentMoveTickRef = useRef<Map<string, number>>(new Map());
+
   const startAgentMovement = useCallback(() => {
+    // Walkable platforms only (skip cover walls)
+    const walkable = PLATFORM_CONFIGS.filter(p => p.w >= 0.5 && p.d >= 0.5);
+
     moveIntervalRef.current = setInterval(() => {
       if (!sceneRef.current) return;
       AGENTS.forEach(agent => {
@@ -1319,35 +1329,89 @@ export default function WatchMode() {
         const state = agentStatesRef.current.find(s => s.id === agent.id);
         if (!state?.alive) return;
 
-        let moveAngle: number, moveDist: number;
-        switch (agent.personality) {
-          case "aggressive":
-            moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 1.5;
-            moveDist = 0.4 + Math.random() * 0.6;
-            break;
-          case "defensive":
-            moveAngle = Math.atan2(mesh.position.z, mesh.position.x) + 0.3 + (Math.random() - 0.5) * 0.5;
-            moveDist = 0.2 + Math.random() * 0.3;
-            break;
-          case "evasive":
-            moveAngle = Math.random() * Math.PI * 2;
-            moveDist = 0.5 + Math.random() * 0.8;
-            break;
-          case "chaotic":
-            moveAngle = Math.random() * Math.PI * 2;
-            moveDist = Math.random() > 0.5 ? 1.0 : 0.1;
-            break;
-          case "adaptive":
-            moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 2;
-            moveDist = 0.3 + Math.random() * 0.4;
-            break;
-          default:
-            moveAngle = Math.random() * Math.PI * 2;
-            moveDist = 0.3;
+        // Track move ticks per agent
+        const tick = (agentMoveTickRef.current.get(agent.id) || 0) + 1;
+        agentMoveTickRef.current.set(agent.id, tick);
+
+        let newX: number, newZ: number;
+
+        // 60% chance: move toward a platform (creates visible jumping)
+        // 40% chance: personality-based movement (creates variety)
+        const shouldTargetPlatform = Math.random() < 0.6;
+
+        if (shouldTargetPlatform) {
+          // Pick a target platform (change every 3-5 ticks)
+          let targetIdx = agentTargetPlatformRef.current.get(agent.id);
+          if (targetIdx === undefined || tick % (3 + Math.floor(Math.random() * 3)) === 0) {
+            // Pick a different platform than current position
+            const currentPlatIdx = walkable.findIndex(p => {
+              const halfW = p.w / 2;
+              const halfD = p.d / 2;
+              return mesh.position.x >= p.x - halfW && mesh.position.x <= p.x + halfW &&
+                     mesh.position.z >= p.z - halfD && mesh.position.z <= p.z + halfD;
+            });
+            // Prefer a platform at a different height for visible jumping
+            const candidates = walkable.filter((_, i) => i !== currentPlatIdx);
+            const target = candidates[Math.floor(Math.random() * candidates.length)];
+            targetIdx = walkable.indexOf(target);
+            agentTargetPlatformRef.current.set(agent.id, targetIdx);
+          }
+
+          const targetPlat = walkable[targetIdx] || walkable[0];
+          // Move toward the center of the target platform with some jitter
+          const jitterX = (Math.random() - 0.5) * targetPlat.w * 0.6;
+          const jitterZ = (Math.random() - 0.5) * targetPlat.d * 0.6;
+          const goalX = targetPlat.x + jitterX;
+          const goalZ = targetPlat.z + jitterZ;
+          const dx = goalX - mesh.position.x;
+          const dz = goalZ - mesh.position.z;
+          const dist = Math.sqrt(dx * dx + dz * dz);
+          // Move speed based on personality
+          const speed = agent.personality === "aggressive" ? 1.2 :
+                        agent.personality === "evasive" ? 1.5 :
+                        agent.personality === "chaotic" ? 1.8 :
+                        agent.personality === "defensive" ? 0.8 : 1.0;
+          const step = Math.min(dist, speed);
+          if (dist > 0.1) {
+            newX = mesh.position.x + (dx / dist) * step;
+            newZ = mesh.position.z + (dz / dist) * step;
+          } else {
+            // Already on platform, small shuffle
+            newX = mesh.position.x + (Math.random() - 0.5) * 0.3;
+            newZ = mesh.position.z + (Math.random() - 0.5) * 0.3;
+          }
+        } else {
+          // Personality-based movement (original behavior)
+          let moveAngle: number, moveDist: number;
+          switch (agent.personality) {
+            case "aggressive":
+              moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 1.5;
+              moveDist = 0.6 + Math.random() * 0.8;
+              break;
+            case "defensive":
+              moveAngle = Math.atan2(mesh.position.z, mesh.position.x) + 0.3 + (Math.random() - 0.5) * 0.5;
+              moveDist = 0.3 + Math.random() * 0.4;
+              break;
+            case "evasive":
+              moveAngle = Math.random() * Math.PI * 2;
+              moveDist = 0.8 + Math.random() * 1.0;
+              break;
+            case "chaotic":
+              moveAngle = Math.random() * Math.PI * 2;
+              moveDist = Math.random() > 0.5 ? 1.5 : 0.2;
+              break;
+            case "adaptive":
+              moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 2;
+              moveDist = 0.4 + Math.random() * 0.5;
+              break;
+            default:
+              moveAngle = Math.random() * Math.PI * 2;
+              moveDist = 0.4;
+          }
+          newX = mesh.position.x + Math.cos(moveAngle) * moveDist;
+          newZ = mesh.position.z + Math.sin(moveAngle) * moveDist;
         }
 
-        const newX = mesh.position.x + Math.cos(moveAngle) * moveDist;
-        const newZ = mesh.position.z + Math.sin(moveAngle) * moveDist;
         const distFromCenter = Math.sqrt(newX * newX + newZ * newZ);
 
         if (distFromCenter < 6.5 && !collidesWithWall(mesh.position.x, mesh.position.z, newX, newZ)) {
@@ -1355,28 +1419,35 @@ export default function WatchMode() {
           const currentY = mesh.position.y;
           const heightDiff = Math.abs(targetY - currentY);
 
-          if (heightDiff > 0.05) {
-            // Jumping up or landing down — arc trajectory
-            const jumpPeakY = Math.max(currentY, targetY) + 0.6;
+          if (heightDiff > 0.08) {
+            // Jumping up or landing down — visible arc trajectory
+            const jumpPeakY = Math.max(currentY, targetY) + 0.8;
+            // Kill any existing Y tweens on this mesh to prevent conflicts
+            gsap.killTweensOf(mesh.position, "y");
             gsap.to(mesh.position, {
-              x: newX, z: newZ, duration: 0.8, ease: "power1.out",
+              x: newX, z: newZ, duration: 0.7, ease: "power1.out",
             });
-            // Jump arc: up then down
+            // Jump arc: up then down with visible peak
             gsap.to(mesh.position, {
-              y: jumpPeakY, duration: 0.35, ease: "power2.out",
+              y: jumpPeakY, duration: 0.3, ease: "power2.out",
               onComplete: () => {
-                gsap.to(mesh.position, { y: targetY, duration: 0.35, ease: "bounce.out" });
+                gsap.to(mesh.position, { y: targetY, duration: 0.3, ease: "bounce.out" });
               },
             });
           } else {
             // Same level — smooth slide
-            gsap.to(mesh.position, { x: newX, y: targetY, z: newZ, duration: 0.8, ease: "power1.out" });
+            gsap.to(mesh.position, { x: newX, y: targetY, z: newZ, duration: 0.7, ease: "power1.out" });
           }
-          const lookTarget = new THREE.Vector3(newX + Math.cos(moveAngle), targetY, newZ + Math.sin(moveAngle));
+          // Look toward movement direction
+          const lookTarget = new THREE.Vector3(
+            newX + (newX - mesh.position.x),
+            targetY + 0.5,
+            newZ + (newZ - mesh.position.z)
+          );
           mesh.lookAt(lookTarget);
         }
       });
-    }, 800);
+    }, 700); // Slightly faster tick for more dynamic movement
   }, []);
 
   // ─── Combat simulation ────────────────────────────────────────────────

@@ -1175,3 +1175,13 @@
 - [x] Extracted PLATFORM_CONFIGS to module-level for collision detection
 - [x] Added getGroundHeight() and collidesWithWall() functions
 - [x] Jump arc animation with bounce.out easing for landing
+
+## GitHub + Platform Physics Fix
+
+- [x] Create public GitHub repo: https://github.com/marguerite347/token-arena (public)
+- [x] Fix agent platform physics — agents now visibly jump on/off platforms during combat
+- [x] Agents intentionally target platforms as movement destinations (60% of moves)
+- [x] Agents spawn ON platforms at correct elevated Y positions
+- [x] Jump arc animation with bounce.out landing when changing elevation
+- [x] Personality-based movement speed (aggressive=1.2, evasive=1.5, chaotic=1.8)
+- [x] Wall collision detection prevents agents from walking through cover walls
