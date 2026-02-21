@@ -1,4 +1,4 @@
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser, users, matches, leaderboard, skyboxCache, agentIdentities, x402Transactions,
@@ -143,14 +143,20 @@ export async function updateSkyboxCache(id: number, data: { skyboxId?: number; f
 export async function getRandomCachedSkybox() {
   const db = await getDb();
   if (!db) return null;
-  const results = await db.select().from(skyboxCache).where(eq(skyboxCache.status, "complete")).orderBy(sql`RAND()`).limit(1);
+  // Query for both 'complete' and 'completed' status values, preferring M4 ('completed') over M3 ('complete')
+  const results = await db.select().from(skyboxCache).where(
+    or(eq(skyboxCache.status, "complete"), eq(skyboxCache.status, "completed"))
+  ).orderBy(sql`RAND()`).limit(1);
   return results.length > 0 ? results[0] : null;
 }
 
 export async function getCachedSkyboxByStyleId(styleId: number) {
   const db = await getDb();
   if (!db) return null;
-  const results = await db.select().from(skyboxCache).where(and(eq(skyboxCache.styleId, styleId), eq(skyboxCache.status, "complete"))).limit(1);
+  // Query for both 'complete' and 'completed' status values
+  const results = await db.select().from(skyboxCache).where(
+    and(eq(skyboxCache.styleId, styleId), or(eq(skyboxCache.status, "complete"), eq(skyboxCache.status, "completed")))
+  ).limit(1);
   return results.length > 0 ? results[0] : null;
 }
 

@@ -1329,4 +1329,13 @@
 - [x] Find all remaining M3/old skybox image references in codebase (procedural neon grid in WatchMode.tsx scene init)
 - [x] Replace title/agent-selection screen: removed procedural canvas grid, now loads random M4 skybox immediately on scene init
 - [x] TS compiles cleanly (0 errors)
+- [x] Push to GitHub (b7e4ce8)
+
+## v49 — Fix Agent Selection Background Still Showing M3 Image
+
+- [x] Investigate: DB had M3 entries (status='complete') vs M4 (status='completed'); getRandomCachedSkybox only queried 'complete'
+- [x] Fix: Updated DB queries to accept both status values; deleted all M3 entries from cache
+- [x] Fix: Added 'or' import to drizzle-orm; both getRandomCachedSkybox and getCachedSkyboxByStyleId now return M4
+- [x] Verified: 239 M4 entries, 0 M3 entries, all endpoints return M4 only
+- [x] Tests: 140/143 pass (3 pre-existing external API failures)
 - [ ] Push to GitHub
