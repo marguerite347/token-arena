@@ -1314,8 +1314,8 @@ export default function WatchMode() {
   // ─── Platform-aware agent movement ────────────────────────────────────
   // Agents intentionally target platforms — they pick a platform to move toward,
   // jump up onto it, fight from elevated positions, then jump down to pursue enemies.
-  const agentTargetPlatformRef = useRef<Map<string, number>>(new Map());
-  const agentMoveTickRef = useRef<Map<string, number>>(new Map());
+  const agentTargetPlatformRef = useRef<Map<string, { idx: number; nextChangeAt: number }>>(new Map());
+  const globalMoveTickRef = useRef(0);
 
   const startAgentMovement = useCallback(() => {
     // Walkable platforms only (skip cover walls)
@@ -1323,39 +1323,48 @@ export default function WatchMode() {
 
     moveIntervalRef.current = setInterval(() => {
       if (!sceneRef.current) return;
+      globalMoveTickRef.current++;
+      
       AGENTS.forEach(agent => {
         const mesh = agentMeshesRef.current.get(agent.id);
         if (!mesh) return;
         const state = agentStatesRef.current.find(s => s.id === agent.id);
         if (!state?.alive) return;
 
-        // Track move ticks per agent
-        const tick = (agentMoveTickRef.current.get(agent.id) || 0) + 1;
-        agentMoveTickRef.current.set(agent.id, tick);
-
         let newX: number, newZ: number;
 
-        // 60% chance: move toward a platform (creates visible jumping)
-        // 40% chance: personality-based movement (creates variety)
-        const shouldTargetPlatform = Math.random() < 0.6;
+        // 70% chance: move toward a platform (creates visible jumping)
+        // 30% chance: personality-based movement (creates variety)
+        const shouldTargetPlatform = Math.random() < 0.7 && walkable.length > 1;
 
         if (shouldTargetPlatform) {
-          // Pick a target platform (change every 3-5 ticks)
-          let targetIdx = agentTargetPlatformRef.current.get(agent.id);
-          if (targetIdx === undefined || tick % (3 + Math.floor(Math.random() * 3)) === 0) {
-            // Pick a different platform than current position
+          // Get or pick a target platform
+          let targetData = agentTargetPlatformRef.current.get(agent.id);
+          
+          // Pick a new platform every 4-6 ticks
+          if (!targetData || globalMoveTickRef.current >= targetData.nextChangeAt) {
+            // Find which platform agent is currently on
             const currentPlatIdx = walkable.findIndex(p => {
               const halfW = p.w / 2;
               const halfD = p.d / 2;
               return mesh.position.x >= p.x - halfW && mesh.position.x <= p.x + halfW &&
                      mesh.position.z >= p.z - halfD && mesh.position.z <= p.z + halfD;
             });
-            // Prefer a platform at a different height for visible jumping
-            const candidates = walkable.filter((_, i) => i !== currentPlatIdx);
-            const target = candidates[Math.floor(Math.random() * candidates.length)];
-            targetIdx = walkable.indexOf(target);
-            agentTargetPlatformRef.current.set(agent.id, targetIdx);
+            
+            // Pick a DIFFERENT platform to ensure visible jumping
+            const candidates = walkable
+              .map((_, i) => i)
+              .filter(i => i !== currentPlatIdx);
+            const newTargetIdx = candidates.length > 0 
+              ? candidates[Math.floor(Math.random() * candidates.length)]
+              : 0;
+            
+            const nextChangeAt = globalMoveTickRef.current + 4 + Math.floor(Math.random() * 3);
+            targetData = { idx: newTargetIdx, nextChangeAt };
+            agentTargetPlatformRef.current.set(agent.id, targetData);
           }
+          
+          const targetIdx = targetData.idx;
 
           const targetPlat = walkable[targetIdx] || walkable[0];
           // Move toward the center of the target platform with some jitter
