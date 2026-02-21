@@ -823,3 +823,10 @@
 - [x] Re-render battle recap videos with Skybox Model 4 panoramic backgrounds
 - [x] Fetch/generate Skybox images from Blockade Labs staging API (3 M4 styles: Cyberpunk, UE Render, SciFi B)
 - [x] Upload new videos to CDN and update Home.tsx references
+
+## v33 — Autonomous Watch Mode (Agent Plays For You)
+- [x] Audit existing auto-play/playtest backend infrastructure
+- [x] Build Watch Mode page with live activity feed and auto-play controls
+- [x] Wire backend to stream agent decisions, bets, battle outcomes to UI
+- [x] Add one-click "Let My Agent Play" button that triggers full autonomous loop
+- [ ] Test end-to-end autonomous play and checkpoint

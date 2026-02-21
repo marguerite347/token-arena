@@ -124,6 +124,12 @@ export default function Home() {
                     ENTER ARENA
                   </button>
                   <button
+                    onClick={() => navigate("/watch")}
+                    className="clip-brutal px-8 py-3 bg-purple-600 text-white font-display text-sm font-bold tracking-wider hover:bg-purple-500 transition-colors"
+                  >
+                    👁 WATCH MODE
+                  </button>
+                  <button
                     onClick={() => navigate("/shop")}
                     className="clip-brutal px-8 py-3 border border-neon-green/40 text-neon-green font-display text-sm font-bold tracking-wider hover:bg-neon-green/10 transition-colors"
                   >

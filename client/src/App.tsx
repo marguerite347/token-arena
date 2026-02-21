@@ -23,6 +23,7 @@ import DAODomains from "./pages/DAODomains";
 import Swap from "./pages/Swap";
 import AgentDemo from "./pages/AgentDemo";
 import { SkyboxGallery } from "./pages/SkyboxGallery";
+import WatchMode from "./pages/WatchMode";
 import { GameProvider } from "./contexts/GameContext";
 
 function Router() {
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/swap" component={Swap} />
       <Route path="/agent-demo" component={AgentDemo} />
       <Route path="/skybox-gallery" component={SkyboxGallery} />
+      <Route path="/watch" component={WatchMode} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
