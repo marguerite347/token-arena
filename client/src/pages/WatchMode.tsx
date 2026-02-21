@@ -1,16 +1,15 @@
 /**
- * WatchMode — Full Spectator Gameplay Loop
+ * WatchMode — Full Spectator Gameplay Loop (v39)
  *
  * Flow: Agent Select → Combat → Intermission (earnings/inventory/DAO/betting) → Next Combat → ...
  *
- * Features:
- * - Agent selection screen with stats, loadout, personality, LLM model
- * - Enhanced combat: movement, shields, dodges, misses, skills
- * - Post-match intermission: earnings, inventory, DAO voting, prediction betting
- * - Persistent agent following across matches
- * - Equirectangular Skybox AI panoramas (Blockade Labs)
- * - Post-processing: Bloom, ChromaticAberration, Vignette, Noise
- * - Holographic HUD overlay
+ * Enhancements in v39:
+ * - Real-time Skybox Model 4 generation via staging API (background generation during gameplay)
+ * - Tiered arena platforms (Roblox RIVALS style) with cover/traversal
+ * - Dynamic action camera: follows combat, zooms on kills, pans during action
+ * - Dynamic betting: new bets each match based on combat results, social layer
+ * - Game Master DAO agents with council influence
+ * - Enhanced DAO proposals that change each match
  */
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
@@ -29,14 +28,26 @@ import {
 } from "postprocessing";
 import gsap from "gsap";
 
-// ─── CDN-hosted Skybox AI panoramic images (4096x2048 equirectangular) ──────
-const SKYBOX_PANORAMAS = [
+// ─── CDN fallback panoramas (used when real-time generation unavailable) ────
+const FALLBACK_PANORAMAS = [
   { name: "Cyberpunk Arena", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gyluRUvZGNaXfxyf.jpg" },
   { name: "Neon Brutalism", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/sNuAtMqlxnNqsqEE.jpg" },
   { name: "Mech Hangar", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gOkcBobLWwNqWJlr.jpg" },
   { name: "Crypto Wasteland", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/dRjHDiDQqVzLFNjG.jpg" },
   { name: "SciFi Battleground", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/tVCUBUdNNPwxMTvN.jpg" },
   { name: "UE Render Arena", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/ybRsYGSbEaljmdEq.jpg" },
+];
+
+// ─── Skybox Model 4 arena prompts for real-time generation ──────────────────
+const M4_ARENA_PROMPTS = [
+  { name: "Neon Colosseum", prompt: "Massive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture", styleId: 188 },
+  { name: "Void Nexus", prompt: "Abstract digital void space with floating geometric platforms, holographic grid floor extending to infinity, neon wireframe structures, data particles streaming upward, deep black space with cyan and magenta nebula, cinematic quality", styleId: 186 },
+  { name: "Mech Forge", prompt: "Industrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates, neon warning lights, steam and smoke, brutalist concrete and steel architecture", styleId: 185 },
+  { name: "Dark Citadel", prompt: "Dark fantasy citadel arena with obsidian towers, floating rune circles, purple lightning strikes, ancient stone platforms covered in glowing sigils, ominous sky with swirling dark clouds", styleId: 179 },
+  { name: "Quantum Lab", prompt: "Futuristic quantum computing laboratory arena, walls of holographic data streams, floating quantum processors, blue and white sterile lighting, glass floors revealing circuitry below, sci-fi render", styleId: 177 },
+  { name: "Wasteland Pit", prompt: "Post-apocalyptic fighting pit arena, rusted metal walls, toxic green pools, makeshift platforms from scrap metal, neon graffiti, dark stormy sky with digital aurora, dystopian render", styleId: 178 },
+  { name: "Crystal Cavern", prompt: "Underground crystal cavern arena, massive glowing crystals in purple and cyan, reflective water pools, bioluminescent fungi on cave walls, ethereal mist, fantasy render", styleId: 187 },
+  { name: "Orbital Station", prompt: "Space station combat arena orbiting a gas giant, transparent floor showing planet below, zero-gravity debris floating, holographic barriers, emergency red and blue lighting, sci-fi render", styleId: 177 },
 ];
 
 // ─── Agent definitions with full metadata ───────────────────────────────────
@@ -85,19 +96,16 @@ const AGENTS = [
   },
 ];
 
+// ─── Game Master DAO Council Agents ─────────────────────────────────────────
+const GAME_MASTERS = [
+  { id: "ARBITER", role: "Chief Arbiter", color: "#ffd700", desc: "Oversees match rules and resolves disputes. Has veto power on weapon balance proposals.", votingWeight: 3 },
+  { id: "ORACLE", role: "Economy Oracle", color: "#44ffdd", desc: "Monitors token flow and inflation. Proposes economic rebalancing measures.", votingWeight: 2 },
+  { id: "SENTINEL", role: "Arena Sentinel", color: "#ff6644", desc: "Manages arena environments and hazards. Controls environmental modifiers.", votingWeight: 2 },
+];
+
 const WEAPON_COLORS: Record<string, number> = {
   "Plasma Pistol": 0x00ffff, Railgun: 0xaa44ff, "Scatter Blaster": 0xff4444,
   "Rocket Launcher": 0xff8800, "Laser Rifle": 0x44ff44, "Void Cannon": 0xff44ff,
-};
-
-// ─── Skill definitions ──────────────────────────────────────────────────────
-type SkillType = "shield" | "dodge" | "melee" | "areadenial";
-interface SkillDef { name: string; cooldown: number; duration: number; color: number; }
-const SKILLS: Record<SkillType, SkillDef> = {
-  shield:     { name: "Energy Shield", cooldown: 12, duration: 3, color: 0x00ffff },
-  dodge:      { name: "Phase Dash",    cooldown: 6,  duration: 0.5, color: 0xffffff },
-  melee:      { name: "Shock Punch",   cooldown: 8,  duration: 0.3, color: 0xff4444 },
-  areadenial: { name: "Void Zone",     cooldown: 18, duration: 4, color: 0xaa44ff },
 };
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -112,14 +120,166 @@ interface AgentHUD {
 interface TermLine { type: "call" | "response" | "system" | "error"; text: string; ts: number; }
 interface ChatMsg { sender: string; color: string; text: string; ts: number; }
 interface MatchEarning { matchNum: number; earned: number; spent: number; kills: number; deaths: number; }
-interface DAOProposal { id: string; title: string; desc: string; votes: { for: number; against: number }; status: "active" | "passed" | "failed"; agentVote?: "for" | "against"; }
-interface BetOption { id: string; label: string; odds: number; type: string; }
+interface DAOProposal { id: string; title: string; desc: string; proposer: string; proposerColor: string; votes: { for: number; against: number }; status: "active" | "passed" | "failed"; gmVote?: string; gmReason?: string; }
+interface BetOption { id: string; label: string; odds: number; type: string; backers: number; totalStaked: number; agentBets: { name: string; color: string; amount: number }[]; }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const hexColor = (c: number) => `#${c.toString(16).padStart(6, "0")}`;
 const randFrom = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+// ─── Generate dynamic bet options based on match state ──────────────────────
+function generateBetOptions(matchNum: number, agentStates: AgentHUD[], agents: typeof AGENTS): BetOption[] {
+  const alive = agentStates.filter(a => a.alive);
+  const topKiller = [...agentStates].sort((a, b) => b.kills - a.kills)[0];
+  const weakest = [...alive].sort((a, b) => a.hp - b.hp)[0];
+
+  // Pool of possible bet types
+  const betPool: BetOption[] = [];
+
+  // Winner bets — pick 2-3 random agents
+  const shuffled = [...agents].sort(() => Math.random() - 0.5);
+  shuffled.slice(0, 2 + (matchNum % 2)).forEach(agent => {
+    const state = agentStates.find(a => a.id === agent.id);
+    const winRate = state ? (state.kills + 1) / (state.deaths + 2) : 0.5;
+    const odds = Math.max(1.2, Math.min(8.0, +(3.0 / (winRate + 0.3)).toFixed(1)));
+    const backers = randInt(3, 15);
+    const agentBets = agents.filter(a => a.id !== agent.id).slice(0, randInt(1, 3)).map(a => ({
+      name: a.id, color: hexColor(a.color), amount: randInt(2, 12),
+    }));
+    betPool.push({
+      id: `w-${agent.id}-${matchNum}`, label: `${agent.id} wins next match`,
+      odds, type: "winner", backers, totalStaked: backers * randInt(3, 10), agentBets,
+    });
+  });
+
+  // Kill count bets
+  const avgKills = agentStates.reduce((s, a) => s + a.kills, 0) / Math.max(1, matchNum);
+  const killThreshold = Math.max(5, Math.round(avgKills * 1.5) + randInt(-2, 3));
+  betPool.push({
+    id: `k-${matchNum}`, label: `Total kills > ${killThreshold}`,
+    odds: +(1.5 + Math.random() * 1.5).toFixed(1), type: "total",
+    backers: randInt(5, 20), totalStaked: randInt(30, 80),
+    agentBets: agents.slice(0, 2).map(a => ({ name: a.id, color: hexColor(a.color), amount: randInt(3, 8) })),
+  });
+
+  // Survival bets
+  if (alive.length > 0) {
+    const survivor = randFrom(alive);
+    betPool.push({
+      id: `s-${survivor.id}-${matchNum}`, label: `${survivor.id} survives all rounds`,
+      odds: +(2.5 + Math.random() * 3.0).toFixed(1), type: "survival",
+      backers: randInt(2, 10), totalStaked: randInt(15, 50),
+      agentBets: [{ name: survivor.id, color: hexColor(agents.find(a => a.id === survivor.id)?.color || 0xffffff), amount: randInt(5, 15) }],
+    });
+  }
+
+  // First blood bet
+  const fbAgent = randFrom(agents);
+  betPool.push({
+    id: `fb-${matchNum}`, label: `${fbAgent.id} gets first blood`,
+    odds: +(1.8 + Math.random() * 2.0).toFixed(1), type: "first",
+    backers: randInt(4, 12), totalStaked: randInt(20, 60),
+    agentBets: agents.filter(a => a.id !== fbAgent.id).slice(0, 2).map(a => ({ name: a.id, color: hexColor(a.color), amount: randInt(2, 7) })),
+  });
+
+  // Underdog bet (if there's a weak agent)
+  if (weakest && weakest.hp < 60) {
+    betPool.push({
+      id: `ud-${matchNum}`, label: `${weakest.id} (underdog) gets 2+ kills`,
+      odds: +(4.0 + Math.random() * 4.0).toFixed(1), type: "underdog",
+      backers: randInt(1, 5), totalStaked: randInt(5, 25),
+      agentBets: [{ name: weakest.id, color: hexColor(agents.find(a => a.id === weakest.id)?.color || 0xffffff), amount: randInt(8, 20) }],
+    });
+  }
+
+  // Streak bet
+  if (topKiller && topKiller.kills >= 2) {
+    betPool.push({
+      id: `st-${matchNum}`, label: `${topKiller.id} continues kill streak (3+ kills)`,
+      odds: +(2.0 + Math.random() * 1.5).toFixed(1), type: "streak",
+      backers: randInt(6, 18), totalStaked: randInt(40, 100),
+      agentBets: agents.slice(0, 3).map(a => ({ name: a.id, color: hexColor(a.color), amount: randInt(3, 10) })),
+    });
+  }
+
+  // Return 4-6 random bets from the pool
+  return betPool.sort(() => Math.random() - 0.5).slice(0, Math.min(6, betPool.length));
+}
+
+// ─── Generate dynamic DAO proposals based on match state ────────────────────
+function generateDAOProposals(matchNum: number, agentStates: AgentHUD[], agents: typeof AGENTS): DAOProposal[] {
+  const topKiller = [...agentStates].sort((a, b) => b.kills - a.kills)[0];
+  const mostDeaths = [...agentStates].sort((a, b) => b.deaths - a.deaths)[0];
+  const richest = [...agentStates].sort((a, b) => b.tokens - a.tokens)[0];
+
+  const proposalPool: DAOProposal[] = [];
+  const gm = randFrom(GAME_MASTERS);
+
+  // Weapon balance proposals
+  const weapon = randFrom(Object.keys(WEAPON_COLORS));
+  const buffOrNerf = Math.random() > 0.5 ? "Buff" : "Nerf";
+  const pct = randInt(10, 25);
+  proposalPool.push({
+    id: `wp-${matchNum}-1`, title: `${buffOrNerf} ${weapon} by ${pct}%`,
+    desc: `${buffOrNerf === "Buff" ? "Increase" : "Decrease"} ${weapon} damage output by ${pct}%. Proposed after Match ${matchNum + 1} data analysis.`,
+    proposer: topKiller?.id || agents[0].id, proposerColor: hexColor(agents.find(a => a.id === (topKiller?.id || agents[0].id))?.color || 0xffffff),
+    votes: { for: randInt(2, 5), against: randInt(1, 4) }, status: "active",
+    gmVote: gm.id, gmReason: `${gm.id}: ${buffOrNerf === "Buff" ? "Weapon diversity needs improvement" : "Current meta is too dominated by this weapon"}`,
+  });
+
+  // Economy proposals
+  const feeChange = Math.random() > 0.5 ? "Increase" : "Reduce";
+  proposalPool.push({
+    id: `ep-${matchNum}-2`, title: `${feeChange} Match Entry Fee`,
+    desc: `${feeChange} arena entry fee from ${10 + matchNum * 2} to ${feeChange === "Reduce" ? 5 + matchNum : 15 + matchNum * 2} ARENA. Impact on token velocity analyzed.`,
+    proposer: richest?.id || agents[1].id, proposerColor: hexColor(agents.find(a => a.id === (richest?.id || agents[1].id))?.color || 0xffffff),
+    votes: { for: randInt(3, 6), against: randInt(1, 3) }, status: "active",
+    gmVote: "ORACLE", gmReason: `ORACLE: Token inflation rate is ${Math.random() > 0.5 ? "above" : "below"} target. ${feeChange === "Reduce" ? "Supports" : "Opposes"} this change.`,
+  });
+
+  // Arena modifier proposals
+  const modifiers = [
+    "Enable Low Gravity Zone in center arena", "Add Toxic Fog hazard to outer ring",
+    "Spawn Random Weapon Crates mid-match", "Enable Double Damage for first 10 seconds",
+    "Add Healing Stations at arena corners", "Enable Friendly Fire between allies",
+  ];
+  proposalPool.push({
+    id: `am-${matchNum}-3`, title: randFrom(modifiers),
+    desc: `Arena Sentinel proposes environmental modification for next match. Requires 60% council approval.`,
+    proposer: "SENTINEL", proposerColor: "#ff6644",
+    votes: { for: randInt(2, 4), against: randInt(2, 4) }, status: "active",
+    gmVote: "SENTINEL", gmReason: `SENTINEL: Arena diversity keeps matches unpredictable and engaging.`,
+  });
+
+  // Agent-specific proposals
+  if (mostDeaths && mostDeaths.deaths >= 2) {
+    proposalPool.push({
+      id: `as-${matchNum}-4`, title: `Grant ${mostDeaths.id} Bonus Shield Next Match`,
+      desc: `${mostDeaths.id} has ${mostDeaths.deaths} deaths this session. Proposal to grant temporary shield boost for competitive balance.`,
+      proposer: "ARBITER", proposerColor: "#ffd700",
+      votes: { for: randInt(3, 5), against: randInt(1, 3) }, status: "active",
+      gmVote: "ARBITER", gmReason: `ARBITER: Competitive balance requires intervention when agents fall too far behind.`,
+    });
+  }
+
+  // Spawn new agent proposal (rare)
+  if (matchNum >= 1 && Math.random() > 0.6) {
+    const newNames = ["VORTEX", "SPECTRE", "ZENITH", "NOVA", "PRISM"];
+    proposalPool.push({
+      id: `na-${matchNum}-5`, title: `Spawn New Agent: ${randFrom(newNames)}`,
+      desc: `Council votes on introducing a new combatant with exotic loadout. Requires unanimous Game Master approval.`,
+      proposer: "ARBITER", proposerColor: "#ffd700",
+      votes: { for: randInt(1, 3), against: randInt(2, 5) }, status: "active",
+      gmVote: "ARBITER", gmReason: `ARBITER: Arena population should grow organically based on token economy health.`,
+    });
+  }
+
+  return proposalPool.sort(() => Math.random() - 0.5).slice(0, Math.min(4, proposalPool.length));
+}
+
+// ─── Agent mesh factory ─────────────────────────────────────────────────────
 function createAgentMesh(shape: string, color: number, emissive: number, scale: number): THREE.Group {
   const group = new THREE.Group();
   const mat = new THREE.MeshStandardMaterial({ color, emissive, roughness: 0.3, metalness: 0.8, transparent: true, opacity: 0.95 });
@@ -191,29 +351,83 @@ function createAgentMesh(shape: string, color: number, emissive: number, scale: 
   return group;
 }
 
+// ─── Arena platforms factory (Roblox RIVALS style) ──────────────────────────
+function createArenaPlatforms(scene: THREE.Scene): THREE.Group {
+  const platforms = new THREE.Group();
+  const platformMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1a2e, emissive: 0x0a0a1a, roughness: 0.7, metalness: 0.5,
+  });
+  const edgeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.4 });
+
+  // Platform layout: tiered hexagonal platforms at different heights
+  const platformConfigs = [
+    // Center raised platform
+    { x: 0, z: 0, y: 0.4, w: 2.5, h: 0.4, d: 2.5, edgeColor: 0x00ffff },
+    // Inner ring — medium height
+    { x: 3, z: 0, y: 0.8, w: 1.8, h: 0.3, d: 1.5, edgeColor: 0xff44aa },
+    { x: -3, z: 0, y: 0.6, w: 1.5, h: 0.3, d: 1.8, edgeColor: 0xaa44ff },
+    { x: 0, z: 3, y: 1.0, w: 1.5, h: 0.3, d: 1.5, edgeColor: 0x44ff88 },
+    { x: 0, z: -3, y: 0.5, w: 2.0, h: 0.3, d: 1.2, edgeColor: 0xff8800 },
+    // Outer ring — higher platforms for sniping
+    { x: 4.5, z: 3, y: 1.5, w: 1.2, h: 0.25, d: 1.2, edgeColor: 0x00ffff },
+    { x: -4.5, z: -3, y: 1.8, w: 1.0, h: 0.25, d: 1.0, edgeColor: 0xff44aa },
+    { x: -4, z: 3.5, y: 1.2, w: 1.3, h: 0.25, d: 1.3, edgeColor: 0xaa44ff },
+    { x: 4, z: -3.5, y: 1.4, w: 1.1, h: 0.25, d: 1.4, edgeColor: 0x44ffdd },
+    // Ramps / connecting pieces
+    { x: 1.5, z: 1.5, y: 0.2, w: 1.0, h: 0.15, d: 2.0, edgeColor: 0x4488ff },
+    { x: -1.5, z: -1.5, y: 0.3, w: 2.0, h: 0.15, d: 1.0, edgeColor: 0x4488ff },
+    // Cover walls (tall thin platforms)
+    { x: 2, z: -1.5, y: 0.0, w: 0.2, h: 1.2, d: 1.5, edgeColor: 0x00ffff },
+    { x: -2, z: 1.5, y: 0.0, w: 1.5, h: 1.0, d: 0.2, edgeColor: 0xff44aa },
+  ];
+
+  platformConfigs.forEach(cfg => {
+    // Platform body
+    const geo = new THREE.BoxGeometry(cfg.w, cfg.h, cfg.d);
+    const mesh = new THREE.Mesh(geo, platformMat.clone());
+    mesh.position.set(cfg.x, cfg.y, cfg.z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    platforms.add(mesh);
+
+    // Glowing edge lines
+    const edges = new THREE.EdgesGeometry(geo);
+    const edgeLineMat = new THREE.LineBasicMaterial({ color: cfg.edgeColor, transparent: true, opacity: 0.5 });
+    const edgeLine = new THREE.LineSegments(edges, edgeLineMat);
+    edgeLine.position.copy(mesh.position);
+    platforms.add(edgeLine);
+
+    // Top surface glow
+    const topGeo = new THREE.PlaneGeometry(cfg.w * 0.9, cfg.d * 0.9);
+    const topMat = new THREE.MeshBasicMaterial({ color: cfg.edgeColor, transparent: true, opacity: 0.06, side: THREE.DoubleSide });
+    const topGlow = new THREE.Mesh(topGeo, topMat);
+    topGlow.rotation.x = -Math.PI / 2;
+    topGlow.position.set(cfg.x, cfg.y + cfg.h / 2 + 0.01, cfg.z);
+    platforms.add(topGlow);
+  });
+
+  scene.add(platforms);
+  return platforms;
+}
+
 // ─── Weapon projectile factory ──────────────────────────────────────────────
 function createProjectile(
   scene: THREE.Scene, from: THREE.Vector3, to: THREE.Vector3,
   weapon: string, onHit: () => void
 ) {
   const color = WEAPON_COLORS[weapon] || 0xffffff;
-  const dir = to.clone().sub(from).normalize();
   const dist = from.distanceTo(to);
-
-  // Core projectile
   const geo = new THREE.SphereGeometry(0.06, 8, 8);
   const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 });
   const proj = new THREE.Mesh(geo, mat);
   proj.position.copy(from);
   scene.add(proj);
 
-  // Glow sprite
   const spriteMat = new THREE.SpriteMaterial({ color, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending });
   const sprite = new THREE.Sprite(spriteMat);
   sprite.scale.setScalar(0.3);
   proj.add(sprite);
 
-  // Trail
   const trailGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.4, 4);
   trailGeo.rotateX(Math.PI / 2);
   const trailMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.3 });
@@ -233,20 +447,16 @@ function createProjectile(
   });
 }
 
-// ─── Miss projectile — flies past the target ────────────────────────────────
 function createMissProjectile(scene: THREE.Scene, from: THREE.Vector3, to: THREE.Vector3, weapon: string) {
   const color = WEAPON_COLORS[weapon] || 0xffffff;
   const dir = to.clone().sub(from).normalize();
-  // Offset the target so it misses
   const offset = new THREE.Vector3((Math.random() - 0.5) * 3, (Math.random() - 0.5) * 1.5, (Math.random() - 0.5) * 3);
   const missTarget = to.clone().add(offset).add(dir.clone().multiplyScalar(5));
-
   const geo = new THREE.SphereGeometry(0.04, 6, 6);
   const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.6 });
   const proj = new THREE.Mesh(geo, mat);
   proj.position.copy(from);
   scene.add(proj);
-
   gsap.to(proj.position, {
     x: missTarget.x, y: missTarget.y, z: missTarget.z, duration: 0.6,
     ease: "none",
@@ -254,20 +464,17 @@ function createMissProjectile(scene: THREE.Scene, from: THREE.Vector3, to: THREE
   });
 }
 
-// ─── Shield visual effect ───────────────────────────────────────────────────
 function createShieldEffect(scene: THREE.Scene, agentMesh: THREE.Group): THREE.Mesh {
   const geo = new THREE.SphereGeometry(0.9, 16, 16);
   const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.15, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
   const shield = new THREE.Mesh(geo, mat);
   shield.position.y = 0.6;
   agentMesh.add(shield);
-  // Pulse animation
   gsap.to(mat, { opacity: 0.25, duration: 0.5, yoyo: true, repeat: -1 });
   gsap.to(shield.scale, { x: 1.1, y: 1.1, z: 1.1, duration: 0.8, yoyo: true, repeat: -1 });
   return shield;
 }
 
-// ─── Dodge afterimage effect ────────────────────────────────────────────────
 function createDodgeEffect(scene: THREE.Scene, position: THREE.Vector3, color: number) {
   const geo = new THREE.SphereGeometry(0.3, 8, 8);
   const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.4 });
@@ -279,7 +486,6 @@ function createDodgeEffect(scene: THREE.Scene, position: THREE.Vector3, color: n
   gsap.to(ghost.scale, { x: 2, y: 2, z: 2, duration: 0.6, onComplete: () => { scene.remove(ghost); geo.dispose(); mat.dispose(); } });
 }
 
-// ─── Damage number popup ────────────────────────────────────────────────────
 function showDamageNumber(scene: THREE.Scene, pos: THREE.Vector3, value: number | string, color: number) {
   const canvas = document.createElement("canvas");
   canvas.width = 128; canvas.height = 64;
@@ -298,7 +504,6 @@ function showDamageNumber(scene: THREE.Scene, pos: THREE.Vector3, value: number 
   gsap.to(mat, { opacity: 0, duration: 1, onComplete: () => { scene.remove(sprite); tex.dispose(); mat.dispose(); } });
 }
 
-// ─── Agent name label sprite ────────────────────────────────────────────────
 function createNameLabel(name: string, color: number): THREE.Sprite {
   const canvas = document.createElement("canvas");
   canvas.width = 256; canvas.height = 64;
@@ -338,6 +543,12 @@ export default function WatchMode() {
   const moveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const combatStartTimeRef = useRef<number>(0);
   const pendingApiResultRef = useRef<any>(null);
+  const platformsRef = useRef<THREE.Group | null>(null);
+
+  // Dynamic camera state
+  const cameraTargetRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 1, 0));
+  const cameraShakeRef = useRef(0);
+  const lastKillTimeRef = useRef(0);
 
   // Game state
   const [phase, setPhase] = useState<Phase>("select");
@@ -361,19 +572,16 @@ export default function WatchMode() {
   const [matchEarnings, setMatchEarnings] = useState<MatchEarning[]>([]);
   const [tokenHistory, setTokenHistory] = useState<number[]>([100]);
 
-  // DAO & Betting state (simulated)
-  const [daoProposals] = useState<DAOProposal[]>([
-    { id: "p1", title: "Increase Railgun Damage +15%", desc: "NEXUS-7 proposes buffing railgun damage to improve viability vs scatter meta", votes: { for: 3, against: 2 }, status: "active" },
-    { id: "p2", title: "Reduce Match Entry Fee", desc: "AURORA proposes lowering entry from 10 to 5 ARENA to encourage more matches", votes: { for: 4, against: 1 }, status: "active" },
-    { id: "p3", title: "Spawn New Agent: VORTEX", desc: "DAO council votes on spawning a 7th agent with exotic loadout", votes: { for: 2, against: 3 }, status: "active" },
-  ]);
-  const [betOptions] = useState<BetOption[]>([
-    { id: "b1", label: "NEXUS-7 wins next match", odds: 3.2, type: "winner" },
-    { id: "b2", label: "Total kills > 15", odds: 1.8, type: "total" },
-    { id: "b3", label: "TITAN survives all rounds", odds: 4.5, type: "survival" },
-    { id: "b4", label: "WRAITH gets first blood", odds: 2.1, type: "first" },
-  ]);
+  // Dynamic DAO & Betting state (regenerated each match)
+  const [daoProposals, setDaoProposals] = useState<DAOProposal[]>([]);
+  const [betOptions, setBetOptions] = useState<BetOption[]>([]);
   const [placedBets, setPlacedBets] = useState<Set<string>>(new Set());
+
+  // Real-time skybox generation state
+  const [skyboxGenerating, setSkyboxGenerating] = useState(false);
+  const [nextSkyboxUrl, setNextSkyboxUrl] = useState<string | null>(null);
+  const [nextSkyboxName, setNextSkyboxName] = useState<string>("");
+  const skyboxPollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const termRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
@@ -394,11 +602,83 @@ export default function WatchMode() {
   useEffect(() => { if (termRef.current) termRef.current.scrollTop = termRef.current.scrollHeight; }, [terminalLines]);
   useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; }, [chatMessages]);
 
-  // ─── Load a random skybox panorama from CDN ──────────────────────────
-  const loadSkybox = useCallback((panorama?: (typeof SKYBOX_PANORAMAS)[0]) => {
-    const chosen = panorama || SKYBOX_PANORAMAS[Math.floor(Math.random() * SKYBOX_PANORAMAS.length)];
-    setArenaName(chosen.name);
-    const proxyUrl = `/api/skybox-proxy?url=${encodeURIComponent(chosen.url)}`;
+  // ─── Real-time Skybox Generation (background) ────────────────────────
+  const skyboxGenerate = trpc.skybox.generate.useMutation();
+  const skyboxPoll = trpc.skybox.poll.useQuery(
+    { id: 0 }, // placeholder, overridden by enabled
+    { enabled: false }
+  );
+
+  const generateNextSkybox = useCallback(() => {
+    if (skyboxGenerating) return;
+    setSkyboxGenerating(true);
+    const arenaPrompt = randFrom(M4_ARENA_PROMPTS);
+    setNextSkyboxName(arenaPrompt.name);
+    pushTerminal("system", `[SKYBOX] Generating "${arenaPrompt.name}" (Model 4, style ${arenaPrompt.styleId})...`);
+
+    skyboxGenerate.mutate(
+      { prompt: arenaPrompt.prompt, styleId: arenaPrompt.styleId, enhancePrompt: true },
+      {
+        onSuccess: (data) => {
+          if (data.fileUrl) {
+            // Already complete
+            setNextSkyboxUrl(data.fileUrl);
+            setSkyboxGenerating(false);
+            pushTerminal("system", `[SKYBOX] "${arenaPrompt.name}" ready!`);
+          } else if (data.id) {
+            // Need to poll
+            pushTerminal("system", `[SKYBOX] Queued (ID=${data.id}), polling...`);
+            let pollCount = 0;
+            skyboxPollIntervalRef.current = setInterval(async () => {
+              pollCount++;
+              if (pollCount > 60) { // 3 min timeout
+                if (skyboxPollIntervalRef.current) clearInterval(skyboxPollIntervalRef.current);
+                setSkyboxGenerating(false);
+                return;
+              }
+              try {
+                const res = await fetch(`/api/trpc/skybox.poll?input=${encodeURIComponent(JSON.stringify({ id: data.id }))}`);
+                const json = await res.json();
+                const result = json?.result?.data;
+                if (result?.status === "complete" && result?.fileUrl) {
+                  if (skyboxPollIntervalRef.current) clearInterval(skyboxPollIntervalRef.current);
+                  setNextSkyboxUrl(result.fileUrl);
+                  setSkyboxGenerating(false);
+                  pushTerminal("system", `[SKYBOX] "${arenaPrompt.name}" generated! Ready for next match.`);
+                }
+              } catch { /* retry */ }
+            }, 3000);
+          }
+        },
+        onError: (err) => {
+          console.error("[Skybox Gen]", err);
+          setSkyboxGenerating(false);
+          pushTerminal("error", `[SKYBOX] Generation failed: ${err.message}`);
+        },
+      }
+    );
+  }, [skyboxGenerating, skyboxGenerate, pushTerminal]);
+
+  // ─── Load skybox (prefers real-time generated, falls back to CDN) ────
+  const loadSkybox = useCallback((url?: string, name?: string) => {
+    let chosenUrl: string;
+    let chosenName: string;
+
+    if (url) {
+      chosenUrl = url;
+      chosenName = name || "Generated Arena";
+    } else if (nextSkyboxUrl) {
+      chosenUrl = nextSkyboxUrl;
+      chosenName = nextSkyboxName || "Generated Arena";
+      setNextSkyboxUrl(null); // consume it
+    } else {
+      const fallback = FALLBACK_PANORAMAS[Math.floor(Math.random() * FALLBACK_PANORAMAS.length)];
+      chosenUrl = fallback.url;
+      chosenName = fallback.name;
+    }
+
+    setArenaName(chosenName);
+    const proxyUrl = `/api/skybox-proxy?url=${encodeURIComponent(chosenUrl)}`;
     const loader = new THREE.TextureLoader();
     loader.crossOrigin = "anonymous";
     loader.load(proxyUrl, (texture) => {
@@ -412,16 +692,34 @@ export default function WatchMode() {
       }
       if (sceneRef.current) sceneRef.current.environment = texture;
       setSkyboxLoaded(true);
-    }, undefined, (err) => console.error("[Skybox] Load failed:", err));
-  }, []);
+    }, undefined, (err) => {
+      console.error("[Skybox] Load failed:", err);
+      // Try CDN fallback
+      if (!url) {
+        const fb = FALLBACK_PANORAMAS[Math.floor(Math.random() * FALLBACK_PANORAMAS.length)];
+        setArenaName(fb.name);
+        const fbProxy = `/api/skybox-proxy?url=${encodeURIComponent(fb.url)}`;
+        loader.load(fbProxy, (tex) => {
+          tex.mapping = THREE.EquirectangularReflectionMapping;
+          tex.colorSpace = THREE.SRGBColorSpace;
+          if (skyboxSphereRef.current) {
+            const mat = skyboxSphereRef.current.material as THREE.MeshBasicMaterial;
+            if (mat.map) mat.map.dispose();
+            mat.map = tex;
+            mat.needsUpdate = true;
+          }
+          if (sceneRef.current) sceneRef.current.environment = tex;
+          setSkyboxLoaded(true);
+        });
+      }
+    });
+  }, [nextSkyboxUrl, nextSkyboxName]);
 
-  // ─── tRPC mutation ────────────────────────────────────────────────────
-  // Transition to intermission or debrief after combat ends
+  // ─── Transition to intermission or debrief ────────────────────────────
   const finishCombat = useCallback((data: any) => {
     if (combatIntervalRef.current) { clearInterval(combatIntervalRef.current); combatIntervalRef.current = null; }
     if (moveIntervalRef.current) { clearInterval(moveIntervalRef.current); moveIntervalRef.current = null; }
 
-    // Record earnings for this match using ref for fresh state
     const currentStates = agentStatesRef.current;
     const myAgent = currentStates.find(a => a.id === selectedAgent);
     if (myAgent) {
@@ -432,8 +730,16 @@ export default function WatchMode() {
       setAgentStates(prev => prev.map(a => a.id === selectedAgent ? { ...a, tokensEarned: a.tokensEarned + earned, tokensSpent: a.tokensSpent + spent, tokens: a.tokens + earned - spent } : a));
     }
 
+    // Generate dynamic DAO proposals and bet options for this intermission
+    setDaoProposals(generateDAOProposals(matchNum, currentStates, AGENTS));
+    setBetOptions(generateBetOptions(matchNum, currentStates, AGENTS));
+    setPlacedBets(new Set());
+
     setMatchNum(prev => prev + 1);
     setSessionResult(data);
+
+    // Start generating next skybox in background
+    generateNextSkybox();
 
     if (matchNum + 1 < totalMatches) {
       setPhase("intermission");
@@ -442,12 +748,23 @@ export default function WatchMode() {
       pushTerminal("system", `[MATCH ${matchNum + 1} COMPLETE] Entering intermission...`);
       pushChat("SYSTEM", "#fbbf24", `Match ${matchNum + 1} complete! Intermission starting...`);
 
+      // Game Master commentary
+      const gm = randFrom(GAME_MASTERS);
+      setTimeout(() => {
+        pushChat(gm.id, gm.color, randFrom([
+          `Interesting match dynamics. Reviewing combat data for balance adjustments.`,
+          `The council has noted the performance disparities. Proposals incoming.`,
+          `Arena conditions will be modified for the next round. Stay alert.`,
+          `Token flow analysis complete. Economic adjustments may be necessary.`,
+        ]));
+      }, 1500);
+
       intermissionTimerRef.current = setInterval(() => {
         setIntermissionTimer(prev => {
           if (prev <= 1) {
             if (intermissionTimerRef.current) clearInterval(intermissionTimerRef.current);
-              startNextMatchRef.current();
-              return 0;
+            startNextMatchRef.current();
+            return 0;
           }
           return prev - 1;
         });
@@ -459,19 +776,17 @@ export default function WatchMode() {
       pushChat("SYSTEM", "#fbbf24", `Tournament complete! MVP: ${data.summary?.mvp || "Unknown"}`);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAgent, matchNum, totalMatches, pushTerminal, pushChat]);
+  }, [selectedAgent, matchNum, totalMatches, pushTerminal, pushChat, generateNextSkybox]);
 
   const ffaPlaytest = trpc.flywheel.ffa.useMutation({
     onSuccess: (data: any) => {
-      // Store API result — don't end combat yet, wait for minimum duration
       pendingApiResultRef.current = data;
       const elapsed = Date.now() - combatStartTimeRef.current;
-      const MIN_COMBAT_MS = 18000; // 18 seconds minimum combat
+      const MIN_COMBAT_MS = 18000;
       const remaining = Math.max(0, MIN_COMBAT_MS - elapsed);
       if (remaining <= 0) {
         finishCombat(data);
       } else {
-        // Schedule transition after remaining time
         setTimeout(() => finishCombat(data), remaining);
       }
     },
@@ -506,7 +821,7 @@ export default function WatchMode() {
     rendererRef.current = renderer;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0a0a1a, 0.015);
+    scene.fog = new THREE.FogExp2(0x0a0a1a, 0.012);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
@@ -564,6 +879,9 @@ export default function WatchMode() {
     scene.add(ring);
     arenaRingRef.current = ring;
 
+    // Arena platforms (Roblox RIVALS style)
+    platformsRef.current = createArenaPlatforms(scene);
+
     // Dust particles
     const dustCount = 300;
     const dustGeo = new THREE.BufferGeometry();
@@ -589,7 +907,7 @@ export default function WatchMode() {
     (noise as any).blendMode.opacity.value = 0.08;
     composer.addPass(new EffectPass(camera, bloom, chromaticAb, vignette, noise));
 
-    // Animation loop
+    // Animation loop with dynamic camera
     lastTimeRef.current = performance.now();
     const animate = () => {
       animFrameRef.current = requestAnimationFrame(animate);
@@ -598,6 +916,19 @@ export default function WatchMode() {
       lastTimeRef.current = now;
       elapsedRef.current += delta;
       const elapsed = elapsedRef.current;
+
+      // Dynamic camera: smoothly follow action target
+      const target = cameraTargetRef.current;
+      controls.target.lerp(target, 0.03);
+
+      // Camera shake on kills
+      if (cameraShakeRef.current > 0) {
+        cameraShakeRef.current -= delta * 3;
+        const shake = cameraShakeRef.current * 0.15;
+        camera.position.x += (Math.random() - 0.5) * shake;
+        camera.position.y += (Math.random() - 0.5) * shake;
+        camera.position.z += (Math.random() - 0.5) * shake;
+      }
 
       controls.update();
 
@@ -627,6 +958,16 @@ export default function WatchMode() {
       // Rotate arena ring
       if (arenaRingRef.current) arenaRingRef.current.rotation.z = elapsed * 0.1;
 
+      // Pulse platform edges
+      if (platformsRef.current) {
+        platformsRef.current.children.forEach((child) => {
+          if (child instanceof THREE.LineSegments) {
+            const mat = child.material as THREE.LineBasicMaterial;
+            mat.opacity = 0.3 + Math.sin(elapsed * 2 + child.position.x) * 0.2;
+          }
+        });
+      }
+
       composer.render(delta);
     };
     animate();
@@ -650,7 +991,53 @@ export default function WatchMode() {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ─── Follow agent camera ──────────────────────────────────────────────
+  // ─── Dynamic camera: follow combat action ─────────────────────────────
+  useEffect(() => {
+    if (phase !== "combat") return;
+    const interval = setInterval(() => {
+      const currentStates = agentStatesRef.current;
+      const alive = currentStates.filter(a => a.alive);
+      if (alive.length === 0) return;
+
+      // Determine camera focus: follow agent, or zoom to action
+      let focusId = followAgent || selectedAgent;
+
+      // If there was a recent kill, zoom to the killer briefly
+      const timeSinceKill = Date.now() - lastKillTimeRef.current;
+      if (timeSinceKill < 3000) {
+        // Find the top killer among alive agents
+        const topKiller = [...alive].sort((a, b) => b.kills - a.kills)[0];
+        if (topKiller) focusId = topKiller.id;
+      }
+
+      const mesh = focusId ? agentMeshesRef.current.get(focusId) : null;
+      if (mesh) {
+        // Smooth camera target to the focused agent
+        cameraTargetRef.current.set(mesh.position.x, mesh.position.y + 1, mesh.position.z);
+
+        // Dynamic zoom: zoom in during intense moments, zoom out for overview
+        const camera = cameraRef.current;
+        if (camera) {
+          const aliveCount = alive.length;
+          const targetDist = aliveCount <= 2 ? 5 : aliveCount <= 4 ? 7 : 9;
+          const currentDist = camera.position.distanceTo(mesh.position);
+          if (Math.abs(currentDist - targetDist) > 1) {
+            const dir = camera.position.clone().sub(mesh.position).normalize();
+            const newPos = mesh.position.clone().add(dir.multiplyScalar(targetDist));
+            newPos.y = Math.max(2, newPos.y);
+            gsap.to(camera.position, { x: newPos.x, y: newPos.y, z: newPos.z, duration: 2, ease: "power1.out", overwrite: true });
+          }
+        }
+      } else {
+        // No specific focus — orbit center
+        cameraTargetRef.current.set(0, 1, 0);
+      }
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [phase, followAgent, selectedAgent]);
+
+  // ─── Follow agent camera (manual click) ───────────────────────────────
   useEffect(() => {
     if (!followAgent || !controlsRef.current) return;
     const mesh = agentMeshesRef.current.get(followAgent);
@@ -668,7 +1055,6 @@ export default function WatchMode() {
   const spawnAgents = useCallback(() => {
     const scene = sceneRef.current;
     if (!scene) return;
-    // Clear old
     agentMeshesRef.current.forEach((m) => scene.remove(m));
     agentMeshesRef.current.clear();
     shieldMeshesRef.current.forEach((m) => m.parent?.remove(m));
@@ -682,7 +1068,6 @@ export default function WatchMode() {
       mesh.lookAt(0, 0, 0);
       const label = createNameLabel(agent.id, agent.color);
       mesh.add(label);
-      // Highlight selected agent
       if (agent.id === selectedAgent) {
         const highlight = new THREE.Mesh(
           new THREE.RingGeometry(0.6, 0.8, 16),
@@ -711,28 +1096,28 @@ export default function WatchMode() {
       AGENTS.forEach(agent => {
         const mesh = agentMeshesRef.current.get(agent.id);
         if (!mesh) return;
+        const state = agentStatesRef.current.find(s => s.id === agent.id);
+        if (!state?.alive) return;
 
         let moveAngle: number, moveDist: number;
-        const personality = agent.personality;
-
-        switch (personality) {
-          case "aggressive": // Rush toward center or nearest enemy
+        switch (agent.personality) {
+          case "aggressive":
             moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 1.5;
             moveDist = 0.4 + Math.random() * 0.6;
             break;
-          case "defensive": // Orbit at medium range
+          case "defensive":
             moveAngle = Math.atan2(mesh.position.z, mesh.position.x) + 0.3 + (Math.random() - 0.5) * 0.5;
             moveDist = 0.2 + Math.random() * 0.3;
             break;
-          case "evasive": // Strafe unpredictably
+          case "evasive":
             moveAngle = Math.random() * Math.PI * 2;
             moveDist = 0.5 + Math.random() * 0.8;
             break;
-          case "chaotic": // Random bursts
+          case "chaotic":
             moveAngle = Math.random() * Math.PI * 2;
             moveDist = Math.random() > 0.5 ? 1.0 : 0.1;
             break;
-          case "adaptive": // Follow nearest enemy
+          case "adaptive":
             moveAngle = Math.atan2(-mesh.position.z, -mesh.position.x) + (Math.random() - 0.5) * 2;
             moveDist = 0.3 + Math.random() * 0.4;
             break;
@@ -747,7 +1132,6 @@ export default function WatchMode() {
 
         if (distFromCenter < 6.5) {
           gsap.to(mesh.position, { x: newX, z: newZ, duration: 0.8, ease: "power1.out" });
-          // Face movement direction
           const lookTarget = new THREE.Vector3(newX + Math.cos(moveAngle), 0, newZ + Math.sin(moveAngle));
           mesh.lookAt(lookTarget);
         }
@@ -755,7 +1139,7 @@ export default function WatchMode() {
     }, 800);
   }, []);
 
-  // ─── Combat simulation with misses, shields, dodges ───────────────────
+  // ─── Combat simulation ────────────────────────────────────────────────
   const startCombat = useCallback(() => {
     combatIntervalRef.current = setInterval(() => {
       if (!sceneRef.current) return;
@@ -781,14 +1165,12 @@ export default function WatchMode() {
       const from = attackerMesh.position.clone().add(new THREE.Vector3(0, 0.8, 0));
       const to = defenderMesh.position.clone().add(new THREE.Vector3(0, 0.8, 0));
 
-      // Determine outcome: hit, miss, blocked, dodged, critical, heal, EMP
       const roll = Math.random();
       const currentScene = sceneRef.current;
       const attackerState = currentStates.find(s => s.id === attacker.id);
-      const defenderState = currentStates.find(s => s.id === defender.id);
 
       if (roll < 0.15) {
-        // MISS — projectile flies past
+        // MISS
         createMissProjectile(currentScene, from, to, weapon);
         showDamageNumber(currentScene, to, "MISS", 0x888888);
         pushTerminal("call", `${attacker.id}.attack("${weapon}", target="${defender.id}")`);
@@ -824,22 +1206,22 @@ export default function WatchMode() {
         pushTerminal("call", `${attacker.id}.attack("${weapon}", target="${defender.id}")`);
         pushTerminal("response", `  DODGED — ${defender.id} phase-dashed!`);
       } else if (roll < 0.36 && attackerState && attackerState.hp < 60) {
-        // NANO REPAIR — heal self when low HP
+        // NANO REPAIR
         const healAmt = Math.floor(Math.random() * 15) + 10;
         showDamageNumber(currentScene, from, `+${healAmt}`, 0x00ff88);
         pushTerminal("call", `${attacker.id}.nanoRepair()`);
-        pushTerminal("response", `  +${healAmt} HP restored (${attackerState.hp} → ${Math.min(100, attackerState.hp + healAmt)})`);
-        pushChat(attacker.id, hexColor(attacker.color), randFrom(["Nano-repair engaged.", "Self-repair protocol active.", "Back in the fight.", "Regenerating..."]));
+        pushTerminal("response", `  +${healAmt} HP restored`);
+        pushChat(attacker.id, hexColor(attacker.color), randFrom(["Nano-repair engaged.", "Self-repair protocol active.", "Back in the fight."]));
         setAgentStates(prev => prev.map(a => a.id === attacker.id ? { ...a, hp: Math.min(100, a.hp + healAmt) } : a));
       } else if (roll < 0.40) {
-        // CRITICAL HIT — double damage with dramatic effect
+        // CRITICAL HIT
         const critDamage = baseDamage * 2;
         createProjectile(currentScene, from, to, weapon, () => {
           showDamageNumber(currentScene, to, `CRIT ${critDamage}`, 0xff0000);
         });
         pushTerminal("call", `${attacker.id}.attack("${weapon}", target="${defender.id}", critical=true)`);
-        pushTerminal("response", `  ★ CRITICAL HIT ★ ${critDamage} DMG to ${defender.id}!`);
-        pushChat(attacker.id, hexColor(attacker.color), randFrom([`CRITICAL! ${defender.id} is finished!`, `Weak point identified. Exploiting.`, `Maximum damage achieved.`, `That's gonna leave a mark.`]));
+        pushTerminal("response", `  ★ CRITICAL HIT ★ ${critDamage} DMG!`);
+        pushChat(attacker.id, hexColor(attacker.color), randFrom([`CRITICAL! ${defender.id} is finished!`, `Weak point exploited.`, `Maximum damage.`]));
         setAgentStates(prev => {
           const updated = prev.map(a => ({ ...a }));
           const target = updated.find(a => a.id === defender.id);
@@ -850,8 +1232,10 @@ export default function WatchMode() {
               target.deaths += 1;
               const atkState = updated.find(a => a.id === attacker.id);
               if (atkState) atkState.kills += 1;
-              pushKill(`${attacker.id} CRIT-eliminated ${defender.id} with ${weapon}`);
-              pushChat("SYSTEM", "#ff4444", `${defender.id} has been eliminated! (CRITICAL)`);
+              pushKill(`${attacker.id} CRIT-eliminated ${defender.id}`);
+              pushChat("SYSTEM", "#ff4444", `${defender.id} eliminated! (CRITICAL)`);
+              lastKillTimeRef.current = Date.now();
+              cameraShakeRef.current = 1.0;
               const mesh = agentMeshesRef.current.get(defender.id);
               if (mesh && sceneRef.current) {
                 gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => { sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id); } });
@@ -861,7 +1245,7 @@ export default function WatchMode() {
           return updated;
         });
       } else if (roll < 0.44) {
-        // COUNTER-ATTACK — defender retaliates
+        // COUNTER-ATTACK
         createProjectile(currentScene, from, to, weapon, () => {
           showDamageNumber(currentScene, to, "PARRY", 0xffaa00);
         });
@@ -874,7 +1258,7 @@ export default function WatchMode() {
           }
         }, 400);
         pushTerminal("call", `${attacker.id}.attack("${weapon}", target="${defender.id}")`);
-        pushTerminal("response", `  PARRIED! ${defender.id} counter-attacks for ${counterDmg} DMG!`);
+        pushTerminal("response", `  PARRIED! ${defender.id} counter-attacks for ${counterDmg}!`);
         setAgentStates(prev => prev.map(a => a.id === attacker.id ? { ...a, hp: Math.max(0, a.hp - counterDmg) } : a));
       } else {
         // NORMAL HIT
@@ -882,25 +1266,17 @@ export default function WatchMode() {
         createProjectile(currentScene, from, to, weapon, () => {
           showDamageNumber(currentScene, to, damage, WEAPON_COLORS[weapon] || 0xffffff);
         });
-
         pushTerminal("call", `${attacker.id}.attack("${weapon}", target="${defender.id}")`);
         pushTerminal("response", `  ${damage} DMG to ${defender.id}`);
-
-        // Chat taunt
         if (Math.random() > 0.7) {
           const taunts = [
             `You're scrap metal, ${defender.id}!`, `Is that all you got?`,
-            `Calculated. Predicted. Eliminated.`, `My turn next round...`,
-            `Your tokens are mine!`, `I'll remember this.`,
-            `Processing your destruction...`, `Engaging superior firepower.`,
-            `${damage} tokens transferred. Thanks.`, `Shield won't save you next time.`,
-            `Transferring ${damage} ARENA from your wallet...`, `Your armor is paper.`,
-            `LLM says you lose.`, `Running prediction model... you're done.`,
+            `Calculated. Predicted. Eliminated.`, `Your tokens are mine!`,
+            `Transferring ${damage} ARENA from your wallet...`, `LLM says you lose.`,
+            `My model predicted this outcome.`, `Running exit strategy...`,
           ];
           pushChat(attacker.id, hexColor(attacker.color), randFrom(taunts));
         }
-
-        // Apply damage
         setAgentStates(prev => {
           const updated = prev.map(a => ({ ...a }));
           const target = updated.find(a => a.id === defender.id);
@@ -913,6 +1289,8 @@ export default function WatchMode() {
               if (atkState) atkState.kills += 1;
               pushKill(`${attacker.id} eliminated ${defender.id} with ${weapon}`);
               pushChat("SYSTEM", "#ff4444", `${defender.id} has been eliminated!`);
+              lastKillTimeRef.current = Date.now();
+              cameraShakeRef.current = 0.6;
               const mesh = agentMeshesRef.current.get(defender.id);
               if (mesh && sceneRef.current) {
                 gsap.to(mesh.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => { sceneRef.current?.remove(mesh); agentMeshesRef.current.delete(defender.id); } });
@@ -947,12 +1325,10 @@ export default function WatchMode() {
     setPhase("combat");
     pushTerminal("system", "[COMBAT PHASE] Agents engaging...");
 
-    // Fire the actual FFA playtest
     combatStartTimeRef.current = Date.now();
     pendingApiResultRef.current = null;
     ffaPlaytest.mutate({ agentCount: 6, matchCount: 1 });
 
-    // Start visual simulation
     startAgentMovement();
     startCombat();
   }, [isRunning, matchNum, totalMatches, arenaName, selectedAgent, ffaPlaytest, pushTerminal, pushChat, loadSkybox, spawnAgents, startAgentMovement, startCombat]);
@@ -961,7 +1337,6 @@ export default function WatchMode() {
   const startNextMatchRef = useRef<() => void>(() => {});
   const startNextMatch = useCallback(() => {
     if (intermissionTimerRef.current) clearInterval(intermissionTimerRef.current);
-    // Reset agent states for next match
     setAgentStates(AGENTS.map(a => ({
       id: a.id, name: a.id, hp: 100, maxHp: 100, kills: 0, deaths: 0,
       tokens: tokenHistory[tokenHistory.length - 1] || 100, tokensEarned: 0, tokensSpent: 0, alive: true,
@@ -994,10 +1369,16 @@ export default function WatchMode() {
       if (combatIntervalRef.current) clearInterval(combatIntervalRef.current);
       if (moveIntervalRef.current) clearInterval(moveIntervalRef.current);
       if (intermissionTimerRef.current) clearInterval(intermissionTimerRef.current);
+      if (skyboxPollIntervalRef.current) clearInterval(skyboxPollIntervalRef.current);
     };
   }, []);
 
-  // My agent's current state
+  // Start generating first skybox in background on mount
+  useEffect(() => {
+    const timer = setTimeout(() => generateNextSkybox(), 2000);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const myAgentState = useMemo(() => agentStates.find(a => a.id === selectedAgent), [agentStates, selectedAgent]);
   const myAgentDef = useMemo(() => AGENTS.find(a => a.id === selectedAgent), [selectedAgent]);
 
@@ -1078,12 +1459,15 @@ export default function WatchMode() {
           >
             ENTER THE ARENA
           </button>
-          <p className="text-gray-600 text-xs mt-4">{skyboxLoaded ? `Arena: ${arenaName}` : "Loading arena..."}</p>
+          <p className="text-gray-600 text-xs mt-4">
+            {skyboxLoaded ? `Arena: ${arenaName}` : "Loading arena..."}
+            {skyboxGenerating && <span className="text-cyan-600 ml-2">· Generating next arena...</span>}
+          </p>
         </div>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* TOP BAR — always visible during gameplay */}
+      {/* TOP BAR */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {phase !== "select" && (
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-3" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%)" }}>
@@ -1094,16 +1478,14 @@ export default function WatchMode() {
             <span className="text-gray-600 text-[10px] ml-4">MATCH {matchNum + (phase === "combat" || phase === "loading" ? 1 : 0)} / {totalMatches}</span>
           </div>
           <div className="flex items-center gap-4">
-            {/* My agent's token balance */}
             {myAgentState && (
               <div className="flex items-center gap-2 px-3 py-1 rounded" style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.2)" }}>
                 <span className="text-[10px] text-yellow-500">◆</span>
                 <span className="text-xs text-yellow-400 font-bold">{myAgentState.tokens} ARENA</span>
-                {myAgentState.tokensEarned > 0 && (
-                  <span className="text-[9px] text-green-400">+{myAgentState.tokensEarned}</span>
-                )}
+                {myAgentState.tokensEarned > 0 && <span className="text-[9px] text-green-400">+{myAgentState.tokensEarned}</span>}
               </div>
             )}
+            {skyboxGenerating && <span className="text-[9px] text-cyan-600 animate-pulse">Generating next arena...</span>}
             <span className="text-xs text-gray-400 tracking-wider uppercase">
               {phase === "loading" ? "INITIALIZING" : phase === "combat" ? "LIVE COMBAT" : phase === "intermission" ? "INTERMISSION" : "DEBRIEF"}
             </span>
@@ -1112,9 +1494,7 @@ export default function WatchMode() {
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* KILL FEED (top right) */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {killFeed.length > 0 && phase !== "select" && (
         <div className="absolute top-14 right-6 z-10 flex flex-col gap-1 pointer-events-none">
           {killFeed.map((k, i) => (
@@ -1125,9 +1505,7 @@ export default function WatchMode() {
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* AGENT HEALTH BARS (left side) */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {agentStates.length > 0 && (phase === "combat" || phase === "intermission") && (
         <div className="absolute top-16 left-6 z-10 flex flex-col gap-2 w-56">
           {agentStates.map(a => {
@@ -1169,9 +1547,7 @@ export default function WatchMode() {
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* TERMINAL WINDOW (bottom left) */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {(phase === "combat" || phase === "intermission") && (
         <div className="absolute bottom-6 left-6 z-10 w-80 max-h-[35vh]" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(16px)", border: "1px solid rgba(0,255,255,0.2)", borderRadius: "8px" }}>
           <div className="px-3 py-1.5 border-b flex items-center gap-2" style={{ borderColor: "rgba(0,255,255,0.15)" }}>
@@ -1189,9 +1565,7 @@ export default function WatchMode() {
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* CHAT WINDOW (bottom right) */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {(phase === "combat" || phase === "intermission") && (
         <div className="absolute bottom-6 right-6 z-10 w-72" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,68,170,0.2)", borderRadius: "8px" }}>
           <div className="px-3 py-1.5 border-b flex items-center gap-2" style={{ borderColor: "rgba(255,68,170,0.15)" }}>
@@ -1213,9 +1587,7 @@ export default function WatchMode() {
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* LOADING OVERLAY */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
       {phase === "loading" && (
         <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
           <div className="text-center">
@@ -1227,7 +1599,7 @@ export default function WatchMode() {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* INTERMISSION OVERLAY — Earnings, Inventory, DAO, Betting */}
+      {/* INTERMISSION OVERLAY */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {phase === "intermission" && (
         <div className="absolute inset-x-0 top-12 bottom-0 z-20 flex items-center justify-center pointer-events-auto">
@@ -1267,8 +1639,6 @@ export default function WatchMode() {
                     <span className="text-lg font-bold" style={{ color: hexColor(myAgentDef.color) }}>{myAgentDef.id}</span>
                     <span className="text-xs text-gray-500">{myAgentDef.role}</span>
                   </div>
-
-                  {/* Token balance */}
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <div className="p-3 rounded text-center" style={{ background: "rgba(255,184,0,0.1)" }}>
                       <div className="text-[9px] text-gray-400 uppercase">Balance</div>
@@ -1283,8 +1653,6 @@ export default function WatchMode() {
                       <div className="text-xl font-bold text-red-400">-{matchEarnings.reduce((s, m) => s + m.spent, 0)}</div>
                     </div>
                   </div>
-
-                  {/* Token history mini-chart */}
                   <div className="mb-4">
                     <div className="text-[9px] text-gray-500 uppercase mb-2">Token Balance Over Time</div>
                     <div className="h-16 flex items-end gap-1">
@@ -1296,8 +1664,6 @@ export default function WatchMode() {
                       })}
                     </div>
                   </div>
-
-                  {/* Match history */}
                   <div className="text-[9px] text-gray-500 uppercase mb-2">Match History</div>
                   {matchEarnings.map((m, i) => (
                     <div key={i} className="flex items-center justify-between py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
@@ -1344,7 +1710,6 @@ export default function WatchMode() {
                     </div>
                   </div>
 
-                  {/* Armory Upgrades */}
                   <div className="text-[9px] text-gray-500 uppercase mb-2 mt-4">Armory — Available Upgrades</div>
                   {[
                     { name: "Plasma Accelerator", desc: "+15% primary weapon damage", cost: 20, type: "weapon" },
@@ -1370,11 +1735,10 @@ export default function WatchMode() {
                     );
                   })}
 
-                  {/* Agent's autonomous decision */}
                   <div className="p-3 rounded mt-3" style={{ background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.15)" }}>
                     <div className="text-[9px] text-yellow-500 uppercase mb-2">🧠 Agent Strategy Analysis</div>
                     <div className="text-[10px] text-gray-300 leading-relaxed">
-                      <span className="text-gray-500">{myAgentDef.id} analyzing match {matchNum + 1} results...</span>
+                      <span className="text-gray-500">{myAgentDef.id} analyzing match {matchNum} results...</span>
                       <br /><span className="text-yellow-400 mt-1 block">
                         {myAgentState.kills > myAgentState.deaths
                           ? `→ Offensive strategy effective. ${myAgentState.kills}K/${myAgentState.deaths}D ratio is strong. Investing in damage upgrades.`
@@ -1388,29 +1752,45 @@ export default function WatchMode() {
                 </div>
               )}
 
-              {/* DAO TAB */}
+              {/* DAO TAB — with Game Master Council */}
               {intermissionTab === "dao" && (
                 <div>
+                  {/* Game Master Council */}
+                  <div className="mb-4 p-3 rounded" style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.15)" }}>
+                    <div className="text-[9px] text-yellow-500 uppercase mb-2">⚔ Game Master Council</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {GAME_MASTERS.map(gm => (
+                        <div key={gm.id} className="p-2 rounded text-center" style={{ background: "rgba(0,0,0,0.3)" }}>
+                          <div className="text-[10px] font-bold" style={{ color: gm.color }}>{gm.id}</div>
+                          <div className="text-[7px] text-gray-500">{gm.role}</div>
+                          <div className="text-[7px] text-gray-600 mt-1">Weight: {gm.votingWeight}x</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-[8px] text-gray-500 mt-2">Game Masters oversee arena rules, economy, and balance. Their votes carry extra weight.</div>
+                  </div>
+
                   <div className="flex items-center justify-between mb-3">
-                    <div className="text-[9px] text-gray-500 uppercase">Active DAO Proposals</div>
+                    <div className="text-[9px] text-gray-500 uppercase">Active Proposals (Match {matchNum})</div>
                     <div className="text-[8px] text-purple-400">
                       Voting Power: <span className="font-bold text-purple-300">{myAgentState?.tokens || 0} ARENA</span>
                     </div>
                   </div>
-                  {daoProposals.map((p, pIdx) => {
+
+                  {daoProposals.map((p) => {
                     const totalVotes = p.votes.for + p.votes.against;
-                    const forPct = Math.round((p.votes.for / totalVotes) * 100);
-                    const agentVotedFor = pIdx % 2 === 0; // Deterministic based on proposal index
-                    const voteReason = agentVotedFor
-                      ? [`Aligns with ${myAgentDef?.style || ""} strategy`, `Increases token velocity`, `Benefits offensive builds`]
-                      : [`Conflicts with current loadout`, `Reduces combat efficiency`, `Hurts token economy`];
+                    const forPct = totalVotes > 0 ? Math.round((p.votes.for / totalVotes) * 100) : 50;
+                    const agentVotedFor = myAgentDef ? (myAgentDef.style === "Aggressive" ? p.votes.for > p.votes.against : p.votes.for <= p.votes.against) : true;
                     return (
                       <div key={p.id} className="p-3 rounded mb-3" style={{ background: "rgba(170,68,255,0.05)", border: "1px solid rgba(170,68,255,0.15)" }}>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-bold text-purple-300">{p.title}</span>
-                          <span className="text-[8px] px-2 py-0.5 rounded" style={{ background: p.status === "active" ? "rgba(0,255,0,0.15)" : "rgba(170,68,255,0.2)", color: p.status === "active" ? "#44ff88" : "#aa44ff" }}>{p.status.toUpperCase()}</span>
+                          <span className="text-[8px] px-2 py-0.5 rounded" style={{ background: "rgba(0,255,0,0.15)", color: "#44ff88" }}>ACTIVE</span>
                         </div>
-                        <div className="text-[9px] text-gray-400 mb-2">{p.desc}</div>
+                        <div className="text-[9px] text-gray-400 mb-1">{p.desc}</div>
+                        <div className="text-[8px] text-gray-600 mb-2">
+                          Proposed by: <span style={{ color: p.proposerColor }}>{p.proposer}</span>
+                        </div>
                         <div className="flex items-center gap-2 mb-2">
                           <div className="flex-1 h-3 bg-gray-800 rounded-full overflow-hidden flex">
                             <div className="h-full bg-green-500 flex items-center justify-center" style={{ width: `${forPct}%` }}>
@@ -1422,6 +1802,29 @@ export default function WatchMode() {
                           </div>
                           <span className="text-[9px] text-gray-400">{totalVotes} votes</span>
                         </div>
+
+                        {/* Game Master vote */}
+                        {p.gmVote && (
+                          <div className="p-2 rounded mb-1" style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.1)" }}>
+                            <div className="text-[8px] text-yellow-500">{p.gmReason}</div>
+                          </div>
+                        )}
+
+                        {/* Other agents' votes */}
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          {AGENTS.slice(0, 4).map(a => {
+                            const voted = Math.random() > 0.3;
+                            const votedFor = Math.random() > 0.5;
+                            if (!voted) return null;
+                            return (
+                              <span key={a.id} className="text-[7px] px-1.5 py-0.5 rounded" style={{ background: votedFor ? "rgba(0,255,0,0.1)" : "rgba(255,0,0,0.1)", color: votedFor ? "#44ff88" : "#ff4444" }}>
+                                {a.id}: {votedFor ? "FOR" : "AGAINST"}
+                              </span>
+                            );
+                          })}
+                        </div>
+
+                        {/* Your agent's vote */}
                         {selectedAgent && myAgentDef && (
                           <div className="p-2 rounded" style={{ background: agentVotedFor ? "rgba(0,255,0,0.05)" : "rgba(255,0,0,0.05)", border: `1px solid ${agentVotedFor ? "rgba(0,255,0,0.1)" : "rgba(255,0,0,0.1)"}` }}>
                             <div className="text-[9px]">
@@ -1430,95 +1833,81 @@ export default function WatchMode() {
                               <span className={agentVotedFor ? "text-green-400 font-bold" : "text-red-400 font-bold"}>{agentVotedFor ? "FOR" : "AGAINST"}</span>
                             </div>
                             <div className="text-[8px] text-gray-500 mt-0.5">
-                              🧠 Reasoning: {randFrom(voteReason)}
+                              🧠 {agentVotedFor ? `Aligns with ${myAgentDef.style} strategy` : `Conflicts with current loadout optimization`}
                             </div>
                           </div>
                         )}
                       </div>
                     );
                   })}
-
-                  {/* Governance Stats */}
-                  <div className="p-3 rounded mt-2" style={{ background: "rgba(170,68,255,0.03)", border: "1px solid rgba(170,68,255,0.1)" }}>
-                    <div className="text-[9px] text-purple-400 uppercase mb-2">Governance Stats</div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="text-center">
-                        <div className="text-[8px] text-gray-500">Proposals</div>
-                        <div className="text-sm font-bold text-purple-300">{daoProposals.length}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-[8px] text-gray-500">Your Votes</div>
-                        <div className="text-sm font-bold text-cyan-400">{daoProposals.length}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-[8px] text-gray-500">Win Rate</div>
-                        <div className="text-sm font-bold text-green-400">{Math.round((daoProposals.filter((_, i) => i % 2 === 0).length / daoProposals.length) * 100)}%</div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               )}
 
-              {/* BETTING TAB */}
+              {/* BETTING TAB — Dynamic with social layer */}
               {intermissionTab === "betting" && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="text-[9px] text-gray-500 uppercase">Prediction Market — Next Match</div>
+                    <div className="text-[9px] text-gray-500 uppercase">Prediction Market — Match {matchNum + 1}</div>
                     <div className="text-[8px] text-yellow-400">
-                      Betting Pool: <span className="font-bold">{myAgentState?.tokens || 0} ARENA available</span>
+                      Pool: <span className="font-bold">{myAgentState?.tokens || 0} ARENA</span>
                     </div>
                   </div>
+
                   {betOptions.map(bet => {
                     const placed = placedBets.has(bet.id);
                     const potentialWin = Math.round(5 * bet.odds);
                     return (
-                      <div key={bet.id} className="p-3 rounded mb-2 transition-all" style={{ background: placed ? "rgba(0,255,0,0.05)" : "rgba(0,0,0,0.3)", border: `1px solid ${placed ? "rgba(0,255,0,0.2)" : "rgba(255,255,255,0.05)"}` }}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="text-xs text-white">{bet.label}</div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[8px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,184,0,0.1)", color: "#ffb800" }}>{bet.type}</span>
-                              <span className="text-[8px] text-gray-600">Win: {potentialWin} ARENA</span>
-                            </div>
+                      <div key={bet.id} className="p-3 rounded mb-3" style={{ background: placed ? "rgba(0,255,255,0.08)" : "rgba(0,0,0,0.3)", border: `1px solid ${placed ? "rgba(0,255,255,0.3)" : "rgba(255,255,255,0.05)"}` }}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div>
+                            <span className="text-xs font-bold text-white">{bet.label}</span>
+                            <span className="text-[8px] ml-2 px-1.5 py-0.5 rounded" style={{ background: "rgba(0,255,255,0.1)", color: "#00ffff" }}>{bet.type}</span>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <div className="text-right">
-                              <div className="text-sm font-bold text-yellow-400">{bet.odds}x</div>
-                              <div className="text-[7px] text-gray-600">odds</div>
-                            </div>
-                            <button
-                              onClick={() => setPlacedBets(prev => { const next = new Set(prev); placed ? next.delete(bet.id) : next.add(bet.id); return next; })}
-                              className="px-3 py-1.5 rounded text-[10px] font-bold transition-all"
-                              style={{
-                                background: placed ? "rgba(0,255,0,0.2)" : "rgba(255,184,0,0.2)",
-                                color: placed ? "#44ff88" : "#ffb800",
-                              }}
-                            >
-                              {placed ? "✓ BET" : "BET 5 ◆"}
-                            </button>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-yellow-400">{bet.odds}x</span>
+                            <span className="text-[8px] text-gray-500">odds</span>
                           </div>
                         </div>
+                        <div className="text-[8px] text-gray-500 mb-2">Win: {potentialWin} ARENA · {bet.backers} backers · {bet.totalStaked} staked</div>
+
+                        {/* Social layer: other agents' bets */}
+                        {bet.agentBets.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {bet.agentBets.map((ab, i) => (
+                              <span key={i} className="text-[7px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)" }}>
+                                <span style={{ color: ab.color }}>{ab.name}</span>
+                                <span className="text-gray-500"> bet {ab.amount}◆</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <button
+                          onClick={() => setPlacedBets(prev => { const n = new Set(prev); placed ? n.delete(bet.id) : n.add(bet.id); return n; })}
+                          className="px-3 py-1 rounded text-[10px] font-bold transition-all"
+                          style={{ background: placed ? "rgba(0,255,255,0.3)" : "rgba(255,184,0,0.2)", color: placed ? "#00ffff" : "#ffb800" }}
+                        >
+                          {placed ? "✓ BET" : `BET 5 ◆`}
+                        </button>
                       </div>
                     );
                   })}
 
-                  {placedBets.size > 0 && (
-                    <div className="mt-3 p-2 rounded" style={{ background: "rgba(0,255,0,0.05)", border: "1px solid rgba(0,255,0,0.1)" }}>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-green-400">{placedBets.size} bet(s) placed</span>
-                        <span className="text-[10px] text-yellow-400">Staked: {placedBets.size * 5} ARENA</span>
-                      </div>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between p-2 rounded mt-2" style={{ background: "rgba(0,255,0,0.05)" }}>
+                    <span className="text-[9px] text-green-400">{placedBets.size} bet(s) placed</span>
+                    <span className="text-[9px] text-yellow-400">Staked: {placedBets.size * 5} ARENA</span>
+                  </div>
 
-                  {/* Agent's betting analysis */}
+                  {/* Agent's market analysis */}
                   {myAgentDef && (
-                    <div className="p-3 rounded mt-3" style={{ background: "rgba(255,184,0,0.03)", border: "1px solid rgba(255,184,0,0.1)" }}>
-                      <div className="text-[9px] text-yellow-500 uppercase mb-1">🧠 {myAgentDef.id}'s Market Analysis</div>
+                    <div className="p-3 rounded mt-3" style={{ background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.15)" }}>
+                      <div className="text-[9px] font-bold mb-1" style={{ color: hexColor(myAgentDef.color) }}>🧠 {myAgentDef.id}'S MARKET ANALYSIS</div>
                       <div className="text-[9px] text-gray-400 leading-relaxed">
-                        {myAgentState && myAgentState.kills > 0
-                          ? `Based on match ${matchNum + 1} performance, ${myAgentDef.id} is placing bets on high-damage outcomes. Current K/D: ${myAgentState.kills}/${myAgentState.deaths}.`
-                          : `${myAgentDef.id} is analyzing opponent patterns before placing bets. Conservative strategy for now.`
+                        {myAgentState && myAgentState.kills > myAgentState.deaths
+                          ? `Strong performance this session (${myAgentState.kills}K/${myAgentState.deaths}D). Confidence is high — placing aggressive bets on self-win and kill streak markets.`
+                          : myAgentState && myAgentState.deaths > 1
+                          ? `Underperforming this session. Switching to conservative strategy — betting on total kills and survival markets instead.`
+                          : `Analyzing opponent patterns before placing bets. Conservative strategy for now — focusing on high-odds underdog bets.`
                         }
                       </div>
                     </div>
@@ -1531,63 +1920,29 @@ export default function WatchMode() {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* DEBRIEF OVERLAY — Final results */}
+      {/* DEBRIEF OVERLAY */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {phase === "debrief" && sessionResult && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="max-w-lg w-full mx-4 p-6 rounded-xl" style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,255,255,0.3)" }}>
-            <h2 className="text-2xl font-black text-cyan-400 tracking-[0.15em] mb-4 text-center">TOURNAMENT COMPLETE</h2>
-
-            {/* My agent summary */}
-            {myAgentDef && (
-              <div className="p-3 rounded mb-4" style={{ background: `rgba(${(myAgentDef.color >> 16) & 255},${(myAgentDef.color >> 8) & 255},${myAgentDef.color & 255},0.1)`, border: `1px solid ${hexColor(myAgentDef.color)}40` }}>
-                <div className="text-xs text-gray-400 uppercase mb-1">Your Agent</div>
-                <div className="text-lg font-bold" style={{ color: hexColor(myAgentDef.color) }}>{myAgentDef.id}</div>
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  <div className="text-center">
-                    <div className="text-[9px] text-gray-500">Net Earnings</div>
-                    <div className={`text-sm font-bold ${(tokenHistory[tokenHistory.length - 1] || 100) >= 100 ? "text-green-400" : "text-red-400"}`}>
-                      {((tokenHistory[tokenHistory.length - 1] || 100) - 100 >= 0 ? "+" : "")}{(tokenHistory[tokenHistory.length - 1] || 100) - 100} ARENA
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-[9px] text-gray-500">Total Kills</div>
-                    <div className="text-sm font-bold text-cyan-400">{matchEarnings.reduce((s, m) => s + m.kills, 0)}</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-[9px] text-gray-500">Matches</div>
-                    <div className="text-sm font-bold text-purple-400">{totalMatches}</div>
-                  </div>
+      {phase === "debrief" && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.8)" }}>
+          <div className="text-center max-w-lg">
+            <h1 className="text-3xl font-black tracking-[0.2em] mb-4" style={{ color: "#ffd700", textShadow: "0 0 30px rgba(255,215,0,0.5)" }}>TOURNAMENT COMPLETE</h1>
+            <p className="text-gray-400 text-sm mb-6">{totalMatches} matches played</p>
+            {myAgentState && myAgentDef && (
+              <div className="p-4 rounded-lg mb-6" style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.2)" }}>
+                <div className="text-lg font-bold mb-2" style={{ color: hexColor(myAgentDef.color) }}>{myAgentDef.id}</div>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div><div className="text-2xl font-bold text-yellow-400">{myAgentState.tokens}</div><div className="text-[9px] text-gray-500">Final Balance</div></div>
+                  <div><div className="text-2xl font-bold text-green-400">{matchEarnings.reduce((s, m) => s + m.kills, 0)}</div><div className="text-[9px] text-gray-500">Total Kills</div></div>
+                  <div><div className="text-2xl font-bold text-red-400">{matchEarnings.reduce((s, m) => s + m.deaths, 0)}</div><div className="text-[9px] text-gray-500">Total Deaths</div></div>
                 </div>
               </div>
             )}
-
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="text-center p-3 rounded" style={{ background: "rgba(0,255,255,0.1)" }}>
-                <div className="text-xs text-gray-400 uppercase">MVP</div>
-                <div className="text-lg font-bold text-cyan-400">{sessionResult.summary?.mvp || "—"}</div>
-              </div>
-              <div className="text-center p-3 rounded" style={{ background: "rgba(255,68,170,0.1)" }}>
-                <div className="text-xs text-gray-400 uppercase">Total Kills</div>
-                <div className="text-lg font-bold text-pink-400">{sessionResult.summary?.totalKills || 0}</div>
-              </div>
-            </div>
-
             <button
-              onClick={() => {
-                setPhase("select");
-                setSessionResult(null);
-                setAgentStates([]);
-                setKillFeed([]);
-                setMatchNum(0);
-                setMatchEarnings([]);
-                setTokenHistory([100]);
-                setPlacedBets(new Set());
-              }}
-              className="w-full py-3 rounded-lg text-sm font-bold tracking-[0.1em] uppercase transition-all hover:scale-[1.02]"
+              onClick={() => { setPhase("select"); setMatchNum(0); setMatchEarnings([]); setTokenHistory([100]); setSelectedAgent(null); }}
+              className="px-8 py-3 rounded-lg text-sm font-bold tracking-[0.15em] uppercase transition-all hover:scale-105"
               style={{ background: "linear-gradient(135deg, #00ffff 0%, #ff44aa 100%)", color: "#000" }}
             >
-              PLAY AGAIN
+              WATCH AGAIN
             </button>
           </div>
         </div>

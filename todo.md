@@ -993,3 +993,37 @@
 - [x] Agent earnings graph showing token balance over time (bar chart)
 - [x] Smooth transitions between all phases with GSAP camera animations
 - [x] WebGL error fallback with graceful reload prompt
+
+## v39 — Enhanced Spectator Experience (Feb 21, 2026)
+
+### Skybox Model 4 Real-Time Generation
+- [x] Review Skybox staging API docs for Model 4 style IDs (17 styles found)
+- [x] Update skybox generation to use Model 4 with correct parameters (8 arena prompts with style IDs 177-188)
+- [x] Generate skyboxes in real-time in the background during gameplay via tRPC skybox.generate + poll
+- [x] New skybox ready for each match transition (falls back to CDN if generation pending)
+
+### Tiered Arena Platforms (Roblox RIVALS style)
+- [x] 13 tiered platforms at different heights (0.2-1.8 units)
+- [x] Agents move around platforms during combat
+- [x] Cover walls for agents to hide behind (tall thin platforms)
+- [x] Visual variety: different sizes, neon edge colors, glowing top surfaces
+
+### Dynamic Action Camera
+- [x] Camera follows the action during combat (tracks focused agent)
+- [x] Zoom-in on kills (camera shake + zoom to killer for 3 seconds)
+- [x] Dynamic zoom based on alive count (closer with fewer agents)
+- [x] Smooth lerp camera target tracking
+- [x] GSAP-powered smooth camera transitions between angles
+
+### Dynamic Betting with Social Layer
+- [x] Bets regenerated every match based on K/D, HP, token balance
+- [x] Show how OTHER agents are betting (social betting tags per bet)
+- [x] Backer count and total staked shown per bet
+- [x] 7 bet types: winner, total kills, survival, first blood, underdog, streak, prop
+- [x] Dynamic odds calculated from agent performance history
+
+### Game Master DAO Integration
+- [x] 3 Game Master agents: ARBITER (rules), ORACLE (economy), SENTINEL (arena)
+- [x] Game Masters propose arena modifiers, weapon balance, economic changes
+- [x] Game Master votes shown with reasoning in DAO tab (weighted votes)
+- [x] Game Master commentary in arena chat between matches
