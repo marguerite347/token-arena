@@ -1163,3 +1163,15 @@
 - [x] Show all 9 deployed contracts with BaseScan links (ARENA, PredictionMarket, DAO, weapons, deployer)
 - [x] Show all 6 agent smart wallets with BaseScan links
 - [x] Keep protocol names (Uniswap AI SDK, x402, OpenSea, DAO) framed as on-chain activity
+
+## Skybox AI + Platform Physics Fixes
+
+- [x] Wire real-time Skybox AI Model 4 panoramas into the 3D arena as actual background
+- [x] Fixed skybox loading timing: use refs for reliable access to generated URLs
+- [x] Agents now see and use generated skybox as the arena environment
+- [x] Added platform collision physics — agents jump on/off platforms with arc trajectories
+- [x] Agents collide with arena geometry (walls block movement, platforms change elevation)
+- [x] Platform-aware movement (agents stand on platforms at correct Y height)
+- [x] Extracted PLATFORM_CONFIGS to module-level for collision detection
+- [x] Added getGroundHeight() and collidesWithWall() functions
+- [x] Jump arc animation with bounce.out easing for landing

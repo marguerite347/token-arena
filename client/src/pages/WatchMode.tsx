@@ -390,7 +390,66 @@ function createAgentMesh(shape: string, color: number, emissive: number, scale: 
   return group;
 }
 
-// ─── Arena platforms factory (Roblox RIVALS style) ──────────────────────────
+// ─── Platform configs (module-level for collision detection) ──────────────────
+interface PlatformConfig {
+  x: number; z: number; y: number; w: number; h: number; d: number; edgeColor: number;
+}
+const PLATFORM_CONFIGS: PlatformConfig[] = [
+  // Center raised platform
+  { x: 0, z: 0, y: 0.4, w: 2.5, h: 0.4, d: 2.5, edgeColor: 0x00ffff },
+  // Inner ring — medium height
+  { x: 3, z: 0, y: 0.8, w: 1.8, h: 0.3, d: 1.5, edgeColor: 0xff44aa },
+  { x: -3, z: 0, y: 0.6, w: 1.5, h: 0.3, d: 1.8, edgeColor: 0xaa44ff },
+  { x: 0, z: 3, y: 1.0, w: 1.5, h: 0.3, d: 1.5, edgeColor: 0x44ff88 },
+  { x: 0, z: -3, y: 0.5, w: 2.0, h: 0.3, d: 1.2, edgeColor: 0xff8800 },
+  // Outer ring — higher platforms for sniping
+  { x: 4.5, z: 3, y: 1.5, w: 1.2, h: 0.25, d: 1.2, edgeColor: 0x00ffff },
+  { x: -4.5, z: -3, y: 1.8, w: 1.0, h: 0.25, d: 1.0, edgeColor: 0xff44aa },
+  { x: -4, z: 3.5, y: 1.2, w: 1.3, h: 0.25, d: 1.3, edgeColor: 0xaa44ff },
+  { x: 4, z: -3.5, y: 1.4, w: 1.1, h: 0.25, d: 1.4, edgeColor: 0x44ffdd },
+  // Ramps / connecting pieces
+  { x: 1.5, z: 1.5, y: 0.2, w: 1.0, h: 0.15, d: 2.0, edgeColor: 0x4488ff },
+  { x: -1.5, z: -1.5, y: 0.3, w: 2.0, h: 0.15, d: 1.0, edgeColor: 0x4488ff },
+  // Cover walls (tall thin platforms) — excluded from ground collision (too narrow/tall)
+  { x: 2, z: -1.5, y: 0.0, w: 0.2, h: 1.2, d: 1.5, edgeColor: 0x00ffff },
+  { x: -2, z: 1.5, y: 0.0, w: 1.5, h: 1.0, d: 0.2, edgeColor: 0xff44aa },
+];
+
+// ─── Platform collision: get ground height at (x, z) ──────────────────────
+function getGroundHeight(px: number, pz: number): number {
+  let maxY = 0; // default ground level
+  for (const p of PLATFORM_CONFIGS) {
+    // Skip cover walls (too narrow to stand on)
+    if (p.w < 0.5 || p.d < 0.5) continue;
+    const halfW = p.w / 2;
+    const halfD = p.d / 2;
+    // Check if point is within platform bounds (AABB)
+    if (px >= p.x - halfW && px <= p.x + halfW && pz >= p.z - halfD && pz <= p.z + halfD) {
+      const topY = p.y + p.h / 2;
+      if (topY > maxY) maxY = topY;
+    }
+  }
+  return maxY;
+}
+
+// Check if moving from (x1,z1) to (x2,z2) would collide with a wall
+function collidesWithWall(x1: number, z1: number, x2: number, z2: number): boolean {
+  for (const p of PLATFORM_CONFIGS) {
+    // Only check walls (narrow objects)
+    if (p.w >= 0.5 && p.d >= 0.5) continue;
+    const halfW = p.w / 2 + 0.3; // agent radius padding
+    const halfD = p.d / 2 + 0.3;
+    const topY = p.y + p.h;
+    // Only block if wall is tall enough
+    if (topY < 0.5) continue;
+    if (x2 >= p.x - halfW && x2 <= p.x + halfW && z2 >= p.z - halfD && z2 <= p.z + halfD) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// ─── Arena platforms factory (Roblox RIVALS style) ──────────────────────────────
 function createArenaPlatforms(scene: THREE.Scene): THREE.Group {
   const platforms = new THREE.Group();
   const platformMat = new THREE.MeshStandardMaterial({
@@ -398,27 +457,7 @@ function createArenaPlatforms(scene: THREE.Scene): THREE.Group {
   });
   const edgeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.4 });
 
-  // Platform layout: tiered hexagonal platforms at different heights
-  const platformConfigs = [
-    // Center raised platform
-    { x: 0, z: 0, y: 0.4, w: 2.5, h: 0.4, d: 2.5, edgeColor: 0x00ffff },
-    // Inner ring — medium height
-    { x: 3, z: 0, y: 0.8, w: 1.8, h: 0.3, d: 1.5, edgeColor: 0xff44aa },
-    { x: -3, z: 0, y: 0.6, w: 1.5, h: 0.3, d: 1.8, edgeColor: 0xaa44ff },
-    { x: 0, z: 3, y: 1.0, w: 1.5, h: 0.3, d: 1.5, edgeColor: 0x44ff88 },
-    { x: 0, z: -3, y: 0.5, w: 2.0, h: 0.3, d: 1.2, edgeColor: 0xff8800 },
-    // Outer ring — higher platforms for sniping
-    { x: 4.5, z: 3, y: 1.5, w: 1.2, h: 0.25, d: 1.2, edgeColor: 0x00ffff },
-    { x: -4.5, z: -3, y: 1.8, w: 1.0, h: 0.25, d: 1.0, edgeColor: 0xff44aa },
-    { x: -4, z: 3.5, y: 1.2, w: 1.3, h: 0.25, d: 1.3, edgeColor: 0xaa44ff },
-    { x: 4, z: -3.5, y: 1.4, w: 1.1, h: 0.25, d: 1.4, edgeColor: 0x44ffdd },
-    // Ramps / connecting pieces
-    { x: 1.5, z: 1.5, y: 0.2, w: 1.0, h: 0.15, d: 2.0, edgeColor: 0x4488ff },
-    { x: -1.5, z: -1.5, y: 0.3, w: 2.0, h: 0.15, d: 1.0, edgeColor: 0x4488ff },
-    // Cover walls (tall thin platforms)
-    { x: 2, z: -1.5, y: 0.0, w: 0.2, h: 1.2, d: 1.5, edgeColor: 0x00ffff },
-    { x: -2, z: 1.5, y: 0.0, w: 1.5, h: 1.0, d: 0.2, edgeColor: 0xff44aa },
-  ];
+  const platformConfigs = PLATFORM_CONFIGS;
 
   platformConfigs.forEach(cfg => {
     // Platform body
@@ -641,6 +680,8 @@ export default function WatchMode() {
   const [nextSkyboxUrl, setNextSkyboxUrl] = useState<string | null>(null);
   const [nextSkyboxName, setNextSkyboxName] = useState<string>("");
   const skyboxPollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const nextSkyboxUrlRef = useRef<string | null>(null);
+  const nextSkyboxNameRef = useRef<string>("");
 
   const termRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
@@ -682,6 +723,8 @@ export default function WatchMode() {
           if (data.fileUrl) {
             // Already complete
             setNextSkyboxUrl(data.fileUrl);
+            nextSkyboxUrlRef.current = data.fileUrl;
+            nextSkyboxNameRef.current = arenaPrompt.name;
             setSkyboxGenerating(false);
             pushTerminal("system", `[SKYBOX] "${arenaPrompt.name}" ready!`);
           } else if (data.id) {
@@ -702,6 +745,8 @@ export default function WatchMode() {
                 if (result?.status === "complete" && result?.fileUrl) {
                   if (skyboxPollIntervalRef.current) clearInterval(skyboxPollIntervalRef.current);
                   setNextSkyboxUrl(result.fileUrl);
+                  nextSkyboxUrlRef.current = result.fileUrl;
+                  nextSkyboxNameRef.current = arenaPrompt.name;
                   setSkyboxGenerating(false);
                   pushTerminal("system", `[SKYBOX] "${arenaPrompt.name}" generated! Ready for next match.`);
                 }
@@ -726,14 +771,23 @@ export default function WatchMode() {
     if (url) {
       chosenUrl = url;
       chosenName = name || "Generated Arena";
+    } else if (nextSkyboxUrlRef.current) {
+      // Use ref for reliable access (state may be stale in callback)
+      chosenUrl = nextSkyboxUrlRef.current;
+      chosenName = nextSkyboxNameRef.current || "Generated Arena";
+      nextSkyboxUrlRef.current = null; // consume it
+      setNextSkyboxUrl(null);
+      pushTerminal("system", `[SKYBOX] Loading AI-generated arena: "${chosenName}"`);
     } else if (nextSkyboxUrl) {
       chosenUrl = nextSkyboxUrl;
       chosenName = nextSkyboxName || "Generated Arena";
       setNextSkyboxUrl(null); // consume it
+      pushTerminal("system", `[SKYBOX] Loading AI-generated arena: "${chosenName}"`);
     } else {
       const fallback = FALLBACK_PANORAMAS[Math.floor(Math.random() * FALLBACK_PANORAMAS.length)];
       chosenUrl = fallback.url;
       chosenName = fallback.name;
+      pushTerminal("system", `[SKYBOX] Using pre-rendered arena: "${chosenName}" (AI generation pending)`);
     }
 
     setArenaName(chosenName);
@@ -1227,7 +1281,10 @@ export default function WatchMode() {
       const mesh = createAgentMesh(agent.shape, agent.color, agent.emissive, agent.scale);
       const angle = (i / AGENTS.length) * Math.PI * 2;
       const radius = 4;
-      mesh.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+      const spawnX = Math.cos(angle) * radius;
+      const spawnZ = Math.sin(angle) * radius;
+      const groundY = getGroundHeight(spawnX, spawnZ);
+      mesh.position.set(spawnX, groundY, spawnZ);
       mesh.lookAt(0, 0, 0);
       const label = createNameLabel(agent.id, agent.color);
       mesh.add(label);
@@ -1293,9 +1350,29 @@ export default function WatchMode() {
         const newZ = mesh.position.z + Math.sin(moveAngle) * moveDist;
         const distFromCenter = Math.sqrt(newX * newX + newZ * newZ);
 
-        if (distFromCenter < 6.5) {
-          gsap.to(mesh.position, { x: newX, z: newZ, duration: 0.8, ease: "power1.out" });
-          const lookTarget = new THREE.Vector3(newX + Math.cos(moveAngle), 0, newZ + Math.sin(moveAngle));
+        if (distFromCenter < 6.5 && !collidesWithWall(mesh.position.x, mesh.position.z, newX, newZ)) {
+          const targetY = getGroundHeight(newX, newZ);
+          const currentY = mesh.position.y;
+          const heightDiff = Math.abs(targetY - currentY);
+
+          if (heightDiff > 0.05) {
+            // Jumping up or landing down — arc trajectory
+            const jumpPeakY = Math.max(currentY, targetY) + 0.6;
+            gsap.to(mesh.position, {
+              x: newX, z: newZ, duration: 0.8, ease: "power1.out",
+            });
+            // Jump arc: up then down
+            gsap.to(mesh.position, {
+              y: jumpPeakY, duration: 0.35, ease: "power2.out",
+              onComplete: () => {
+                gsap.to(mesh.position, { y: targetY, duration: 0.35, ease: "bounce.out" });
+              },
+            });
+          } else {
+            // Same level — smooth slide
+            gsap.to(mesh.position, { x: newX, y: targetY, z: newZ, duration: 0.8, ease: "power1.out" });
+          }
+          const lookTarget = new THREE.Vector3(newX + Math.cos(moveAngle), targetY, newZ + Math.sin(moveAngle));
           mesh.lookAt(lookTarget);
         }
       });
