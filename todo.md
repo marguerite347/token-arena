@@ -795,15 +795,24 @@
 - [ ] Checkpoint and deploy
 
 ## v31 — Base Mainnet Deployment & ERC-8021 Builder Codes ($10K Bounty)
-- [ ] Research ERC-8021 builder codes on base.dev
-- [ ] Prepare deployment scripts for Base mainnet (chain ID 8453)
-- [ ] Deploy ARENA token to Base mainnet
-- [ ] Deploy 6 weapon tokens (PLAS, RAIL, SCAT, RCKT, BEAM, VOID) to Base mainnet
-- [ ] Deploy PredictionMarket contract to Base mainnet
-- [ ] Deploy TokenArenaDAO contract to Base mainnet
-- [ ] Verify all 9 contracts on basescan.org
+- [x] Research ERC-8021 builder codes on base.dev
+- [x] Prepare deployment scripts for Base mainnet (chain ID 8453)
+- [x] Deploy ARENA token to Base mainnet
+- [x] Deploy 6 weapon tokens (PLAS, RAIL, SCAT, RCKT, BEAM, VOID) to Base mainnet
+- [x] Deploy PredictionMarket contract to Base mainnet
+- [x] Deploy TokenArenaDAO contract to Base mainnet
+- [x] Verify all 9/9 contracts on basescan.org
 - [x] Integrate ERC-8021 builder codes into transaction flows
-- [ ] Update app to support both testnet and mainnet
-- [ ] Update shared/web3.ts with mainnet contract addresses
+- [x] Update app to support both testnet and mainnet
+- [x] Update shared/web3.ts with mainnet contract addresses
 - [x] Update README with mainnet contract addresses
-- [ ] Run tests and checkpoint
+- [x] Run tests and checkpoint
+
+## v32 — ETHDenver Submission (Deadline: Feb 21, 2026 8:00 AM MST)
+- [x] Diagnose Skybox API (staging endpoint 403 issue) — staging works, prod key scoped to staging only
+- [x] Diagnose vision LLM scene graph generation — working
+- [x] Fix any broken integrations — no fixes needed, all healthy
+- [ ] Publish app to get stable public URL
+- [x] Write Devfolio submission document (title, tagline, description, bounties)
+- [x] Create demo video script/storyboard
+- [ ] Deliver all materials to user
