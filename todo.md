@@ -1149,3 +1149,9 @@
 - [x] Enhanced uniswap.config to show SDK version and routing types
 - [x] Write vitest tests for SDK integration (15 tests passing)
 - [x] Checkpoint and deliver
+
+## Bug Fixes
+
+- [x] Fix "1 error" badge on agent selection screen (ConnectModal + React 19 zustand issue)
+- [x] Skip WalletProvider on /watch route (WatchMode uses its own agent wallet display)
+- [x] WebGL error is sandbox-only (no GPU) — real browsers unaffected, error handling already in place

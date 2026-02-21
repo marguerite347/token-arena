@@ -27,6 +27,7 @@ import WatchMode from "./pages/WatchMode";
 import { GameProvider } from "./contexts/GameContext";
 import { LiveBettingTicker } from "./components/LiveBettingTicker";
 import { useLocation } from "wouter";
+import { type ReactNode } from "react";
 
 function Router() {
   return (
@@ -56,13 +57,30 @@ function Router() {
   );
 }
 
+/**
+ * Conditionally wraps children in WalletProvider.
+ * WatchMode has its own wallet display (agent wallets) and doesn't need
+ * RainbowKit's ConnectModal, which causes a known React 19 zustand
+ * state-during-render warning. Skip it on /watch to avoid the error overlay.
+ */
+function ConditionalWalletProvider({ children }: { children: ReactNode }) {
+  const [location] = useLocation();
+  const isWatchMode = location === "/watch";
+
+  if (isWatchMode) {
+    return <>{children}</>;
+  }
+
+  return <WalletProvider>{children}</WalletProvider>;
+}
+
 function App() {
   const [location] = useLocation();
   const isWatchMode = location === "/watch";
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <WalletProvider>
+        <ConditionalWalletProvider>
           <GameProvider>
             <TooltipProvider>
               <Toaster />
@@ -70,7 +88,7 @@ function App() {
               <Router />
             </TooltipProvider>
           </GameProvider>
-        </WalletProvider>
+        </ConditionalWalletProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
