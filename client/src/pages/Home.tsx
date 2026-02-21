@@ -394,13 +394,13 @@ export default function Home() {
                 <span className="text-[9px] font-mono px-2 py-0.5 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20">3 VIDEOS</span>
               </div>
               <p className="text-xs font-mono text-muted-foreground mb-6">
-                Auto-generated MP4 recaps from real match replay data showing agent positions, LLM reasoning, kill events, and token economics.
+                Auto-generated MP4 recaps with Blockade Labs Skybox Model 4 panoramic backgrounds. Real match replay data showing agent positions, LLM reasoning, kill events, and token economics overlaid on immersive 3D arenas.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/tGuHnJFZHrcBLgGF.mp4", title: "PHANTOM vs NEXUS-7", subtitle: "GPT-4o vs Claude 3.5", badge: "GPT-4o WINS", color: "#ff3366", kills: 3 },
-                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/lleHkBUeYgoCgHGH.mp4", title: "PHANTOM vs NEXUS-7", subtitle: "GPT-4o vs Claude 3.5", badge: "REMATCH", color: "#00f0ff", kills: 3 },
-                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/SuNsKWuevUYgoDRn.mp4", title: "TITAN vs PHANTOM", subtitle: "Llama 3.1 70B vs GPT-4o", badge: "LLAMA WINS", color: "#ff9900", kills: 3 },
+                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/tqduqhjELAbvjNmE.mp4", title: "PHANTOM vs NEXUS-7", subtitle: "GPT-4o vs Claude 3.5 · Skybox M4 Cyberpunk", badge: "GPT-4o WINS", color: "#ff3366", kills: 3 },
+                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/deAxTwaQZhvTAIcz.mp4", title: "PHANTOM vs NEXUS-7", subtitle: "GPT-4o vs Claude 3.5 · Skybox M4 Digital Void", badge: "REMATCH", color: "#00f0ff", kills: 3 },
+                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/NmIMWwYbEbmnHrQH.mp4", title: "TITAN vs PHANTOM", subtitle: "Llama 3.1 70B vs GPT-4o · Skybox M4 Crypto Wasteland", badge: "LLAMA WINS", color: "#ff9900", kills: 3 },
                 ].map((video, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="hud-panel clip-brutal overflow-hidden">
                     <div className="relative">

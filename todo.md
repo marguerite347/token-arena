@@ -816,3 +816,6 @@
 - [x] Write Devfolio submission document (title, tagline, description, bounties)
 - [x] Create demo video script/storyboard
 - [ ] Deliver all materials to user
+- [x] Re-render battle recap videos with Skybox Model 4 panoramic backgrounds
+- [x] Fetch/generate Skybox images from Blockade Labs staging API (3 M4 styles: Cyberpunk, UE Render, SciFi B)
+- [x] Upload new videos to CDN and update Home.tsx references
