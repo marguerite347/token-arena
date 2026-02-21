@@ -812,10 +812,14 @@
 - [x] Diagnose Skybox API (staging endpoint 403 issue) — staging works, prod key scoped to staging only
 - [x] Diagnose vision LLM scene graph generation — working
 - [x] Fix any broken integrations — no fixes needed, all healthy
+- [x] Add OpenSea API integration for memory NFT marketplace
+- [x] Create NFT display components for memory market
+- [x] Wire OpenSea API into memory market and auction pages
+- [x] Test NFT display and marketplace features (tRPC endpoints + React component)
 - [ ] Publish app to get stable public URL
 - [x] Write Devfolio submission document (title, tagline, description, bounties)
 - [x] Create demo video script/storyboard
-- [ ] Deliver all materials to user
+- [x] Deliver all materials to user
 - [x] Re-render battle recap videos with Skybox Model 4 panoramic backgrounds
 - [x] Fetch/generate Skybox images from Blockade Labs staging API (3 M4 styles: Cyberpunk, UE Render, SciFi B)
 - [x] Upload new videos to CDN and update Home.tsx references

@@ -1327,6 +1327,34 @@ export const appRouter = router({
       return { briefing };
     }),
   }),
+  nft: router({
+    collection: publicProcedure.query(async () => {
+      const { getMemoryNFTCollection } = await import("./openSeaService");
+      return getMemoryNFTCollection();
+    }),
+    listings: publicProcedure
+      .input(z.object({ limit: z.number().default(20), offset: z.number().default(0) }).optional())
+      .query(async ({ input }) => {
+        const { getMemoryNFTListings } = await import("./openSeaService");
+        return getMemoryNFTListings(input?.limit ?? 20, input?.offset ?? 0);
+      }),
+    search: publicProcedure
+      .input(z.object({ query: z.string(), limit: z.number().default(10) }))
+      .query(async ({ input }) => {
+        const { searchMemoryNFTs } = await import("./openSeaService");
+        return searchMemoryNFTs(input.query, input.limit);
+      }),
+    stats: publicProcedure.query(async () => {
+      const { getMemoryNFTStats } = await import("./openSeaService");
+      return getMemoryNFTStats();
+    }),
+    offers: publicProcedure
+      .input(z.object({ contractAddress: z.string(), tokenId: z.string() }))
+      .query(async ({ input }) => {
+        const { getNFTOffers } = await import("./openSeaService");
+        return getNFTOffers(input.contractAddress, input.tokenId);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
