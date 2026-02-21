@@ -1,0 +1,30 @@
+{
+  "query": "SELECT id, fileUrl FROM skybox_cache WHERE status = 'complete'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT id, fileUrl FROM skybox_cache WHERE status = 'complete'",
+  "rows": [
+    {
+      "id": "4",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg_A_colossal_cyberpunk_arena_8223941509_14997657.jpg?ver=1"
+    },
+    {
+      "id": "5",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangular-jpg_In_a_post-apocalyptic_desert_9623416410_14997659.jpg?ver=1"
+    },
+    {
+      "id": "6",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular-jpg_A_digital_void_space_9983137796_14997660.jpg?ver=1"
+    },
+    {
+      "id": "7",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangular-jpg_An_expansive_hangar_bay_3592434325_14997661.jpg?ver=1"
+    },
+    {
+      "id": "8",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangular-jpg_An_otherworldly_arena_pulsates_9142454532_14997662.jpg?ver=1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfileUrl\n4\thttps://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg_A_colossal_cyberpunk_arena_8223941509_14997657.jpg?ver=1\n5\thttps://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangular-jpg_In_a_post-apocalyptic_desert_9623416410_14997659.jpg?ver=1\n6\thttps://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular-jpg_A_digital_void_space_9983137796_14997660.jpg?ver=1\n7\thttps://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangular-jpg_An_expansive_hangar_bay_3592434325_14997661.jpg?ver=1\n8\thttps://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangular-jpg_An_otherworldly_arena_pulsates_9142454532_14997662.jpg?ver=1\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

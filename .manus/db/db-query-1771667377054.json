@@ -1,0 +1,14 @@
+{
+  "query": "SELECT COUNT(*) as total, SUM(CASE WHEN fileUrl IS NOT NULL AND fileUrl != '' THEN 1 ELSE 0 END) as with_url FROM skybox_cache WHERE status IN ('complete','completed');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT COUNT(*) as total, SUM(CASE WHEN fileUrl IS NOT NULL AND fileUrl != '' THEN 1 ELSE 0 END) as with_url FROM skybox_cache WHERE status IN ('complete','completed');",
+  "rows": [
+    {
+      "total": "244",
+      "with_url": "244"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\twith_url\n244\t244\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

@@ -1,0 +1,80 @@
+{
+  "query": "SELECT id, styleId, status, fileUrl, thumbUrl FROM skybox_cache WHERE fileUrl IS NOT NULL AND fileUrl != '' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT id, styleId, status, fileUrl, thumbUrl FROM skybox_cache WHERE fileUrl IS NOT NULL AND fileUrl != '' LIMIT 10;",
+  "rows": [
+    {
+      "id": "4",
+      "styleId": "89",
+      "status": "complete",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg_A_colossal_cyberpunk_arena_8223941509_14997657.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Open_World_thumb_A_colossal_cyberpunk_arena_9769470054_14997657.jpg?ver=1"
+    },
+    {
+      "id": "5",
+      "styleId": "146",
+      "status": "complete",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangular-jpg_In_a_post-apocalyptic_desert_9623416410_14997659.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Dystopian_Render_thumb_In_a_post-apocalyptic_desert_3987181233_14997659.jpg?ver=1"
+    },
+    {
+      "id": "6",
+      "styleId": "148",
+      "status": "complete",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular-jpg_A_digital_void_space_9983137796_14997660.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Concept_Render_thumb_A_digital_void_space_4394547232_14997660.jpg?ver=1"
+    },
+    {
+      "id": "7",
+      "styleId": "147",
+      "status": "complete",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangular-jpg_An_expansive_hangar_bay_3592434325_14997661.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Detailed_Render_thumb_An_expansive_hangar_bay_5509285494_14997661.jpg?ver=1"
+    },
+    {
+      "id": "8",
+      "styleId": "93",
+      "status": "complete",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangular-jpg_An_otherworldly_arena_pulsates_9142454532_14997662.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Scifi_Concept_Art_thumb_An_otherworldly_arena_pulsates_4106538377_14997662.jpg?ver=1"
+    },
+    {
+      "id": "30001",
+      "styleId": "188",
+      "status": "completed",
+      "fileUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_Cyberpunk_equirectangular-jpg_In_the_heart_of_2349681710_461051.jpg?ver=1",
+      "thumbUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_Cyberpunk_equirectangular-jpg_In_the_heart_of_2349681710_461051.jpg?ver=1"
+    },
+    {
+      "id": "30002",
+      "styleId": "177",
+      "status": "completed",
+      "fileUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirectangular-jpg_A_colossal_cyberpunk_colosseum_4786860318_461052.jpg?ver=1",
+      "thumbUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirectangular-jpg_A_colossal_cyberpunk_colosseum_4786860318_461052.jpg?ver=1"
+    },
+    {
+      "id": "30003",
+      "styleId": "178",
+      "status": "completed",
+      "fileUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirectangular-jpg_Ruined_blockchain_server_towers_3827485551_461053.jpg?ver=1",
+      "thumbUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirectangular-jpg_Ruined_blockchain_server_towers_3827485551_461053.jpg?ver=1"
+    },
+    {
+      "id": "30004",
+      "styleId": "186",
+      "status": "completed",
+      "fileUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_In_a_vast_digital_2709806722_461054.jpg?ver=1",
+      "thumbUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_In_a_vast_digital_2709806722_461054.jpg?ver=1"
+    },
+    {
+      "id": "30005",
+      "styleId": "185",
+      "status": "completed",
+      "fileUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_Octane_Render_equirectangular-jpg_Inside_an_immense_hangar_9881111161_461055.jpg?ver=1",
+      "thumbUrl": "https://images-staging.blockadelabs.com/images/imagine/M4_Octane_Render_equirectangular-jpg_Inside_an_immense_hangar_9881111161_461055.jpg?ver=1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstyleId\tstatus\tfileUrl\tthumbUrl\n4\t89\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg_A_colossal_cyberpunk_arena_8223941509_14997657.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Open_World_thumb_A_colossal_cyberpunk_arena_9769470054_14997657.jpg?ver=1\n5\t146\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangular-jpg_In_a_post-apocalyptic_desert_9623416410_14997659.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Dystopian_Render_thumb_In_a_post-apocalyptic_desert_3987181233_14997659.jpg?ver=1\n6\t148\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular-jpg_A_digital_void_space_9983137796_14997660.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Concept_Render_thumb_A_digital_void_space_4394547232_14997660.jpg?ver=1\n7\t147\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangular-jpg_An_expansive_hangar_bay_3592434325_14997661.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Detailed_Render_thumb_An_expansive_hangar_bay_5509285494_14997661.jpg?ver=1\n8\t93\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangular-jpg_An_otherworldly_arena_pulsates_9142454532_14997662.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Scifi_Concept_Art_thumb_An_otherworldly_arena_pulsates_4106538377_14997662.jpg?ver=1\n30001\t188\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_Cyberpunk_equirectangular-jpg_In_the_heart_of_2349681710_461051.jpg?ver=1\thttps://images-staging.blockadelabs.com/images/imagine/M4_Cyberpunk_equirectangular-jpg_In_the_heart_of_2349681710_461051.jpg?ver=1\n30002\t177\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirectangular-jpg_A_colossal_cyberpunk_colosseum_4786860318_461052.jpg?ver=1\thttps://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirectangular-jpg_A_colossal_cyberpunk_colosseum_4786860318_461052.jpg?ver=1\n30003\t178\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirectangular-jpg_Ruined_blockchain_server_towers_3827485551_461053.jpg?ver=1\thttps://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirectangular-jpg_Ruined_blockchain_server_towers_3827485551_461053.jpg?ver=1\n30004\t186\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_In_a_vast_digital_2709806722_461054.jpg?ver=1\thttps://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangular-jpg_In_a_vast_digital_2709806722_461054.jpg?ver=1\n30005\t185\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_Octane_Render_equirectangular-jpg_Inside_an_immense_hangar_9881111161_461055.jpg?ver=1\thttps://images-staging.blockadelabs.com/images/imagine/M4_Octane_Render_equirectangular-jpg_Inside_an_immense_hangar_9881111161_461055.jpg?ver=1\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

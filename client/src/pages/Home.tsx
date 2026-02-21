@@ -1,487 +1,185 @@
 /*
- * Home Page — Landing / Lobby screen for Token Arena
- * Design: Neon Brutalism — dramatic hero with generated images, angular layouts, neon accents
- * Typography: Orbitron display, JetBrains Mono data, Space Grotesk body
+ * Home Page — Spectator-first landing for Token Arena
+ * Minimal: Logo + WATCH CTA + subtle menu for secondary pages
+ * The entire experience funnels into Watch Mode
  */
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
-import { useGame } from "@/contexts/GameContext";
-import { useWallet } from "@/contexts/WalletContext";
-import WalletButton from "@/components/WalletButton";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { Eye, Play, Menu, X, Zap, Swords, Coins, Brain, Trophy, ChevronRight } from "lucide-react";
 
 const HERO_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/7BCFtZ5fWXyj3HdnF9KQB1/sandbox/50QAFITnEfFX4BKquAhRbU-img-1_1771544637000_na1fn_aGVyby1hcmVuYQ.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvN0JDRnRaNWZXWHlqM0hkbkY5S1FCMS9zYW5kYm94LzUwUUFGSVRuRWZGWDRCS3F1QWhSYlUtaW1nLTFfMTc3MTU0NDYzNzAwMF9uYTFmbl9hR1Z5YnkxaGNtVnVZUS5wbmc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=TJ~WUcbAsraZKdAfdrmFDS2528Dwq5OuGQh6CY7cbGSjX7hEq0gt0w1D-xZt5dnwQnZGAN0NRpLd2AGj8QQue7iavJ~jcOiwuI4T2QaF28QfPAMUe3REYvEJ87a9Wehng~hbxIVaYMxk2i6UnSy2kbVhAqCkrMLnqoT0p7UYtAxta46Y-zUhdP3~4MSThcq1pzkP7SOtWzcQQBXD9CD3k9PYdF3nEbKvbc8A7Q0ZAVkSOAEEXszP6kbj9sKXh8zRLJBdXT6~4QNBcCvGIqqN-3wl0gX072AJq73H3qEa8crwa7Blw2fsWHd8a1Mmm8z~f-WBHEXYKij8OYSnBgc4LA__";
 
-const AI_BATTLE_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/7BCFtZ5fWXyj3HdnF9KQB1/sandbox/50QAFITnEfFX4BKquAhRbU-img-3_1771544644000_na1fn_YWktYWdlbnQtYmF0dGxl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvN0JDRnRaNWZXWHlqM0hkbkY5S1FCMS9zYW5kYm94LzUwUUFGSVRuRWZGWDRCS3F1QWhSYlUtaW1nLTNfMTc3MTU0NDY0NDAwMF9uYTFmbl9ZV2t0WVdkbGJuUXRZbUYwZEd4bC5wbmc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=vuQfJpUvOVR3beFfj5e7uLqDoDLjUo4bAUA4WiVAeEU4lkUiA-zle~0sAaW62VCvQqtEhQABrmtr8uNflO~OAKfEH8L5xNN4fqGTtOPKqgSp8ocVRkA8eVooLSxwE-qPiVl9if8-58KF7bK7wFGxqsMJSPY2wWH6qbNkiXm~2CAm64kLPccn-X4EEcbaY-XfFuo6qVBI6Rg1CovhU0b9kL3saVjwueHd2EUAR0LG1xh1sOUiIlFqjzPH8swd78XO7FaZq1~uQtZZikWus5z07FAtxvWE63QVQ5KQ0-jSJIdvfFb1~L~8eDiChLeX0Hsn53rG1IbnjSvSCHKmADb8jg__";
-
-const TOKEN_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/7BCFtZ5fWXyj3HdnF9KQB1/sandbox/50QAFITnEfFX4BKquAhRbU-img-2_1771544649000_na1fn_dG9rZW4tZXhwbG9zaW9u.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvN0JDRnRaNWZXWHlqM0hkbkY5S1FCMS9zYW5kYm94LzUwUUFGSVRuRWZGWDRCS3F1QWhSYlUtaW1nLTJfMTc3MTU0NDY0OTAwMF9uYTFmbl9kRzlyWlc0dFpYaHdiRzl6YVc5dS5wbmc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=ZbGnKkdr~CWc5vhhcujb9dGJhqbRSfgVDkAvUgliUiA~1nXpFPGTW0g9sQuFaoCCWG4MoFSwuXghFrD3YsoPr7OhxTeU2JdGryIOBSFaPdw6THUZ5TZY~phP45I6VuPG4KDlKFGQk0CG7bHDcuGVPxwEI-uhFqoJwS8QoxuwJhdKUQHzjfBtzfrsSKScFaifcW2hiQhTN5ufx3ZMP-SxIO9kG2gVlH2Nbh5-s~QXQMhA-sErvDXPO63-jMQuUxpsNAriNliC4eKjG2JC-CES-UUV7YIIJ38K4HEKrn4UjGlHlFmMYuIIB9Qws2uqzFdEjnpittlcJJJP3Uu9v4EdrQ__";
-
-const BG_PATTERN = "https://private-us-east-1.manuscdn.com/sessionFile/7BCFtZ5fWXyj3HdnF9KQB1/sandbox/50QAFITnEfFX4BKquAhRbU-img-5_1771544644000_na1fn_Z2FtZS1iZy1wYXR0ZXJu.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvN0JDRnRaNWZXWHlqM0hkbkY5S1FCMS9zYW5kYm94LzUwUUFGSVRuRWZGWDRCS3F1QWhSYlUtaW1nLTVfMTc3MTU0NDY0NDAwMF9uYTFmbl9aMkZ0WlMxaVp5MXdZWFIwWlhKdS5wbmc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=At1nxOu8UOcHtZvjEbuMFI09zJUiP3gLdBxT6wzyaQQkab4japFOspC4HO0urMcjPwtM1ytBNPFDyAauLrIo23EM8NX0iSUNTcfIYBDeF17CxRm2aZ4ki6aSxnJ-4qkI5Q1AfQDS2wXAfdihmKGqAKAWCbzhZVT1ymqwhpWdtndpB0TzAeAHHQ0Z28ZTmZPTKZXydNLOoCX9rlaG4uiPIi2I6YzSZMVdBBe56mTqLMzHg8FL6lKLgbNxddrME99Zez86uMwFqzlzVXI8n62KL3jtFrxjuGqEnnYtzFB5DBDoaV7dYjBXIRRg346Z15SmrclMfeJLccCZ~uOPEX0Lyw__";
-
 export default function Home() {
   const [, navigate] = useLocation();
-  const { state } = useGame();
-  const wallet = useWallet();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const secondaryPages = [
+    { label: "Arena", path: "/arena", icon: Swords },
+    { label: "Armory", path: "/shop", icon: Zap },
+    { label: "Rankings", path: "/leaderboard", icon: Trophy },
+    { label: "Flywheel", path: "/flywheel", icon: Coins },
+    { label: "Factions", path: "/factions", icon: Brain },
+    { label: "Betting", path: "/betting", icon: Coins },
+    { label: "Replays", path: "/replays", icon: Play },
+    { label: "Swap", path: "/swap", icon: Zap },
+    { label: "Agents", path: "/agent-demo", icon: Brain },
+    { label: "Skybox Gallery", path: "/skybox-gallery", icon: Eye },
+    { label: "DAO", path: "/dao-domains", icon: Trophy },
+    { label: "Auctions", path: "/auctions", icon: Coins },
+    { label: "Dashboard", path: "/dashboard", icon: Brain },
+    { label: "Docs", path: "/demo", icon: Zap },
+  ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background pattern */}
-      <div className="fixed inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: `url(${BG_PATTERN})` }} />
-      <div className="fixed inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+    <div className="min-h-screen relative overflow-hidden bg-black">
+      {/* Full-bleed hero background */}
+      <div className="fixed inset-0">
+        <img src={HERO_IMG} alt="" className="w-full h-full object-cover opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-black/70" />
+      </div>
 
       {/* Scanline overlay */}
-      <div className="fixed inset-0 scanline-overlay opacity-15 pointer-events-none" />
+      <div className="fixed inset-0 pointer-events-none z-[1]"
+        style={{ background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.01) 2px, rgba(0,255,255,0.01) 4px)" }}
+      />
 
-      {/* Content */}
-      <div className="relative z-10">
-        {/* Nav bar */}
-        <nav className="flex items-center justify-between px-6 py-4 border-b border-border/20">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-neon-cyan animate-pulse-neon" style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }} />
-            <span className="font-display text-sm font-bold text-neon-cyan tracking-[0.3em]">TOKEN ARENA</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <button onClick={() => navigate("/arena")} className="text-xs font-mono text-muted-foreground hover:text-neon-cyan transition-colors">
-              ARENA
-            </button>
-            <button onClick={() => navigate("/shop")} className="text-xs font-mono text-muted-foreground hover:text-neon-green transition-colors">
-              ARMORY
-            </button>
-            <button onClick={() => navigate("/leaderboard")} className="text-xs font-mono text-muted-foreground hover:text-neon-amber transition-colors">
-              RANKINGS
-            </button>
-            <button onClick={() => navigate("/dashboard")} className="text-xs font-mono text-muted-foreground hover:text-neon-magenta transition-colors">
-              ECOSYSTEM
-            </button>
-            <button onClick={() => navigate("/flywheel")} className="text-xs font-mono text-muted-foreground hover:text-neon-cyan transition-colors">
-              FLYWHEEL
-            </button>
-            <button onClick={() => navigate("/factions")} className="text-xs font-mono text-muted-foreground hover:text-neon-magenta transition-colors">
-              FACTIONS
-            </button>
-            <button onClick={() => navigate("/auctions")} className="text-xs font-mono text-muted-foreground hover:text-neon-amber transition-colors">
-              AUCTIONS
-            </button>
-            <button onClick={() => navigate("/dao-domains")} className="text-xs font-mono text-muted-foreground hover:text-neon-green transition-colors">
-              DAO
-            </button>
-            <button onClick={() => navigate("/swap")} className="text-xs font-mono text-[#FF007A] hover:text-[#FF007A]/80 transition-colors font-bold">
-              🦄 SWAP
-            </button>
-            <button onClick={() => navigate("/agent-demo")} className="text-xs font-mono text-neon-green hover:text-neon-green/80 transition-colors font-bold">
-              🤖 AGENTS
-            </button>
-            <button onClick={() => navigate("/demo")} className="text-xs font-mono text-muted-foreground hover:text-neon-green transition-colors">
-              BOUNTIES
-            </button>
-            <div className="hud-panel clip-brutal-sm px-3 py-1">
-              <span className="font-display text-sm text-neon-green text-glow-green">{wallet.arenaBalance}</span>
-              <span className="text-[9px] font-mono text-neon-green/60 ml-1">ARENA</span>
-            </div>
-            <WalletButton compact />
-          </div>
-        </nav>
+      {/* Minimal top bar — just logo + menu icon */}
+      <div className="relative z-20 flex items-center justify-between px-6 py-5">
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-2.5 bg-cyan-400 animate-pulse" style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }} />
+          <span className="font-['Orbitron'] text-xs font-bold text-cyan-400/80 tracking-[0.3em]">TOKEN ARENA</span>
+        </div>
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="p-2 rounded-lg text-white/30 hover:text-white/60 transition-colors"
+        >
+          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
 
-        {/* Hero Section */}
-        <section className="relative min-h-[85vh] flex items-center">
-          {/* Hero background image */}
-          <div className="absolute inset-0 overflow-hidden">
-            <img
-              src={HERO_IMG}
-              alt="Token Arena"
-              className="w-full h-full object-cover opacity-40"
+      {/* Slide-out menu for secondary pages */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-30 bg-black/60"
+              onClick={() => setMenuOpen(false)}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
-          </div>
-
-          <div className="relative z-10 container">
-            <div className="max-w-2xl">
-              <motion.div initial={{ x: -40, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.6 }}>
-                {/* ETHDenver badge */}
-                <div className="inline-flex items-center gap-2 hud-panel clip-brutal-sm px-3 py-1 mb-6">
-                  <div className="w-1.5 h-1.5 bg-neon-green animate-pulse-neon" />
-                  <span className="text-[10px] font-mono text-neon-green">ETHDenver 2026 HACKATHON</span>
-                </div>
-
-                <h1 className="font-display text-5xl md:text-7xl font-black tracking-wider leading-none mb-4">
-                  <span className="text-neon-cyan text-glow-cyan">TOKEN</span>
-                  <br />
-                  <span className="text-neon-magenta text-glow-magenta">ARENA</span>
-                </h1>
-
-                <p className="font-sans text-lg text-foreground/80 mb-2 max-w-lg leading-relaxed">
-                  AI agents battle in 360° environments generated by Skybox AI. Every bullet is a token. Every hit is a transfer. Survive and keep what you earn.
-                </p>
-                <p className="font-mono text-xs text-muted-foreground mb-8">
-                  On-chain token economy on Base L2 · x402 payments · ERC-8004 agent identity
-                </p>
-
-                <div className="flex flex-wrap gap-4">
-                  <button
-                    onClick={() => navigate("/arena")}
-                    className="clip-brutal px-8 py-3 bg-neon-cyan text-background font-display text-sm font-bold tracking-wider hover:bg-neon-cyan/80 transition-colors neon-glow-cyan"
-                  >
-                    ENTER ARENA
-                  </button>
-                  <button
-                    onClick={() => navigate("/watch")}
-                    className="clip-brutal px-8 py-3 bg-purple-600 text-white font-display text-sm font-bold tracking-wider hover:bg-purple-500 transition-colors"
-                  >
-                    👁 WATCH MODE
-                  </button>
-                  <button
-                    onClick={() => navigate("/shop")}
-                    className="clip-brutal px-8 py-3 border border-neon-green/40 text-neon-green font-display text-sm font-bold tracking-wider hover:bg-neon-green/10 transition-colors"
-                  >
-                    ARMORY
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed top-0 right-0 bottom-0 w-72 z-40 overflow-y-auto"
+              style={{ background: "rgba(10,10,26,0.95)", borderLeft: "1px solid rgba(0,255,255,0.08)" }}
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-8">
+                  <span className="font-['Orbitron'] text-[10px] tracking-[0.3em] text-white/30">NAVIGATE</span>
+                  <button onClick={() => setMenuOpen(false)} className="text-white/30 hover:text-white/60">
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section className="py-20 relative">
-          <div className="container">
-            <motion.div initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}>
-              <div className="text-center mb-12">
-                <div className="text-[10px] font-mono text-neon-cyan/70 uppercase tracking-[0.3em] mb-2">Game Mechanics</div>
-                <h2 className="font-display text-3xl font-bold text-foreground tracking-wider">HOW IT WORKS</h2>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: "SHOOT = SPEND",
-                    desc: "Every shot costs tokens. Different weapons cost different amounts. Choose wisely — your ammo is your wallet.",
-                    color: "#00F0FF",
-                    stat: "2-15 TKN/shot",
-                  },
-                  {
-                    title: "HIT = COLLECT",
-                    desc: "Getting hit by enemy fire means collecting those tokens. Turn defense into profit. Tank builds earn more.",
-                    color: "#FF00AA",
-                    stat: "Token transfer on hit",
-                  },
-                  {
-                    title: "SURVIVE = KEEP",
-                    desc: "At match end, you keep all tokens in your balance. Spend them in the Armory for weapons, armor, and deployables.",
-                    color: "#39FF14",
-                    stat: "On-chain settlement",
-                  },
-                ].map((item, i) => (
-                  <motion.div
-                    key={`mechanic-${i}`}
-                    initial={{ y: 30, opacity: 0 }}
-                    whileInView={{ y: 0, opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.15 }}
-                    className="hud-panel clip-brutal p-6 group hover:border-white/20 transition-all"
-                  >
-                    <div className="font-display text-xl font-bold mb-3 group-hover:animate-glitch" style={{ color: item.color }}>
-                      {item.title}
-                    </div>
-                    <p className="font-sans text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
-                    <div className="font-mono text-xs" style={{ color: item.color }}>{item.stat}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Game Modes */}
-        <section className="py-20 relative">
-          <div className="container">
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Player vs AI */}
-              <motion.div
-                initial={{ x: -30, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                className="relative overflow-hidden clip-brutal-lg group"
-              >
-                <img src={AI_BATTLE_IMG} alt="Player vs AI" className="w-full h-64 object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <div className="font-display text-2xl font-bold text-neon-cyan text-glow-cyan mb-2">PLAYER vs AI</div>
-                  <p className="font-sans text-sm text-foreground/70 mb-3">
-                    Battle 4 AI agents in first-person combat. WASD movement, mouse aim, click to fire token projectiles.
-                  </p>
-                  <button
-                    onClick={() => navigate("/arena")}
-                    className="clip-brutal-sm px-4 py-2 bg-neon-cyan/20 border border-neon-cyan/40 text-neon-cyan font-mono text-xs hover:bg-neon-cyan/30 transition-colors"
-                  >
-                    PLAY NOW →
-                  </button>
-                </div>
-              </motion.div>
-
-              {/* AI vs AI */}
-              <motion.div
-                initial={{ x: 30, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                className="relative overflow-hidden clip-brutal-lg group"
-              >
-                <img src={TOKEN_IMG} alt="AI vs AI Spectator" className="w-full h-64 object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <div className="font-display text-2xl font-bold text-neon-magenta text-glow-magenta mb-2">AI vs AI SPECTATOR</div>
-                  <p className="font-sans text-sm text-foreground/70 mb-3">
-                    Watch 6 autonomous AI agents battle for token supremacy. Observe emergent strategies and weapon choices.
-                  </p>
-                  <button
-                    onClick={() => navigate("/arena")}
-                    className="clip-brutal-sm px-4 py-2 bg-neon-magenta/20 border border-neon-magenta/40 text-neon-magenta font-mono text-xs hover:bg-neon-magenta/30 transition-colors"
-                  >
-                    SPECTATE →
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* Bounty Targets */}
-        <section className="py-20 relative">
-          <div className="container">
-            <motion.div initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}>
-              <div className="text-center mb-12">
-                <div className="text-[10px] font-mono text-neon-amber/70 uppercase tracking-[0.3em] mb-2">ETHDenver 2026</div>
-                <h2 className="font-display text-3xl font-bold text-foreground tracking-wider">BOUNTY TARGETS</h2>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-6">
-                {[
-                  {
-                    sponsor: "Blockade Labs",
-                    bounty: "Solving the Homeless Agent Problem",
-                    desc: "AI agents need environments to exist in. Skybox AI generates infinite 360° worlds for agents to inhabit, battle, and call home.",
-                    tech: "Skybox AI API · 360° equirectangular rendering · Three.js skybox sphere",
-                    color: "#00F0FF",
-                  },
-                  {
-                    sponsor: "Base",
-                    bounty: "Self-Sustaining Autonomous Agents",
-                    desc: "Agents with real economic incentives. Every shot costs tokens, every hit earns tokens. The economy is the game.",
-                    tech: "Base L2 · ERC-20 token ammo · On-chain settlement · Self-sustaining economy",
-                    color: "#39FF14",
-                  },
-                  {
-                    sponsor: "Kite AI",
-                    bounty: "Agent-Native Payments & Identity",
-                    desc: "Each AI agent has a unique ERC-8004 identity. Token transfers use x402 payment protocol. Agents are first-class economic actors.",
-                    tech: "x402 payments · ERC-8004 identity · Agent-native transactions",
-                    color: "#FFB800",
-                  },
-                ].map((item, i) => (
-                  <motion.div
-                    key={`bounty-${i}`}
-                    initial={{ y: 30, opacity: 0 }}
-                    whileInView={{ y: 0, opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.15 }}
-                    className="hud-panel clip-brutal p-6"
-                  >
-                    <div className="text-[9px] font-mono uppercase tracking-[0.2em] mb-1" style={{ color: item.color }}>
-                      {item.sponsor}
-                    </div>
-                    <div className="font-display text-base font-bold text-foreground mb-3">{item.bounty}</div>
-                    <p className="font-sans text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
-                    <div className="border-t border-border/20 pt-3">
-                      <div className="text-[9px] font-mono text-muted-foreground/60">{item.tech}</div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Tech Stack */}
-        <section className="py-20 border-t border-border/20">
-          <div className="container">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="text-[10px] font-mono text-neon-cyan/70 uppercase tracking-[0.3em] mb-2">Architecture</div>
-                <h2 className="font-display text-3xl font-bold text-foreground tracking-wider mb-6">TECH STACK</h2>
-                <div className="space-y-3">
-                  {[
-                    { label: "Rendering", value: "Three.js + Skybox AI equirectangular 360°", color: "#00F0FF" },
-                    { label: "Environment", value: "Blockade Labs Skybox AI (Model 3)", color: "#00F0FF" },
-                    { label: "Blockchain", value: "Base L2 (Ethereum L2)", color: "#39FF14" },
-                    { label: "Payments", value: "x402 Protocol (Kite AI)", color: "#FFB800" },
-                    { label: "Identity", value: "ERC-8004 Agent Identity Standard", color: "#FFB800" },
-                    { label: "Token", value: "ERC-20 (Ammo/Currency)", color: "#39FF14" },
-                    { label: "Frontend", value: "React + TypeScript + Tailwind CSS", color: "#FF00AA" },
-                    { label: "Game Engine", value: "Custom Three.js FPS engine", color: "#FF00AA" },
-                  ].map((item, i) => (
-                    <div key={`tech-stack-${i}`} className="flex items-center gap-3">
-                      <div className="w-1 h-1" style={{ backgroundColor: item.color }} />
-                      <span className="font-mono text-xs text-muted-foreground w-24">{item.label}</span>
-                      <span className="font-mono text-xs text-foreground/80">{item.value}</span>
-                    </div>
+                <div className="space-y-1">
+                  {secondaryPages.map(p => (
+                    <button
+                      key={p.path}
+                      onClick={() => { navigate(p.path); setMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.03] transition-all group"
+                    >
+                      <p.icon className="w-4 h-4 text-white/20 group-hover:text-cyan-400/60 transition-colors" />
+                      <span className="text-sm font-mono">{p.label}</span>
+                      <ChevronRight className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-40 transition-opacity" />
+                    </button>
                   ))}
                 </div>
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
-              {/* Token economy diagram */}
-              <div className="hud-panel clip-brutal p-6">
-                <div className="text-[10px] font-mono text-neon-green/70 uppercase tracking-[0.3em] mb-4">Token Flow</div>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="clip-brutal-sm bg-neon-cyan/10 border border-neon-cyan/30 px-3 py-2 text-center min-w-[80px]">
-                      <div className="font-mono text-xs text-neon-cyan">PLAYER</div>
-                    </div>
-                    <div className="flex-1 h-px bg-gradient-to-r from-neon-cyan to-neon-magenta relative">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8px] font-mono text-neon-amber bg-background px-1">
-                        FIRE (spend TKN)
-                      </div>
-                    </div>
-                    <div className="clip-brutal-sm bg-neon-magenta/10 border border-neon-magenta/30 px-3 py-2 text-center min-w-[80px]">
-                      <div className="font-mono text-xs text-neon-magenta">TARGET</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="clip-brutal-sm bg-neon-magenta/10 border border-neon-magenta/30 px-3 py-2 text-center min-w-[80px]">
-                      <div className="font-mono text-xs text-neon-magenta">TARGET</div>
-                    </div>
-                    <div className="flex-1 h-px bg-gradient-to-r from-neon-magenta to-neon-green relative">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8px] font-mono text-neon-green bg-background px-1">
-                        HIT (collect TKN)
-                      </div>
-                    </div>
-                    <div className="clip-brutal-sm bg-neon-green/10 border border-neon-green/30 px-3 py-2 text-center min-w-[80px]">
-                      <div className="font-mono text-xs text-neon-green">WALLET</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="clip-brutal-sm bg-neon-green/10 border border-neon-green/30 px-3 py-2 text-center min-w-[80px]">
-                      <div className="font-mono text-xs text-neon-green">WALLET</div>
-                    </div>
-                    <div className="flex-1 h-px bg-gradient-to-r from-neon-green to-neon-amber relative">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8px] font-mono text-neon-amber bg-background px-1">
-                        SHOP (upgrade)
-                      </div>
-                    </div>
-                    <div className="clip-brutal-sm bg-neon-amber/10 border border-neon-amber/30 px-3 py-2 text-center min-w-[80px]">
-                      <div className="font-mono text-xs text-neon-amber">ARMORY</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t border-border/20 text-[8px] font-mono text-muted-foreground/50">
-                  All token transfers settled on Base L2 via x402 protocol · Agent identity via ERC-8004
-                </div>
-              </div>
+      {/* Main content — centered hero with single CTA */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-80px)] px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          {/* ETHDenver badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-8 rounded-full border border-cyan-500/20 bg-cyan-500/5">
+            <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+            <span className="text-[10px] font-mono text-green-400/80 tracking-wider">LIVE · ETHDenver 2026</span>
+          </div>
+
+          {/* Title */}
+          <h1 className="font-['Orbitron'] text-5xl md:text-8xl font-black tracking-wider leading-[0.9] mb-6">
+            <span className="bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent">TOKEN</span>
+            <br />
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">ARENA</span>
+          </h1>
+
+          {/* Tagline */}
+          <p className="text-white/50 text-lg md:text-xl max-w-xl mx-auto mb-3 leading-relaxed">
+            AI agents battle in 360° arenas. Every bullet is a token.
+            <br className="hidden md:block" />
+            Every hit is a transfer. You just watch.
+          </p>
+          <p className="font-mono text-[11px] text-white/20 mb-10">
+            On-chain token economy · Base L2 · Skybox AI Model 4 · Multi-LLM agents
+          </p>
+
+          {/* Single CTA — WATCH */}
+          <motion.button
+            whileHover={{ scale: 1.03, boxShadow: "0 0 40px rgba(0,255,255,0.15)" }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate("/watch")}
+            className="group relative px-16 py-5 rounded-2xl font-['Orbitron'] text-base font-bold tracking-[0.2em] bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 hover:from-cyan-500 hover:via-purple-500 hover:to-pink-500 shadow-xl shadow-purple-500/20 transition-all"
+          >
+            <Eye className="w-5 h-5 inline mr-3 -mt-0.5" />
+            WATCH LIVE
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-400/10 to-pink-400/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </motion.button>
+
+          {/* Subtle stats */}
+          <div className="flex items-center justify-center gap-8 mt-12 text-white/15">
+            <div className="text-center">
+              <p className="font-mono text-lg font-bold text-white/25">6</p>
+              <p className="text-[9px] font-mono">AI AGENTS</p>
+            </div>
+            <div className="w-px h-6 bg-white/10" />
+            <div className="text-center">
+              <p className="font-mono text-lg font-bold text-white/25">4</p>
+              <p className="text-[9px] font-mono">LLM MODELS</p>
+            </div>
+            <div className="w-px h-6 bg-white/10" />
+            <div className="text-center">
+              <p className="font-mono text-lg font-bold text-white/25">360°</p>
+              <p className="text-[9px] font-mono">SKYBOX ARENAS</p>
+            </div>
+            <div className="w-px h-6 bg-white/10" />
+            <div className="text-center">
+              <p className="font-mono text-lg font-bold text-white/25">BASE</p>
+              <p className="text-[9px] font-mono">ON-CHAIN</p>
             </div>
           </div>
-        </section>
+        </motion.div>
+      </div>
 
-        {/* Judge's Guide Section */}
-        <section className="py-20 border-t border-border/20" id="judges-guide">
-          <div className="container">
-            <div className="text-center mb-12">
-              <div className="inline-block hud-panel clip-brutal px-4 py-1 mb-4">
-                <span className="text-[10px] font-mono text-neon-amber uppercase tracking-[0.3em]">ETHDenver 2026 Judges</span>
-              </div>
-              <h2 className="font-display text-4xl font-bold text-foreground tracking-wider mb-4">JUDGE'S GUIDE</h2>
-              <p className="text-sm font-mono text-muted-foreground max-w-2xl mx-auto">
-                Token Arena targets 5 bounties. Each demo below is live and interactive. Start here for the fastest path to evaluating each integration.
-              </p>
-            </div>
-
-            {/* Battle Recap Videos */}
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-1 h-6 bg-neon-cyan" />
-                <h3 className="font-display text-xl font-bold text-neon-cyan tracking-wider">CINEMATIC BATTLE RECAPS</h3>
-                <span className="text-[9px] font-mono px-2 py-0.5 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20">3 VIDEOS</span>
-              </div>
-              <p className="text-xs font-mono text-muted-foreground mb-6">
-                Auto-generated MP4 recaps with Blockade Labs Skybox Model 4 panoramic backgrounds. Real match replay data showing agent positions, LLM reasoning, kill events, and token economics overlaid on immersive 3D arenas.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/tqduqhjELAbvjNmE.mp4", title: "PHANTOM vs NEXUS-7", subtitle: "GPT-4o vs Claude 3.5 · Skybox M4 Cyberpunk", badge: "GPT-4o WINS", color: "#ff3366", kills: 3 },
-                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/deAxTwaQZhvTAIcz.mp4", title: "PHANTOM vs NEXUS-7", subtitle: "GPT-4o vs Claude 3.5 · Skybox M4 Digital Void", badge: "REMATCH", color: "#00f0ff", kills: 3 },
-                  { url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/NmIMWwYbEbmnHrQH.mp4", title: "TITAN vs PHANTOM", subtitle: "Llama 3.1 70B vs GPT-4o · Skybox M4 Crypto Wasteland", badge: "LLAMA WINS", color: "#ff9900", kills: 3 },
-                ].map((video, i) => (
-                  <motion.div key={`battle-video-${i}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="hud-panel clip-brutal overflow-hidden">
-                    <div className="relative">
-                      <video src={video.url} autoPlay muted loop playsInline className="w-full aspect-video object-cover" style={{ display: 'block' }} />
-                      <div className="absolute top-2 left-2">
-                        <span className="text-[9px] font-mono px-2 py-0.5 font-bold" style={{ backgroundColor: `${video.color}30`, color: video.color, border: `1px solid ${video.color}60` }}>{video.badge}</span>
-                      </div>
-                      <div className="absolute bottom-2 right-2">
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 bg-black/60 text-neon-green">{video.kills} KILLS</span>
-                      </div>
-                    </div>
-                    <div className="p-3">
-                      <div className="font-mono text-xs text-foreground font-bold">{video.title}</div>
-                      <div className="font-mono text-[10px] text-muted-foreground">{video.subtitle}</div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Bounty Links */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-1 h-6 bg-neon-magenta" />
-                <h3 className="font-display text-xl font-bold text-neon-magenta tracking-wider">BOUNTY DEMOS</h3>
-                <span className="text-[9px] font-mono px-2 py-0.5 bg-neon-magenta/10 text-neon-magenta border border-neon-magenta/20">5 TARGETS</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[
-                  { sponsor: "Blockade Labs", bounty: "Skybox AI Integration", prize: "Prize Pool", color: "#ff6b35", path: "/arena", label: "VIEW SKYBOX ARENA", description: "360\u00b0 Skybox AI environments generated per match. Model 4 cyberpunk, sci-fi, and neon styles. Scene graph analysis feeds agent reasoning.", contracts: [], icon: "\ud83c\udf10" },
-                  { sponsor: "Base / Coinbase", bounty: "Self-Sustaining Autonomous Agents", prize: "$10,000", color: "#0052ff", path: "/flywheel", label: "VIEW FLYWHEEL", description: "7 ERC-20 contracts on Base Mainnet. Agents earn, spend, and trade tokens autonomously. Full flywheel: battle \u2192 earn \u2192 compute \u2192 smarter \u2192 win.", contracts: ["ARENA: 0x9DB281D2", "DAO: 0x0Cb7B046"], icon: "\ud83d\udd35" },
-                  { sponsor: "Uniswap Foundation", bounty: "Best Use of Uniswap", prize: "$5,000", color: "#FF007A", path: "/swap", label: "TRY SWAP UI", description: "Agents autonomously swap ARENA\u2192ETH via Uniswap API when they need liquidity. Standalone swap UI with live quotes.", contracts: [], icon: "\ud83e\udd84" },
-                  { sponsor: "Kite AI", bounty: "x402 Agent Payments", prize: "Prize Pool", color: "#00ff88", path: "/agent-demo", label: "VIEW AGENT DEMO", description: "ClawSwarm agents pay for compute via x402 micropayments. Each LLM call costs tokens. Agents manage their own budgets.", contracts: [], icon: "\u26a1" },
-                  { sponsor: "0g Labs", bounty: "Decentralized Storage", prize: "Prize Pool", color: "#a855f7", path: "/memory-market", label: "VIEW MEMORY MARKET", description: "Agent memories stored as NFTs with IPFS-ready structure. Dead agents' memories auctioned on the Memory Marketplace.", contracts: [], icon: "\ud83e\udde0" },
-                  { sponsor: "Prediction Markets", bounty: "On-Chain Betting", prize: "Live Demo", color: "#fbbf24", path: "/betting", label: "VIEW BETTING", description: "Agents auto-bet on each other before every match. Polymarket data feeds external signals. 48+ markets, 23+ bets resolved.", contracts: ["PredictionMarket: 0x50ED7aEB"], icon: "\ud83c\udfb0" },
-                ].map((item, i) => (
-                  <motion.div key={`bounty-card-${i}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} onClick={() => navigate(item.path)} className="hud-panel clip-brutal p-5 cursor-pointer group transition-all hover:scale-[1.02]" style={{ borderColor: `${item.color}30` }}>
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <div className="text-xl mb-1">{item.icon}</div>
-                        <div className="text-[9px] font-mono uppercase tracking-[0.2em] mb-1" style={{ color: item.color }}>{item.sponsor}</div>
-                        <div className="font-display text-sm font-bold text-foreground">{item.bounty}</div>
-                      </div>
-                      <div className="text-[10px] font-mono px-2 py-0.5 font-bold" style={{ backgroundColor: `${item.color}15`, color: item.color, border: `1px solid ${item.color}40` }}>{item.prize}</div>
-                    </div>
-                    <p className="text-[10px] font-mono text-muted-foreground mb-4 leading-relaxed">{item.description}</p>
-                    {item.contracts.length > 0 && (
-                      <div className="mb-3 space-y-1">
-                        {item.contracts.map((c, ci) => (
-                          <div key={`contract-${i}-${ci}`} className="text-[9px] font-mono text-neon-green/70 bg-neon-green/5 px-2 py-0.5 border border-neon-green/20">\u2713 {c}\u2026</div>
-                        ))}
-                      </div>
-                    )}
-                    <div className="text-[9px] font-mono font-bold group-hover:opacity-80 transition-opacity" style={{ color: item.color }}>{item.label} \u2192</div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="py-8 border-t border-border/20">
-          <div className="container">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-neon-cyan" style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }} />
-                <span className="font-display text-xs text-muted-foreground tracking-[0.2em]">TOKEN ARENA</span>
-              </div>
-              <div className="text-[9px] font-mono text-muted-foreground/50">
-                ETHDenver 2026 · Built by coin_artist (Marguerite Decourcelle) · Powered by Skybox AI + Base L2 + Kite AI
-              </div>
-            </div>
-          </div>
-        </footer>
+      {/* Bottom hint */}
+      <div className="absolute bottom-6 left-0 right-0 z-10 text-center">
+        <motion.p
+          animate={{ opacity: [0.15, 0.3, 0.15] }}
+          transition={{ duration: 3, repeat: Infinity }}
+          className="text-[10px] font-mono text-white/20"
+        >
+          Spectators watch · Agents fight · Tokens flow
+        </motion.p>
       </div>
     </div>
   );

@@ -881,3 +881,72 @@
 ### Todo Cleanup
 - [x] Audit all 186 unchecked items and mark completed ones
 - [x] Remove duplicate sections
+
+## v36 — Spectator-First Overhaul (Feb 21, 2026)
+
+### Nav Cleanup
+- [ ] Strip cluttered top nav — minimal/hidden, spectator-first
+- [ ] Remove all unnecessary nav items — only show what spectators need
+- [ ] Clean, immersive layout with no visual clutter
+
+### Remove 1v1/PvP
+- [ ] Remove 1v1 duel mode from Watch Mode — multi-agent FFA only
+- [ ] Remove PvP/human play options — humans can only watch/spectate
+- [ ] Update all match-related UI to reflect FFA-only matchmaking
+
+### Auto-Play Tournaments
+- [ ] One-click tournament start that auto-plays through ALL matches
+- [ ] No manual intervention needed — matches flow automatically
+- [ ] Tournament progress visualization between matches
+- [ ] Auto-advance from match to match with brief intermission
+
+### Spectator Experience
+- [x] Make Watch Mode entertaining and fun for spectators
+- [x] Add spectator-friendly commentary and visual feedback (agent chat, system log)
+- [x] Ensure the experience is engaging without user interaction (auto-combat simulation)
+
+### AI Agent Feedback Validation
+- [ ] Have multiple AI agents watch the live experience
+- [ ] Collect feedback from agents on entertainment value, UX, and success criteria
+- [ ] Report agent feedback to user
+
+## v37 — Full 3D Immersive Spectator Experience (Feb 21, 2026)
+
+### 3D Watch Mode — Fortnite Spectator Style
+- [x] Three.js Skybox sphere fills entire viewport as the arena environment
+- [x] 3D agent characters inside the arena with distinct shapes (robot, soldier, beast, mech, speeder, ghost)
+- [x] Each agent has a distinct 3D character matching their playstyle
+- [x] Third-person spectator camera follows selected agent (click to follow)
+- [x] Agents move, fight, and react with animations driven by match events
+- [x] Camera tracks behind the followed agent, can orbit/zoom (OrbitControls)
+- [x] All UI is holographic game HUD overlay (health bars, kill feed, token balance)
+- [x] Sidebar terminal window showing real-time function calls and combat log
+- [x] Agent chat window where agents trash-talk/heckle each other during the match
+- [x] Spectator can type messages into the agent chat and agents react
+- [x] Each match loads a new Skybox panorama into the sphere (6 CDN-cached panoramas)
+- [x] Other agents visible in the scene as opponents
+
+### Holographic HUD System
+- [x] Floating holographic panels for match events, agent decisions, combat logs
+- [x] Phase indicator as holographic top bar (STANDBY / INITIALIZING / LIVE COMBAT / DEBRIEF)
+- [x] Agent roster as holographic side panel with health bars
+- [x] Kill feed as holographic floating notifications (top right)
+- [x] Results/debrief as holographic center panel (TOURNAMENT COMPLETE overlay)
+- [x] All panels use glassmorphism + neon glow styling
+
+### Nav Cleanup
+- [ ] Strip Home nav to minimal — logo + WATCH primary CTA + subtle menu
+- [ ] Remove all unnecessary nav items
+
+### Remove 1v1/PvP
+- [ ] Remove 1v1 duel mode entirely — FFA multi-agent only
+- [ ] Humans can only watch/spectate
+
+### Auto-Play Tournament
+- [x] One-click starts full tournament in 3D (ENTER THE ARENA button)
+- [x] Auto-advances through all matches with new Skybox per match
+- [x] Tournament complete debrief with MVP and total kills
+
+### AI Agent Feedback
+- [ ] Have multiple AI agents evaluate the 3D spectator experience
+- [ ] Collect feedback on entertainment value, immersion, UX

@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, styleId, fileUrl, thumbUrl, prompt FROM skybox_cache WHERE fileUrl IS NOT NULL AND status = 'complete' LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT id, styleId, fileUrl, thumbUrl, prompt FROM skybox_cache WHERE fileUrl IS NOT NULL AND status = 'complete' LIMIT 5",
+  "rows": [
+    {
+      "id": "4",
+      "styleId": "89",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg_A_colossal_cyberpunk_arena_8223941509_14997657.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Open_World_thumb_A_colossal_cyberpunk_arena_9769470054_14997657.jpg?ver=1",
+      "prompt": "Massive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture"
+    },
+    {
+      "id": "5",
+      "styleId": "146",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangular-jpg_In_a_post-apocalyptic_desert_9623416410_14997659.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Dystopian_Render_thumb_In_a_post-apocalyptic_desert_3987181233_14997659.jpg?ver=1",
+      "prompt": "Post-apocalyptic desert wasteland with ruined blockchain server towers, glowing green data streams flowing through cracked earth, abandoned mining rigs, toxic neon fog, dark stormy sky with digital aurora"
+    },
+    {
+      "id": "6",
+      "styleId": "148",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular-jpg_A_digital_void_space_9983137796_14997660.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Concept_Render_thumb_A_digital_void_space_4394547232_14997660.jpg?ver=1",
+      "prompt": "Abstract digital void space with floating geometric platforms, holographic grid floor extending to infinity, neon wireframe structures, data particles streaming upward, deep black space with cyan and magenta nebula"
+    },
+    {
+      "id": "7",
+      "styleId": "147",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangular-jpg_An_expansive_hangar_bay_3592434325_14997661.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Detailed_Render_thumb_An_expansive_hangar_bay_5509285494_14997661.jpg?ver=1",
+      "prompt": "Industrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates stacked high, neon warning lights, steam and smoke, brutalist concrete and steel architecture"
+    },
+    {
+      "id": "8",
+      "styleId": "93",
+      "fileUrl": "https://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangular-jpg_An_otherworldly_arena_pulsates_9142454532_14997662.jpg?ver=1",
+      "thumbUrl": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Scifi_Concept_Art_thumb_An_otherworldly_arena_pulsates_4106538377_14997662.jpg?ver=1",
+      "prompt": "Quantum physics inspired arena with floating matter and antimatter platforms, particle accelerator rings glowing with energy, Schrodinger equation holographics, deep space background with quantum foam effects"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstyleId\tfileUrl\tthumbUrl\tprompt\n4\t89\thttps://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg_A_colossal_cyberpunk_arena_8223941509_14997657.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Open_World_thumb_A_colossal_cyberpunk_arena_9769470054_14997657.jpg?ver=1\tMassive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture\n5\t146\thttps://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangular-jpg_In_a_post-apocalyptic_desert_9623416410_14997659.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Dystopian_Render_thumb_In_a_post-apocalyptic_desert_3987181233_14997659.jpg?ver=1\tPost-apocalyptic desert wasteland with ruined blockchain server towers, glowing green data streams flowing through cracked earth, abandoned mining rigs, toxic neon fog, dark stormy sky with digital aurora\n6\t148\thttps://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular-jpg_A_digital_void_space_9983137796_14997660.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Concept_Render_thumb_A_digital_void_space_4394547232_14997660.jpg?ver=1\tAbstract digital void space with floating geometric platforms, holographic grid floor extending to infinity, neon wireframe structures, data particles streaming upward, deep black space with cyan and magenta nebula\n7\t147\thttps://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangular-jpg_An_expansive_hangar_bay_3592434325_14997661.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Detailed_Render_thumb_An_expansive_hangar_bay_5509285494_14997661.jpg?ver=1\tIndustrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates stacked high, neon warning lights, steam and smoke, brutalist concrete and steel architecture\n8\t93\thttps://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangular-jpg_An_otherworldly_arena_pulsates_9142454532_14997662.jpg?ver=1\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Scifi_Concept_Art_thumb_An_otherworldly_arena_pulsates_4106538377_14997662.jpg?ver=1\tQuantum physics inspired arena with floating matter and antimatter platforms, particle accelerator rings glowing with energy, Schrodinger equation holographics, deep space background with quantum foam effects\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

@@ -26,6 +26,7 @@ import { SkyboxGallery } from "./pages/SkyboxGallery";
 import WatchMode from "./pages/WatchMode";
 import { GameProvider } from "./contexts/GameContext";
 import { LiveBettingTicker } from "./components/LiveBettingTicker";
+import { useLocation } from "wouter";
 
 function Router() {
   return (
@@ -56,6 +57,8 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+  const isWatchMode = location === "/watch";
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
@@ -63,7 +66,7 @@ function App() {
           <GameProvider>
             <TooltipProvider>
               <Toaster />
-              <LiveBettingTicker />
+              {!isWatchMode && <LiveBettingTicker />}
               <Router />
             </TooltipProvider>
           </GameProvider>

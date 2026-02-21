@@ -1,0 +1,90 @@
+{
+  "query": "SELECT id, prompt, styleId, status, LEFT(fileUrl, 80) as fileUrl_preview, LEFT(thumbUrl, 80) as thumbUrl_preview FROM skybox_cache WHERE status IN ('complete', 'completed') LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT id, prompt, styleId, status, LEFT(fileUrl, 80) as fileUrl_preview, LEFT(thumbUrl, 80) as thumbUrl_preview FROM skybox_cache WHERE status IN ('complete', 'completed') LIMIT 10;",
+  "rows": [
+    {
+      "id": "4",
+      "prompt": "Massive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture",
+      "styleId": "89",
+      "status": "complete",
+      "fileUrl_preview": "https://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg",
+      "thumbUrl_preview": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Open_World_thumb_A_colos"
+    },
+    {
+      "id": "5",
+      "prompt": "Post-apocalyptic desert wasteland with ruined blockchain server towers, glowing green data streams flowing through cracked earth, abandoned mining rigs, toxic neon fog, dark stormy sky with digital aurora",
+      "styleId": "146",
+      "status": "complete",
+      "fileUrl_preview": "https://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangul",
+      "thumbUrl_preview": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Dystopian_Render_thumb_I"
+    },
+    {
+      "id": "6",
+      "prompt": "Abstract digital void space with floating geometric platforms, holographic grid floor extending to infinity, neon wireframe structures, data particles streaming upward, deep black space with cyan and magenta nebula",
+      "styleId": "148",
+      "status": "complete",
+      "fileUrl_preview": "https://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular",
+      "thumbUrl_preview": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Concept_Render_thumb_A_d"
+    },
+    {
+      "id": "7",
+      "prompt": "Industrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates stacked high, neon warning lights, steam and smoke, brutalist concrete and steel architecture",
+      "styleId": "147",
+      "status": "complete",
+      "fileUrl_preview": "https://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangula",
+      "thumbUrl_preview": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Detailed_Render_thumb_An"
+    },
+    {
+      "id": "8",
+      "prompt": "Quantum physics inspired arena with floating matter and antimatter platforms, particle accelerator rings glowing with energy, Schrodinger equation holographics, deep space background with quantum foam effects",
+      "styleId": "93",
+      "status": "complete",
+      "fileUrl_preview": "https://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangu",
+      "thumbUrl_preview": "https://images.blockadelabs.com/thumbs/imagine/thumb_M3_Scifi_Concept_Art_thumb_"
+    },
+    {
+      "id": "30001",
+      "prompt": "pov in the center of an expansive massive brutalist cyberpunk arena, neon glows in the misty rain, concrete walls covered in structures like circuit boards, lots of pipes and conduits surrounding the arena playfield, dramatic neon lighting, rain-slicked surfaces",
+      "styleId": "188",
+      "status": "completed",
+      "fileUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_Cyberpunk_equirectangu",
+      "thumbUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_Cyberpunk_equirectangu"
+    },
+    {
+      "id": "30002",
+      "prompt": "Massive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture, sci-fi render",
+      "styleId": "177",
+      "status": "completed",
+      "fileUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirec",
+      "thumbUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirec"
+    },
+    {
+      "id": "30003",
+      "prompt": "Post-apocalyptic desert wasteland with ruined blockchain server towers, glowing green data streams flowing through cracked earth, abandoned mining rigs, toxic neon fog, dark stormy sky with digital aurora, dystopian render",
+      "styleId": "178",
+      "status": "completed",
+      "fileUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirec",
+      "thumbUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirec"
+    },
+    {
+      "id": "30004",
+      "prompt": "Abstract digital void space with floating geometric platforms, holographic grid floor extending to infinity, neon wireframe structures, data particles streaming upward, deep black space with cyan and magenta nebula, Unreal Engine cinematic quality",
+      "styleId": "186",
+      "status": "completed",
+      "fileUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangu",
+      "thumbUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangu"
+    },
+    {
+      "id": "30005",
+      "prompt": "Industrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates stacked high, neon warning lights, steam and smoke, brutalist concrete and steel architecture, Octane render quality",
+      "styleId": "185",
+      "status": "completed",
+      "fileUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_Octane_Render_equirect",
+      "thumbUrl_preview": "https://images-staging.blockadelabs.com/images/imagine/M4_Octane_Render_equirect"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tprompt\tstyleId\tstatus\tfileUrl_preview\tthumbUrl_preview\n4\tMassive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture\t89\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Open_World_equirectangular-jpg\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Open_World_thumb_A_colos\n5\tPost-apocalyptic desert wasteland with ruined blockchain server towers, glowing green data streams flowing through cracked earth, abandoned mining rigs, toxic neon fog, dark stormy sky with digital aurora\t146\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Dystopian_Render_equirectangul\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Dystopian_Render_thumb_I\n6\tAbstract digital void space with floating geometric platforms, holographic grid floor extending to infinity, neon wireframe structures, data particles streaming upward, deep black space with cyan and magenta nebula\t148\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Concept_Render_equirectangular\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Concept_Render_thumb_A_d\n7\tIndustrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates stacked high, neon warning lights, steam and smoke, brutalist concrete and steel architecture\t147\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Detailed_Render_equirectangula\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Detailed_Render_thumb_An\n8\tQuantum physics inspired arena with floating matter and antimatter platforms, particle accelerator rings glowing with energy, Schrodinger equation holographics, deep space background with quantum foam effects\t93\tcomplete\thttps://images.blockadelabs.com/images/imagine/M3_Scifi_Concept_Art_equirectangu\thttps://images.blockadelabs.com/thumbs/imagine/thumb_M3_Scifi_Concept_Art_thumb_\n30001\tpov in the center of an expansive massive brutalist cyberpunk arena, neon glows in the misty rain, concrete walls covered in structures like circuit boards, lots of pipes and conduits surrounding the arena playfield, dramatic neon lighting, rain-slicked surfaces\t188\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_Cyberpunk_equirectangu\thttps://images-staging.blockadelabs.com/images/imagine/M4_Cyberpunk_equirectangu\n30002\tMassive cyberpunk colosseum arena with neon cyan and magenta energy barriers, floating hexagonal platforms over a dark abyss, holographic scoreboards, particle effects, dark atmospheric fog with volumetric neon lighting, brutalist architecture, sci-fi render\t177\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirec\thttps://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_A_equirec\n30003\tPost-apocalyptic desert wasteland with ruined blockchain server towers, glowing green data streams flowing through cracked earth, abandoned mining rigs, toxic neon fog, dark stormy sky with digital aurora, dystopian render\t178\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirec\thttps://images-staging.blockadelabs.com/images/imagine/M4_Scifi_Render_B_equirec\n30004\tAbstract digital void space with floating geometric platforms, holographic grid floor extending to infinity, neon wireframe structures, data particles streaming upward, deep black space with cyan and magenta nebula, Unreal Engine cinematic quality\t186\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangu\thttps://images-staging.blockadelabs.com/images/imagine/M4_UE_Render_equirectangu\n30005\tIndustrial mech hangar bay with massive robotic suits in repair bays, sparking welding equipment, ammunition crates stacked high, neon warning lights, steam and smoke, brutalist concrete and steel architecture, Octane render quality\t185\tcompleted\thttps://images-staging.blockadelabs.com/images/imagine/M4_Octane_Render_equirect\thttps://images-staging.blockadelabs.com/images/imagine/M4_Octane_Render_equirect\n",
+  "stderr": "",
+  "execution_time_ms": 83
+}

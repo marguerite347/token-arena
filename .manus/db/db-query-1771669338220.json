@@ -1,0 +1,22 @@
+{
+  "query": "SELECT status, COUNT(*) as cnt FROM skybox_cache GROUP BY status ORDER BY cnt DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3hcb1ckWrBNtaRR.root --database bG7YNnRdvFJngV4wp2JFr8 --execute SELECT status, COUNT(*) as cnt FROM skybox_cache GROUP BY status ORDER BY cnt DESC",
+  "rows": [
+    {
+      "status": "completed",
+      "cnt": "239"
+    },
+    {
+      "status": "complete",
+      "cnt": "5"
+    },
+    {
+      "status": "pending",
+      "cnt": "5"
+    }
+  ],
+  "messages": [],
+  "stdout": "status\tcnt\ncompleted\t239\ncomplete\t5\npending\t5\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

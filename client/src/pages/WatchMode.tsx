@@ -1,667 +1,1508 @@
-/**
- * Watch Mode — Immersive Agent Tracking Experience
+/*
+ * WatchMode — Immersive 3D Spectator Experience
  * 
- * Design philosophy: Show only what matters, when it matters.
- * No visible tabs, no cluttered nav. Just your agent's journey.
- * 
- * Phases: IDLE → SETUP → ARENA → REASONING → COMBAT → SETTLEMENT → DEBRIEF
+ * Full-viewport Three.js scene with:
+ * - Equirectangular Skybox AI panorama (Blockade Labs) as arena environment
+ * - Post-processing: Bloom, ChromaticAberration, Vignette, Noise
+ * - 3D agent characters with distinct visual identities
+ * - Weapon fire particle effects (plasma, railgun, scatter, rocket, laser, void)
+ * - Cinematic camera with GSAP animations
+ * - Holographic HUD overlay (health bars, kill feed, terminal, chat)
+ * - Auto-play FFA tournament
  */
-import { useState, useEffect, useRef, useMemo } from "react";
+
+import { useEffect, useRef, useState, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { useLocation } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import {
-  Play, Zap, Swords, Trophy, Coins, Eye, Loader2, Bot, Target,
-  Shield, Flame, DollarSign, Crown, ArrowLeft, ChevronDown,
-  Brain, Crosshair, BarChart3, Sparkles, Users, Volume2, VolumeX,
-} from "lucide-react";
+  EffectComposer,
+  RenderPass,
+  EffectPass,
+  BloomEffect,
+  ChromaticAberrationEffect,
+  VignetteEffect,
+  NoiseEffect,
+  BlendFunction,
+} from "postprocessing";
+import gsap from "gsap";
 
-type Phase = "idle" | "setup" | "arena" | "reasoning" | "combat" | "settlement" | "debrief";
-type BattleMode = "1v1" | "ffa";
+// ─── CDN-hosted Skybox AI panoramic images (4096x2048 equirectangular) ──────
+const SKYBOX_PANORAMAS = [
+  { name: "Cyberpunk Arena", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gyluRUvZGNaXfxyf.jpg" },
+  { name: "Neon Brutalism", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/sNuAtMqlxnNqsqEE.jpg" },
+  { name: "Mech Hangar", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/gOkcBobLWwNqWJlr.jpg" },
+  { name: "Crypto Wasteland", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/dRjHDiDQqVzLFNjG.jpg" },
+  { name: "SciFi Battleground", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/tVCUBUdNNPwxMTvN.jpg" },
+  { name: "UE Render Arena", url: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663362740070/ybRsYGSbEaljmdEq.jpg" },
+];
 
-interface LiveEvent {
-  id: number;
-  phase: Phase;
-  icon: React.ReactNode;
+// ─── Agent character definitions ────────────────────────────────────────────
+const AGENT_CHARS: Record<
+  string,
+  { color: number; emissive: number; label: string; scale: number; shape: string }
+> = {
+  "NEXUS-7": { color: 0x00ffff, emissive: 0x003333, label: "NEXUS-7", scale: 1.0, shape: "robot" },
+  "PHANTOM": { color: 0x00ff88, emissive: 0x003322, label: "PHANTOM", scale: 1.1, shape: "soldier" },
+  "TITAN": { color: 0xaa44ff, emissive: 0x220044, label: "TITAN", scale: 1.4, shape: "beast" },
+  "CIPHER": { color: 0x4488ff, emissive: 0x002244, label: "CIPHER", scale: 1.2, shape: "mech" },
+  "AURORA": { color: 0x44ffdd, emissive: 0x003333, label: "AURORA", scale: 0.9, shape: "speeder" },
+  "WRAITH": { color: 0xff44aa, emissive: 0x330022, label: "WRAITH", scale: 1.0, shape: "ghost" },
+};
+
+const WEAPON_COLORS: Record<string, number> = {
+  "Plasma Pistol": 0x00ffff,
+  Railgun: 0xaa44ff,
+  "Scatter Blaster": 0xff4444,
+  "Rocket Launcher": 0xff8800,
+  "Laser Rifle": 0x44ff44,
+  "Void Cannon": 0xff44ff,
+};
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+interface AgentHUD {
+  agentId: string;
+  name: string;
+  hp: number;
+  maxHp: number;
+  kills: number;
+  tokens: number;
+  alive: boolean;
+}
+interface TermLine {
+  type: "call" | "response" | "system" | "error";
   text: string;
-  detail?: string;
+  ts: number;
+}
+interface ChatMsg {
+  sender: string;
   color: string;
+  text: string;
   ts: number;
 }
 
-// ─── Phase metadata ────────────────────────────────────────────
-const PHASE_META: Record<Phase, { label: string; color: string; icon: React.ReactNode }> = {
-  idle:       { label: "STANDBY",     color: "text-slate-500",  icon: <Eye className="w-4 h-4" /> },
-  setup:      { label: "INITIALIZING", color: "text-cyan-400",   icon: <Zap className="w-4 h-4" /> },
-  arena:      { label: "ARENA GEN",   color: "text-purple-400", icon: <Sparkles className="w-4 h-4" /> },
-  reasoning:  { label: "AI THINKING", color: "text-blue-400",   icon: <Brain className="w-4 h-4" /> },
-  combat:     { label: "COMBAT",      color: "text-red-400",    icon: <Crosshair className="w-4 h-4" /> },
-  settlement: { label: "SETTLING",    color: "text-green-400",  icon: <Coins className="w-4 h-4" /> },
-  debrief:    { label: "DEBRIEF",     color: "text-yellow-400", icon: <Trophy className="w-4 h-4" /> },
-};
+// ─── Helpers ────────────────────────────────────────────────────────────────
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+function createAgentMesh(
+  shape: string,
+  color: number,
+  emissive: number,
+  scale: number
+): THREE.Group {
+  const group = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({
+    color,
+    emissive,
+    roughness: 0.3,
+    metalness: 0.8,
+    transparent: true,
+    opacity: 0.95,
+  });
+
+  switch (shape) {
+    case "robot": {
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), mat);
+      body.position.y = 0.6;
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), mat);
+      head.position.y = 1.2;
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.06), eyeMat);
+      eyeL.position.set(-0.1, 1.25, 0.2);
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.06), eyeMat);
+      eyeR.position.set(0.1, 1.25, 0.2);
+      group.add(body, head, eyeL, eyeR);
+      break;
+    }
+    case "soldier": {
+      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 0.8, 8), mat);
+      torso.position.y = 0.6;
+      const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), mat);
+      helmet.position.y = 1.2;
+      const visor = new THREE.Mesh(
+        new THREE.BoxGeometry(0.3, 0.1, 0.05),
+        new THREE.MeshBasicMaterial({ color: 0xffffff })
+      );
+      visor.position.set(0, 1.2, 0.25);
+      group.add(torso, helmet, visor);
+      break;
+    }
+    case "beast": {
+      const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.5, 0), mat);
+      core.position.y = 0.7;
+      for (let i = 0; i < 6; i++) {
+        const spike = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.4, 4), mat);
+        const angle = (i / 6) * Math.PI * 2;
+        spike.position.set(
+          Math.cos(angle) * 0.5,
+          0.7 + Math.sin(angle * 2) * 0.2,
+          Math.sin(angle) * 0.5
+        );
+        spike.lookAt(core.position);
+        spike.rotateX(Math.PI);
+        group.add(spike);
+      }
+      const eyes = new THREE.Mesh(
+        new THREE.SphereGeometry(0.12),
+        new THREE.MeshBasicMaterial({ color: 0xff0000 })
+      );
+      eyes.position.set(0, 0.9, 0.4);
+      group.add(core, eyes);
+      break;
+    }
+    case "mech": {
+      const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 0.6), mat);
+      chassis.position.y = 0.4;
+      const turret = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2, 0.25, 0.3, 6),
+        mat
+      );
+      turret.position.y = 0.8;
+      const barrel = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
+        mat
+      );
+      barrel.position.set(0, 0.8, 0.35);
+      barrel.rotateX(Math.PI / 2);
+      group.add(chassis, turret, barrel);
+      break;
+    }
+    case "speeder": {
+      const hull = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.6, 4, 8), mat);
+      hull.position.y = 0.5;
+      hull.rotateZ(Math.PI / 6);
+      const wing1 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.02, 0.3), mat);
+      wing1.position.set(0, 0.5, 0);
+      group.add(hull, wing1);
+      break;
+    }
+    case "ghost": {
+      const ghostMat = mat.clone();
+      ghostMat.transparent = true;
+      ghostMat.opacity = 0.6;
+      const form = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), ghostMat);
+      form.position.y = 0.8;
+      form.scale.y = 1.4;
+      for (let i = 0; i < 3; i++) {
+        const trail = new THREE.Mesh(
+          new THREE.ConeGeometry(0.1, 0.5, 4),
+          ghostMat
+        );
+        trail.position.set(
+          Math.sin(i * 2.1) * 0.2,
+          0.2,
+          Math.cos(i * 2.1) * 0.2
+        );
+        group.add(trail);
+      }
+      const eye = new THREE.Mesh(
+        new THREE.SphereGeometry(0.08),
+        new THREE.MeshBasicMaterial({ color: 0xffffff })
+      );
+      eye.position.set(0, 0.9, 0.3);
+      group.add(form, eye);
+      break;
+    }
+  }
+
+  group.scale.setScalar(scale);
+  return group;
+}
+
+// ─── Weapon projectile factory ──────────────────────────────────────────────
+function createProjectile(
+  scene: THREE.Scene,
+  from: THREE.Vector3,
+  to: THREE.Vector3,
+  weapon: string,
+  onComplete: () => void
+) {
+  const color = WEAPON_COLORS[weapon] || 0xffffff;
+
+  switch (weapon) {
+    case "Plasma Pistol": {
+      const geo = new THREE.SphereGeometry(0.08, 8, 8);
+      const mat = new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.9,
+      });
+      const bolt = new THREE.Mesh(geo, mat);
+      bolt.position.copy(from);
+      const spriteMat = new THREE.SpriteMaterial({
+        color,
+        transparent: true,
+        opacity: 0.4,
+      });
+      const glow = new THREE.Sprite(spriteMat);
+      glow.scale.setScalar(0.4);
+      bolt.add(glow);
+      scene.add(bolt);
+      gsap.to(bolt.position, {
+        x: to.x,
+        y: to.y,
+        z: to.z,
+        duration: 0.6,
+        ease: "power2.in",
+        onComplete: () => {
+          scene.remove(bolt);
+          onComplete();
+        },
+      });
+      break;
+    }
+    case "Railgun": {
+      const dir = to.clone().sub(from);
+      const len = dir.length();
+      const geo = new THREE.CylinderGeometry(0.02, 0.02, len, 8);
+      geo.rotateX(Math.PI / 2);
+      geo.translate(0, 0, len / 2);
+      const mat = new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.9,
+      });
+      const beam = new THREE.Mesh(geo, mat);
+      beam.position.copy(from);
+      beam.lookAt(to);
+      scene.add(beam);
+      const glowGeo = new THREE.CylinderGeometry(0.06, 0.06, len, 8);
+      glowGeo.rotateX(Math.PI / 2);
+      glowGeo.translate(0, 0, len / 2);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.3,
+      });
+      const glowBeam = new THREE.Mesh(glowGeo, glowMat);
+      glowBeam.position.copy(from);
+      glowBeam.lookAt(to);
+      scene.add(glowBeam);
+      gsap.to(mat, { opacity: 0, duration: 0.5, delay: 0.1 });
+      gsap.to(glowMat, {
+        opacity: 0,
+        duration: 0.5,
+        delay: 0.1,
+        onComplete: () => {
+          scene.remove(beam);
+          scene.remove(glowBeam);
+          onComplete();
+        },
+      });
+      break;
+    }
+    case "Scatter Blaster": {
+      for (let i = 0; i < 8; i++) {
+        const spread = new THREE.Vector3(
+          to.x + (Math.random() - 0.5) * 1.5,
+          to.y + (Math.random() - 0.5) * 0.5,
+          to.z + (Math.random() - 0.5) * 1.5
+        );
+        const p = new THREE.Mesh(
+          new THREE.SphereGeometry(0.04),
+          new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.8 })
+        );
+        p.position.copy(from);
+        scene.add(p);
+        gsap.to(p.position, {
+          x: spread.x,
+          y: spread.y,
+          z: spread.z,
+          duration: 0.4,
+          ease: "power1.out",
+          onComplete: () => { scene.remove(p); },
+        });
+      }
+      setTimeout(onComplete, 400);
+      break;
+    }
+    case "Rocket Launcher": {
+      const rocket = new THREE.Mesh(
+        new THREE.ConeGeometry(0.06, 0.2, 6),
+        new THREE.MeshBasicMaterial({ color })
+      );
+      rocket.position.copy(from);
+      scene.add(rocket);
+      const trailInterval = setInterval(() => {
+        const smoke = new THREE.Mesh(
+          new THREE.SphereGeometry(0.05 + Math.random() * 0.05),
+          new THREE.MeshBasicMaterial({
+            color: 0x888888,
+            transparent: true,
+            opacity: 0.5,
+          })
+        );
+        smoke.position.copy(rocket.position);
+        scene.add(smoke);
+        gsap.to(smoke.material as THREE.MeshBasicMaterial, {
+          opacity: 0,
+          duration: 0.8,
+          onComplete: () => { scene.remove(smoke); },
+        });
+        gsap.to(smoke.scale, { x: 2, y: 2, z: 2, duration: 0.8 });
+      }, 50);
+      gsap.to(rocket.position, {
+        x: to.x,
+        y: to.y,
+        z: to.z,
+        duration: 0.7,
+        ease: "power2.in",
+        onComplete: () => {
+          clearInterval(trailInterval);
+          scene.remove(rocket);
+          const explosion = new THREE.Mesh(
+            new THREE.SphereGeometry(0.5),
+            new THREE.MeshBasicMaterial({
+              color: 0xff4400,
+              transparent: true,
+              opacity: 0.8,
+            })
+          );
+          explosion.position.copy(to);
+          scene.add(explosion);
+          gsap.to(explosion.scale, { x: 3, y: 3, z: 3, duration: 0.4 });
+          gsap.to(explosion.material as THREE.MeshBasicMaterial, {
+            opacity: 0,
+            duration: 0.4,
+            onComplete: () => {
+              scene.remove(explosion);
+              onComplete();
+            },
+          });
+        },
+      });
+      rocket.lookAt(to);
+      break;
+    }
+    case "Laser Rifle": {
+      const dir2 = to.clone().sub(from);
+      const len2 = dir2.length();
+      const beamGeo = new THREE.CylinderGeometry(0.01, 0.01, len2, 4);
+      beamGeo.rotateX(Math.PI / 2);
+      beamGeo.translate(0, 0, len2 / 2);
+      const beamMat = new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 1,
+      });
+      const laserBeam = new THREE.Mesh(beamGeo, beamMat);
+      laserBeam.position.copy(from);
+      laserBeam.lookAt(to);
+      scene.add(laserBeam);
+      gsap.to(beamMat, {
+        opacity: 0.3,
+        duration: 0.1,
+        yoyo: true,
+        repeat: 4,
+        onComplete: () => {
+          scene.remove(laserBeam);
+          onComplete();
+        },
+      });
+      break;
+    }
+    case "Void Cannon": {
+      const voidSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(0.15, 16, 16),
+        new THREE.MeshBasicMaterial({
+          color: 0x220033,
+          transparent: true,
+          opacity: 0.9,
+        })
+      );
+      voidSphere.position.copy(from);
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(0.2, 0.03, 8, 16),
+        new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.7 })
+      );
+      ring.position.copy(from);
+      scene.add(voidSphere, ring);
+      gsap.to(voidSphere.position, {
+        x: to.x,
+        y: to.y,
+        z: to.z,
+        duration: 0.8,
+        ease: "power1.inOut",
+      });
+      gsap.to(ring.position, {
+        x: to.x,
+        y: to.y,
+        z: to.z,
+        duration: 0.8,
+        ease: "power1.inOut",
+      });
+      gsap.to(ring.rotation, { z: Math.PI * 4, duration: 0.8 });
+      setTimeout(() => {
+        gsap.to(voidSphere.scale, { x: 4, y: 4, z: 4, duration: 0.3 });
+        gsap.to(voidSphere.material as THREE.MeshBasicMaterial, {
+          opacity: 0,
+          duration: 0.3,
+          onComplete: () => {
+            scene.remove(voidSphere);
+            scene.remove(ring);
+            onComplete();
+          },
+        });
+      }, 800);
+      break;
+    }
+    default: {
+      const defaultBolt = new THREE.Mesh(
+        new THREE.SphereGeometry(0.06),
+        new THREE.MeshBasicMaterial({ color: 0xffffff })
+      );
+      defaultBolt.position.copy(from);
+      scene.add(defaultBolt);
+      gsap.to(defaultBolt.position, {
+        x: to.x,
+        y: to.y,
+        z: to.z,
+        duration: 0.5,
+        onComplete: () => {
+          scene.remove(defaultBolt);
+          onComplete();
+        },
+      });
+    }
+  }
+}
+
+// ─── Damage number popup ────────────────────────────────────────────────────
+function showDamageNumber(
+  scene: THREE.Scene,
+  position: THREE.Vector3,
+  damage: number,
+  color: number
+) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d")!;
+  ctx.font = "bold 40px monospace";
+  ctx.fillStyle = `#${color.toString(16).padStart(6, "0")}`;
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 3;
+  ctx.textAlign = "center";
+  ctx.strokeText(`-${damage}`, 64, 45);
+  ctx.fillText(`-${damage}`, 64, 45);
+  const tex = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(
+    new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 1 })
+  );
+  sprite.position.copy(position).add(new THREE.Vector3(0, 1.8, 0));
+  sprite.scale.set(0.8, 0.4, 1);
+  scene.add(sprite);
+  gsap.to(sprite.position, {
+    y: position.y + 3,
+    duration: 1.2,
+    ease: "power2.out",
+  });
+  gsap.to(sprite.material, {
+    opacity: 0,
+    duration: 1.2,
+    onComplete: () => {
+      scene.remove(sprite);
+      tex.dispose();
+    },
+  });
+}
+
+// ─── Agent name label sprite ────────────────────────────────────────────────
+function createNameLabel(name: string, color: number): THREE.Sprite {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d")!;
+  ctx.font = "bold 28px monospace";
+  ctx.fillStyle = `#${color.toString(16).padStart(6, "0")}`;
+  ctx.strokeStyle = "rgba(0,0,0,0.8)";
+  ctx.lineWidth = 4;
+  ctx.textAlign = "center";
+  ctx.strokeText(name, 128, 40);
+  ctx.fillText(name, 128, 40);
+  const tex = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(
+    new THREE.SpriteMaterial({ map: tex, transparent: true })
+  );
+  sprite.scale.set(1.5, 0.4, 1);
+  sprite.position.y = 2.0;
+  return sprite;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
 export default function WatchMode() {
-  const [, navigate] = useLocation();
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [battleMode, setBattleMode] = useState<BattleMode>("1v1");
-  const [agentCount, setAgentCount] = useState(4);
-  const [matchCount, setMatchCount] = useState(3);
-  const [events, setEvents] = useState<LiveEvent[]>([]);
-  const [currentMatch, setCurrentMatch] = useState(0);
-  const [totalMatches, setTotalMatches] = useState(0);
-  const [sessionResult, setSessionResult] = useState<any>(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [showConfig, setShowConfig] = useState(false);
-  const [observerReport, setObserverReport] = useState<any>(null);
-  const [observerLoading, setObserverLoading] = useState(false);
-  const feedRef = useRef<HTMLDivElement>(null);
-  const eid = useRef(0);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const composerRef = useRef<EffectComposer | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const agentMeshesRef = useRef<Map<string, THREE.Group>>(new Map());
+  const skyboxSphereRef = useRef<THREE.Mesh | null>(null);
+  const animFrameRef = useRef<number>(0);
+  const elapsedRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const dustRef = useRef<THREE.Points | null>(null);
+  const pointLightsRef = useRef<THREE.PointLight[]>([]);
+  const combatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const arenaRingRef = useRef<THREE.Mesh | null>(null);
 
-  // ─── tRPC mutations ──────────────────────────────────────────
-  const playtest = trpc.flywheel.playtest.useMutation({
+  // State
+  const [phase, setPhase] = useState<
+    "idle" | "loading" | "combat" | "debrief"
+  >("idle");
+  const [isRunning, setIsRunning] = useState(false);
+  const [agentStates, setAgentStates] = useState<AgentHUD[]>([]);
+  const [terminalLines, setTerminalLines] = useState<TermLine[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  const [killFeed, setKillFeed] = useState<string[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [followAgent, setFollowAgent] = useState<string | null>(null);
+  const [sessionResult, setSessionResult] = useState<any>(null);
+  const [skyboxLoaded, setSkyboxLoaded] = useState(false);
+  const [arenaName, setArenaName] = useState("");
+
+  const termRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+
+  // Push helpers
+  const pushTerminal = useCallback((type: TermLine["type"], text: string) => {
+    setTerminalLines((prev) => [
+      ...prev.slice(-80),
+      { type, text, ts: Date.now() },
+    ]);
+  }, []);
+  const pushChat = useCallback(
+    (sender: string, color: string, text: string) => {
+      setChatMessages((prev) => [
+        ...prev.slice(-50),
+        { sender, color, text, ts: Date.now() },
+      ]);
+    },
+    []
+  );
+  const pushKill = useCallback((text: string) => {
+    setKillFeed((prev) => [...prev.slice(-5), text]);
+  }, []);
+
+  // Auto-scroll
+  useEffect(() => {
+    if (termRef.current) termRef.current.scrollTop = termRef.current.scrollHeight;
+  }, [terminalLines]);
+  useEffect(() => {
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+  }, [chatMessages]);
+
+  // ─── Load a random skybox panorama from CDN ──────────────────────────
+  const loadSkybox = useCallback(
+    (panorama?: (typeof SKYBOX_PANORAMAS)[0]) => {
+      const chosen =
+        panorama ||
+        SKYBOX_PANORAMAS[Math.floor(Math.random() * SKYBOX_PANORAMAS.length)];
+      setArenaName(chosen.name);
+
+      const proxyUrl = `/api/skybox-proxy?url=${encodeURIComponent(chosen.url)}`;
+      const loader = new THREE.TextureLoader();
+      loader.crossOrigin = "anonymous";
+      loader.load(
+        proxyUrl,
+        (texture) => {
+          texture.mapping = THREE.EquirectangularReflectionMapping;
+          texture.colorSpace = THREE.SRGBColorSpace;
+          if (skyboxSphereRef.current) {
+            const mat =
+              skyboxSphereRef.current.material as THREE.MeshBasicMaterial;
+            if (mat.map) mat.map.dispose();
+            mat.map = texture;
+            mat.needsUpdate = true;
+          }
+          if (sceneRef.current) {
+            sceneRef.current.environment = texture;
+          }
+          setSkyboxLoaded(true);
+        },
+        undefined,
+        (err) => {
+          console.error("[Skybox] Load failed:", err);
+        }
+      );
+    },
+    []
+  );
+
+  // ─── tRPC mutation ────────────────────────────────────────────────────
+  const ffaPlaytest = trpc.flywheel.ffa.useMutation({
     onSuccess: (data: any) => {
+      if (combatIntervalRef.current) {
+        clearInterval(combatIntervalRef.current);
+        combatIntervalRef.current = null;
+      }
       setPhase("debrief");
       setIsRunning(false);
       setSessionResult(data);
-      pushEvent("debrief", <Trophy className="w-4 h-4" />,
-        `Session complete — ${data.matchesPlayed} matches`,
-        `MVP: ${data.summary.mvp} · ${data.summary.totalKills} kills · ${data.summary.totalTokensEarned} ARENA earned`,
-        "text-yellow-400");
+      pushTerminal(
+        "system",
+        `[SESSION COMPLETE] ${data.matchesPlayed} matches played`
+      );
+      pushChat(
+        "SYSTEM",
+        "#fbbf24",
+        `Tournament complete! MVP: ${data.summary?.mvp || "Unknown"}`
+      );
     },
     onError: (err: any) => {
+      if (combatIntervalRef.current) {
+        clearInterval(combatIntervalRef.current);
+        combatIntervalRef.current = null;
+      }
       setPhase("idle");
       setIsRunning(false);
-      pushEvent("idle", <Shield className="w-4 h-4" />, "Error", err.message, "text-red-400");
+      pushTerminal("error", `[ERROR] ${err.message}`);
     },
   });
 
-  const ffaPlaytest = trpc.flywheel.ffa.useMutation({
-    onSuccess: (data: any) => {
-      setPhase("debrief");
-      setIsRunning(false);
-      setSessionResult({ ...data, isFFA: true });
-      pushEvent("debrief", <Crown className="w-4 h-4" />,
-        `FFA session complete — ${data.matchesPlayed} matches`,
-        `MVP: ${data.summary.mvp} · ${data.summary.totalKills} kills · ${data.summary.totalTokensEarned} ARENA earned`,
-        "text-yellow-400");
-    },
-    onError: (err: any) => {
-      setPhase("idle");
-      setIsRunning(false);
-      pushEvent("idle", <Shield className="w-4 h-4" />, "FFA Error", err.message, "text-red-400");
-    },
-  });
-
-  // ─── Observer mutation ────────────────────────────────────────
-  const observerMutation = trpc.observer.evaluate.useMutation({
-    onSuccess: (data: any) => {
-      setObserverReport(data);
-      setObserverLoading(false);
-      pushEvent("debrief", <Brain className="w-4 h-4" />,
-        `Observer Report: ${data.grade} (${data.overallScore}/100)`,
-        data.summary,
-        "text-purple-400");
-    },
-    onError: () => {
-      setObserverLoading(false);
-    },
-  });
-
-  const requestObserverReport = () => {
-    if (!sessionResult) return;
-    setObserverLoading(true);
-    observerMutation.mutate({ sessionData: sessionResult });
-  };
-
-  const pushEvent = (p: Phase, icon: React.ReactNode, text: string, detail: string, color: string) => {
-    eid.current += 1;
-    setEvents(prev => [...prev, { id: eid.current, phase: p, icon, text, detail, color, ts: Date.now() }]);
-  };
-
+  // ─── Three.js Scene Setup ────────────────────────────────────────────
   useEffect(() => {
-    if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight;
-  }, [events]);
+    if (!canvasRef.current) return;
+    const container = canvasRef.current;
 
-  // ─── Cinematic launch sequence ───────────────────────────────
-  const launch = async () => {
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: "high-performance",
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+
+    // Scene
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0a0a1a, 0.015);
+    sceneRef.current = scene;
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(
+      70,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.set(0, 3, 10);
+    cameraRef.current = camera;
+
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI * 0.85;
+    controls.minPolarAngle = Math.PI * 0.15;
+    controls.maxDistance = 18;
+    controls.minDistance = 2;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.3;
+    controlsRef.current = controls;
+
+    // ─── Skybox Sphere ──────────────────────────────────────────────────
+    const skyGeo = new THREE.SphereGeometry(100, 64, 64);
+    skyGeo.scale(-1, 1, 1);
+    const skyMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      side: THREE.FrontSide,
+    });
+    const skySphere = new THREE.Mesh(skyGeo, skyMat);
+    skySphere.renderOrder = -1; // render first
+    skySphere.frustumCulled = false;
+    // Skybox should not be affected by fog
+    skyMat.fog = false;
+    scene.add(skySphere);
+    skyboxSphereRef.current = skySphere;
+
+    // ─── Lighting ───────────────────────────────────────────────────────
+    const ambient = new THREE.AmbientLight(0x334466, 0.8);
+    scene.add(ambient);
+    const dirLight = new THREE.DirectionalLight(0x88aaff, 1.2);
+    dirLight.position.set(5, 10, 5);
+    scene.add(dirLight);
+    const pointCyan = new THREE.PointLight(0x00ffff, 2, 20);
+    pointCyan.position.set(-5, 3, -5);
+    scene.add(pointCyan);
+    const pointPink = new THREE.PointLight(0xff44aa, 2, 20);
+    pointPink.position.set(5, 3, 5);
+    scene.add(pointPink);
+    const pointPurple = new THREE.PointLight(0xaa44ff, 1.5, 15);
+    pointPurple.position.set(0, 6, 0);
+    scene.add(pointPurple);
+    pointLightsRef.current = [pointCyan, pointPink, pointPurple];
+
+    // ─── Arena floor grid ───────────────────────────────────────────────
+    const gridHelper = new THREE.GridHelper(30, 30, 0x00ffff, 0x112233);
+    gridHelper.position.y = -0.01;
+    const gridMat = gridHelper.material as THREE.Material;
+    gridMat.transparent = true;
+    gridMat.opacity = 0.25;
+    scene.add(gridHelper);
+
+    // ─── Arena boundary ring ────────────────────────────────────────────
+    const ringGeo = new THREE.TorusGeometry(7, 0.03, 8, 64);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0x00ffff,
+      transparent: true,
+      opacity: 0.4,
+    });
+    const arenaRing = new THREE.Mesh(ringGeo, ringMat);
+    arenaRing.rotation.x = Math.PI / 2;
+    arenaRing.position.y = 0.01;
+    scene.add(arenaRing);
+    arenaRingRef.current = arenaRing;
+
+    // ─── Ambient dust particles ─────────────────────────────────────────
+    const dustCount = 600;
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPositions = new Float32Array(dustCount * 3);
+    const dustColors = new Float32Array(dustCount * 3);
+    for (let i = 0; i < dustCount; i++) {
+      dustPositions[i * 3] = (Math.random() - 0.5) * 40;
+      dustPositions[i * 3 + 1] = Math.random() * 12;
+      dustPositions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+      const c = new THREE.Color().setHSL(
+        0.55 + Math.random() * 0.1,
+        0.8,
+        0.6
+      );
+      dustColors[i * 3] = c.r;
+      dustColors[i * 3 + 1] = c.g;
+      dustColors[i * 3 + 2] = c.b;
+    }
+    dustGeo.setAttribute(
+      "position",
+      new THREE.BufferAttribute(dustPositions, 3)
+    );
+    dustGeo.setAttribute("color", new THREE.BufferAttribute(dustColors, 3));
+    const dustMat = new THREE.PointsMaterial({
+      size: 0.04,
+      transparent: true,
+      opacity: 0.5,
+      vertexColors: true,
+    });
+    const dust = new THREE.Points(dustGeo, dustMat);
+    scene.add(dust);
+    dustRef.current = dust;
+
+    // ─── Post-processing pipeline ───────────────────────────────────────
+    const composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    const bloomEffect = new BloomEffect({
+      intensity: 1.5,
+      luminanceThreshold: 0.3,
+      luminanceSmoothing: 0.7,
+      mipmapBlur: true,
+    });
+    const chromaticEffect = new ChromaticAberrationEffect({
+      offset: new THREE.Vector2(0.001, 0.001),
+      radialModulation: false,
+      modulationOffset: 0.0,
+    });
+    const vignetteEffect = new VignetteEffect({
+      darkness: 0.6,
+      offset: 0.3,
+    });
+    const noiseEffect = new NoiseEffect({
+      blendFunction: BlendFunction.OVERLAY,
+    });
+    noiseEffect.blendMode.opacity.value = 0.06;
+
+    const effectPass = new EffectPass(
+      camera,
+      bloomEffect,
+      chromaticEffect,
+      vignetteEffect,
+      noiseEffect
+    );
+    composer.addPass(effectPass);
+    composerRef.current = composer;
+
+    // ─── Animation loop ─────────────────────────────────────────────────
+    lastTimeRef.current = performance.now();
+    const animate = () => {
+      animFrameRef.current = requestAnimationFrame(animate);
+      const now = performance.now();
+      const delta = Math.min((now - lastTimeRef.current) / 1000, 0.1);
+      lastTimeRef.current = now;
+      elapsedRef.current += delta;
+      const elapsed = elapsedRef.current;
+
+      controls.update();
+
+      // Animate dust
+      if (dustRef.current) {
+        const positions = dustRef.current.geometry.attributes.position
+          .array as Float32Array;
+        for (let i = 0; i < dustCount; i++) {
+          positions[i * 3 + 1] += delta * 0.08;
+          if (positions[i * 3 + 1] > 12) positions[i * 3 + 1] = 0;
+          positions[i * 3] += Math.sin(elapsed + i) * delta * 0.02;
+        }
+        dustRef.current.geometry.attributes.position.needsUpdate = true;
+      }
+
+      // Animate agent meshes (bob)
+      agentMeshesRef.current.forEach((mesh) => {
+        mesh.position.y = Math.sin(elapsed * 2 + mesh.position.x) * 0.05;
+      });
+
+      // Pulse point lights
+      if (pointLightsRef.current.length >= 3) {
+        pointLightsRef.current[0].intensity =
+          2 + Math.sin(elapsed * 1.5) * 0.5;
+        pointLightsRef.current[1].intensity =
+          2 + Math.cos(elapsed * 1.5) * 0.5;
+        pointLightsRef.current[2].intensity =
+          1.5 + Math.sin(elapsed * 0.8) * 0.3;
+      }
+
+      // Slowly rotate arena ring
+      if (arenaRingRef.current) {
+        arenaRingRef.current.rotation.z = elapsed * 0.1;
+      }
+
+      composer.render(delta);
+    };
+    animate();
+
+    // Load initial skybox
+    loadSkybox();
+
+    // Resize handler
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animFrameRef.current);
+      controls.dispose();
+      renderer.dispose();
+      composer.dispose();
+      if (container.contains(renderer.domElement))
+        container.removeChild(renderer.domElement);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Follow agent camera ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!followAgent || !controlsRef.current) return;
+    const mesh = agentMeshesRef.current.get(followAgent);
+    if (mesh) {
+      const target = mesh.position.clone().add(new THREE.Vector3(0, 1, 0));
+      gsap.to(controlsRef.current.target, {
+        x: target.x,
+        y: target.y,
+        z: target.z,
+        duration: 1,
+        ease: "power2.out",
+      });
+      if (cameraRef.current) {
+        const camPos = mesh.position
+          .clone()
+          .add(new THREE.Vector3(3, 2.5, 3));
+        gsap.to(cameraRef.current.position, {
+          x: camPos.x,
+          y: camPos.y,
+          z: camPos.z,
+          duration: 1.5,
+          ease: "power2.out",
+        });
+      }
+    }
+  }, [followAgent]);
+
+  // ─── Launch tournament ────────────────────────────────────────────────
+  const launchTournament = useCallback(async () => {
+    if (isRunning) return;
     setIsRunning(true);
-    setEvents([]);
+    setPhase("loading");
+    setTerminalLines([]);
+    setChatMessages([]);
+    setKillFeed([]);
     setSessionResult(null);
-    setShowConfig(false);
-    setTotalMatches(matchCount);
 
-    const isFFA = battleMode === "ffa";
-    const modeLabel = isFFA ? `${agentCount}-agent free-for-all` : "1v1 duel";
+    // Load a new random skybox
+    loadSkybox();
 
-    // Phase: SETUP
-    setPhase("setup");
-    pushEvent("setup", <Zap className="w-4 h-4" />,
-      `Initializing ${modeLabel} session`,
-      `${matchCount} match${matchCount > 1 ? "es" : ""} queued. Connecting to LLM endpoints...`,
-      "text-cyan-400");
-    await sleep(900);
+    pushTerminal("system", "━━━ INITIALIZING TOURNAMENT ━━━");
+    pushTerminal("call", "flywheel.ffa({ agentCount: 6, matchCount: 3 })");
+    pushChat("SYSTEM", "#fbbf24", "Tournament starting — 6 agents, 3 rounds");
 
-    // Simulate per-match phases
-    for (let i = 1; i <= matchCount; i++) {
-      setCurrentMatch(i);
+    // Spawn agent meshes in the arena
+    const scene = sceneRef.current;
+    if (scene) {
+      agentMeshesRef.current.forEach((m) => scene.remove(m));
+      agentMeshesRef.current.clear();
 
-      // ARENA
-      setPhase("arena");
-      pushEvent("arena", <Sparkles className="w-4 h-4" />,
-        `Match ${i}/${matchCount} — Generating arena`,
-        "Requesting Skybox AI panorama (Model 4). Building 360° environment...",
-        "text-purple-400");
-      await sleep(700);
+      const agentNames = Object.keys(AGENT_CHARS);
+      agentNames.forEach((name, i) => {
+        const cfg = AGENT_CHARS[name];
+        const mesh = createAgentMesh(
+          cfg.shape,
+          cfg.color,
+          cfg.emissive,
+          cfg.scale
+        );
+        const angle = (i / agentNames.length) * Math.PI * 2;
+        const radius = 4;
+        mesh.position.set(
+          Math.cos(angle) * radius,
+          0,
+          Math.sin(angle) * radius
+        );
+        mesh.lookAt(0, 0, 0);
+        const label = createNameLabel(name, cfg.color);
+        mesh.add(label);
+        scene.add(mesh);
+        agentMeshesRef.current.set(name, mesh);
+      });
 
-      // REASONING
-      setPhase("reasoning");
-      pushEvent("reasoning", <Brain className="w-4 h-4" />,
-        "Agents analyzing terrain",
-        isFFA
-          ? `${agentCount} agents running vision analysis. Each choosing weapons, positioning, and betting strategy...`
-          : "Both agents scanning arena via computer vision. Selecting loadouts and placing bets...",
-        "text-blue-400");
-      await sleep(600);
-
-      pushEvent("reasoning", <DollarSign className="w-4 h-4" />,
-        "Prediction market created",
-        isFFA
-          ? `All ${agentCount} agents placing self-bets. Spectator wagers calculated.`
-          : "Agents betting on themselves. Market odds locked.",
-        "text-green-400");
-      await sleep(400);
-
-      // COMBAT
-      setPhase("combat");
-      pushEvent("combat", <Crosshair className="w-4 h-4" />,
-        "Combat engaged",
-        isFFA
-          ? `${agentCount}-way firefight! Every bullet is a token transfer on Base L2.`
-          : "Agents exchanging fire. Every hit = ARENA tokens transferred.",
-        "text-red-400");
-      await sleep(500);
-
-      pushEvent("combat", <Target className="w-4 h-4" />,
-        "Damage dealt",
-        "Token transfers executing. Agent HP depleting. Weapon ammo burning...",
-        "text-orange-400");
-      await sleep(300);
-
-      // SETTLEMENT
-      setPhase("settlement");
-      pushEvent("settlement", <Coins className="w-4 h-4" />,
-        `Match ${i} settled`,
-        "Winner determined. Prediction market resolved. Payouts distributed.",
-        "text-green-400");
-      await sleep(400);
+      setFollowAgent(agentNames[0]);
+      setAgentStates(
+        agentNames.map((name) => ({
+          agentId: name,
+          name,
+          hp: 100,
+          maxHp: 100,
+          kills: 0,
+          tokens: 100,
+          alive: true,
+        }))
+      );
     }
 
-    // Fire the real backend call
+    await sleep(800);
     setPhase("combat");
-    pushEvent("combat", <Zap className="w-4 h-4" />,
-      "Executing on backend",
-      "Running full session with real LLM calls, token economics, and prediction markets...",
-      "text-yellow-400");
+    pushTerminal("system", "[COMBAT PHASE] Agents engaging...");
 
-    if (isFFA) {
-      ffaPlaytest.mutate({ matchCount, agentCount, useLLM: true });
-    } else {
-      playtest.mutate({ matchCount, useLLM: true });
-    }
+    // Fire the actual FFA playtest
+    ffaPlaytest.mutate({ agentCount: 6, matchCount: 3 });
+
+    // Simulate visual combat while waiting for API response
+    const agentNames = Object.keys(AGENT_CHARS);
+    combatIntervalRef.current = setInterval(() => {
+      if (!sceneRef.current) return;
+      const attacker =
+        agentNames[Math.floor(Math.random() * agentNames.length)];
+      let defender =
+        agentNames[Math.floor(Math.random() * agentNames.length)];
+      while (defender === attacker)
+        defender =
+          agentNames[Math.floor(Math.random() * agentNames.length)];
+
+      const weapons = Object.keys(WEAPON_COLORS);
+      const weapon = weapons[Math.floor(Math.random() * weapons.length)];
+      const damage = Math.floor(Math.random() * 25) + 5;
+
+      const attackerMesh = agentMeshesRef.current.get(attacker);
+      const defenderMesh = agentMeshesRef.current.get(defender);
+
+      if (attackerMesh && defenderMesh && sceneRef.current) {
+        const from = attackerMesh.position
+          .clone()
+          .add(new THREE.Vector3(0, 0.8, 0));
+        const to = defenderMesh.position
+          .clone()
+          .add(new THREE.Vector3(0, 0.8, 0));
+
+        const currentScene = sceneRef.current;
+        createProjectile(currentScene, from, to, weapon, () => {
+          showDamageNumber(
+            currentScene,
+            to,
+            damage,
+            WEAPON_COLORS[weapon] || 0xffffff
+          );
+        });
+
+        // Move agents slightly (random walk within arena)
+        const moveAngle = Math.random() * Math.PI * 2;
+        const moveDist = 0.3 + Math.random() * 0.5;
+        const newX =
+          attackerMesh.position.x + Math.cos(moveAngle) * moveDist;
+        const newZ =
+          attackerMesh.position.z + Math.sin(moveAngle) * moveDist;
+        const distFromCenter = Math.sqrt(newX * newX + newZ * newZ);
+        if (distFromCenter < 6) {
+          gsap.to(attackerMesh.position, {
+            x: newX,
+            z: newZ,
+            duration: 0.5,
+            ease: "power1.out",
+          });
+          attackerMesh.lookAt(defenderMesh.position);
+        }
+
+        setAgentStates((prev) =>
+          prev.map((a) => {
+            if (a.name === defender && a.alive)
+              return { ...a, hp: Math.max(0, a.hp - damage) };
+            if (a.name === attacker)
+              return {
+                ...a,
+                kills: a.kills + (Math.random() > 0.7 ? 1 : 0),
+              };
+            return a;
+          })
+        );
+
+        pushTerminal(
+          "call",
+          `${attacker}.attack("${weapon}", target="${defender}")`
+        );
+        pushTerminal("response", `  ${damage} DMG to ${defender}`);
+
+        const attackerCfg = AGENT_CHARS[attacker];
+        if (Math.random() > 0.65) {
+          const taunts = [
+            `You're scrap metal, ${defender}!`,
+            `Is that all you got?`,
+            `Calculated. Predicted. Eliminated.`,
+            `My turn next round...`,
+            `Your tokens are mine!`,
+            `I'll remember this.`,
+            `Processing your destruction...`,
+            `Engaging superior firepower.`,
+          ];
+          pushChat(
+            attacker,
+            `#${attackerCfg.color.toString(16).padStart(6, "0")}`,
+            taunts[Math.floor(Math.random() * taunts.length)]
+          );
+        }
+
+        // Kill check
+        setAgentStates((prev) => {
+          const updated = prev.map((a) => ({ ...a }));
+          const target = updated.find((a) => a.name === defender);
+          if (target && target.hp <= 0 && target.alive) {
+            target.alive = false;
+            pushKill(`${attacker} eliminated ${defender} with ${weapon}`);
+            pushChat("SYSTEM", "#ff4444", `${defender} has been eliminated!`);
+            const mesh = agentMeshesRef.current.get(defender);
+            if (mesh && sceneRef.current) {
+              gsap.to(mesh.scale, {
+                x: 0,
+                y: 0,
+                z: 0,
+                duration: 0.5,
+                onComplete: () => {
+                  sceneRef.current?.remove(mesh);
+                  agentMeshesRef.current.delete(defender);
+                },
+              });
+            }
+          }
+          return updated;
+        });
+      }
+    }, 1500);
+  }, [isRunning, ffaPlaytest, pushTerminal, pushChat, pushKill, loadSkybox]);
+
+  // ─── Chat send ────────────────────────────────────────────────────────
+  const sendChat = () => {
+    if (!chatInput.trim()) return;
+    pushChat("YOU", "#ffffff", chatInput);
+    const agents = Object.keys(AGENT_CHARS);
+    const responder = agents[Math.floor(Math.random() * agents.length)];
+    const cfg = AGENT_CHARS[responder];
+    setTimeout(() => {
+      const reactions = [
+        `Interesting take, human.`,
+        `Stay out of this, spectator.`,
+        `You think you could do better?`,
+        `Noted. Adjusting strategy.`,
+        `Bold words from the sidelines.`,
+      ];
+      pushChat(
+        responder,
+        `#${cfg.color.toString(16).padStart(6, "0")}`,
+        reactions[Math.floor(Math.random() * reactions.length)]
+      );
+    }, 800 + Math.random() * 1500);
+    setChatInput("");
   };
 
-  // ─── Derived state ──────────────────────────────────────────
-  const phaseMeta = PHASE_META[phase];
-  const progress = phase === "idle" ? 0 : phase === "debrief" ? 100 :
-    totalMatches > 0 ? Math.round((currentMatch / totalMatches) * 100) : 50;
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (combatIntervalRef.current) clearInterval(combatIntervalRef.current);
+    };
+  }, []);
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════════
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden">
-      {/* ─── Ambient background ─────────────────────────────── */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a1a] via-[#0a0a0f] to-[#050508]" />
-        <AnimatePresence>
-          {phase === "combat" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.15 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-gradient-to-t from-red-900/30 via-transparent to-transparent"
-            />
-          )}
-          {phase === "reasoning" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-gradient-to-t from-blue-900/30 via-transparent to-transparent"
-            />
-          )}
-          {phase === "debrief" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.12 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-gradient-to-t from-yellow-900/20 via-transparent to-transparent"
-            />
-          )}
-        </AnimatePresence>
-      </div>
+    <div
+      className="fixed inset-0 bg-black overflow-hidden select-none"
+      style={{ fontFamily: "'Orbitron', 'JetBrains Mono', monospace" }}
+    >
+      {/* Three.js Canvas */}
+      <div ref={canvasRef} className="absolute inset-0 z-0" />
 
-      {/* ─── Minimal top bar ────────────────────────────────── */}
-      <div className="relative z-20 flex items-center justify-between px-6 py-4 border-b border-white/5">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate("/")} className="text-white/30 hover:text-white/60 transition">
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isRunning ? "bg-green-400 animate-pulse" : "bg-white/20"}`} />
-            <span className="font-['Orbitron'] text-xs tracking-[0.2em] text-white/60">WATCH MODE</span>
-          </div>
-        </div>
-
-        {/* Phase indicator */}
+      {/* ─── TOP BAR ─── */}
+      <div
+        className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-3"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%)",
+        }}
+      >
         <div className="flex items-center gap-3">
-          <span className={`text-xs font-mono ${phaseMeta.color} flex items-center gap-1.5`}>
-            {phaseMeta.icon}
-            {phaseMeta.label}
+          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-cyan-400 text-sm font-bold tracking-[0.3em] uppercase">
+            Token Arena
           </span>
-          {isRunning && (
-            <span className="text-[10px] font-mono text-white/30">
-              {currentMatch}/{totalMatches}
+          {arenaName && (
+            <span className="text-gray-500 text-xs tracking-wider ml-2">
+              // {arenaName}
             </span>
           )}
         </div>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-gray-400 tracking-wider uppercase">
+            {phase === "idle"
+              ? "STANDBY"
+              : phase === "loading"
+                ? "INITIALIZING"
+                : phase === "combat"
+                  ? "LIVE COMBAT"
+                  : "DEBRIEF"}
+          </span>
+          <div
+            className={`w-2 h-2 rounded-full ${phase === "combat" ? "bg-red-500 animate-pulse" : phase === "debrief" ? "bg-green-500" : "bg-gray-500"}`}
+          />
+        </div>
       </div>
 
-      {/* ─── Progress bar ───────────────────────────────────── */}
-      {isRunning && (
-        <div className="relative z-20 h-[2px] bg-white/5">
-          <motion.div
-            className="h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-red-500"
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          />
+      {/* ─── KILL FEED (top right) ─── */}
+      {killFeed.length > 0 && (
+        <div className="absolute top-14 right-6 z-10 flex flex-col gap-1 pointer-events-none">
+          {killFeed.map((k, i) => (
+            <div
+              key={`kill-${i}`}
+              className="text-xs px-3 py-1.5 rounded"
+              style={{
+                background: "rgba(255,0,0,0.15)",
+                border: "1px solid rgba(255,0,0,0.3)",
+                color: "#ff6666",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              {k}
+            </div>
+          ))}
         </div>
       )}
 
-      {/* ─── Main content ───────────────────────────────────── */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 py-8">
-        <AnimatePresence mode="wait">
-          {/* ─── IDLE STATE: Launch screen ────────────────── */}
-          {phase === "idle" && !sessionResult && (
-            <motion.div
-              key="idle"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="flex flex-col items-center justify-center min-h-[70vh] text-center"
-            >
-              <div className="mb-8">
-                <motion.div
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center"
-                >
-                  <Eye className="w-8 h-8 text-cyan-400" />
-                </motion.div>
-                <h1 className="font-['Orbitron'] text-2xl font-bold mb-3 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                  AUTONOMOUS MODE
-                </h1>
-                <p className="text-white/40 text-sm max-w-md mx-auto leading-relaxed">
-                  Your AI agent handles everything — arena generation, combat decisions, betting, and token management. Sit back and watch.
-                </p>
-              </div>
-
-              {/* Config toggle */}
-              <button
-                onClick={() => setShowConfig(!showConfig)}
-                className="flex items-center gap-2 text-xs text-white/30 hover:text-white/50 transition mb-6"
-              >
-                <span>Configure</span>
-                <ChevronDown className={`w-3 h-3 transition-transform ${showConfig ? "rotate-180" : ""}`} />
-              </button>
-
-              <AnimatePresence>
-                {showConfig && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden mb-8 w-full max-w-sm"
-                  >
-                    <div className="space-y-4 p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                      {/* Battle mode */}
-                      <div>
-                        <label className="text-[10px] uppercase tracking-wider text-white/30 mb-2 block">Mode</label>
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            onClick={() => setBattleMode("1v1")}
-                            className={`px-3 py-2 rounded-lg text-xs font-medium transition ${
-                              battleMode === "1v1"
-                                ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                                : "bg-white/5 text-white/40 border border-white/5 hover:border-white/10"
-                            }`}
-                          >
-                            <Swords className="w-3 h-3 inline mr-1.5" />1v1 Duel
-                          </button>
-                          <button
-                            onClick={() => setBattleMode("ffa")}
-                            className={`px-3 py-2 rounded-lg text-xs font-medium transition ${
-                              battleMode === "ffa"
-                                ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
-                                : "bg-white/5 text-white/40 border border-white/5 hover:border-white/10"
-                            }`}
-                          >
-                            <Users className="w-3 h-3 inline mr-1.5" />Free-For-All
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Agent count (FFA) */}
-                      {battleMode === "ffa" && (
-                        <div>
-                          <label className="text-[10px] uppercase tracking-wider text-white/30 mb-2 block">
-                            Agents <span className="text-orange-400">{agentCount}</span>
-                          </label>
-                          <div className="flex gap-1.5">
-                            {[2, 3, 4, 6, 8].map(n => (
-                              <button
-                                key={`ac-${n}`}
-                                onClick={() => setAgentCount(n)}
-                                className={`flex-1 py-1.5 rounded text-xs font-mono transition ${
-                                  agentCount === n
-                                    ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
-                                    : "bg-white/5 text-white/30 border border-white/5"
-                                }`}
-                              >
-                                {n}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Match count */}
-                      <div>
-                        <label className="text-[10px] uppercase tracking-wider text-white/30 mb-2 block">Matches</label>
-                        <div className="flex gap-1.5">
-                          {[1, 3, 5, 10].map(n => (
-                            <button
-                              key={`mc-${n}`}
-                              onClick={() => setMatchCount(n)}
-                              className={`flex-1 py-1.5 rounded text-xs font-mono transition ${
-                                matchCount === n
-                                  ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                                  : "bg-white/5 text-white/30 border border-white/5"
-                              }`}
-                            >
-                              {n}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Launch button */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={launch}
-                className={`px-12 py-4 rounded-xl font-['Orbitron'] text-sm font-bold tracking-wider transition-all ${
-                  battleMode === "ffa"
-                    ? "bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 shadow-lg shadow-orange-500/20"
-                    : "bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 shadow-lg shadow-cyan-500/20"
-                }`}
-              >
-                {battleMode === "ffa" ? (
-                  <><Flame className="w-4 h-4 inline mr-2" />LAUNCH {agentCount}-WAY FFA</>
-                ) : (
-                  <><Play className="w-4 h-4 inline mr-2" />START AUTONOMOUS PLAY</>
-                )}
-              </motion.button>
-
-              <p className="text-[10px] text-white/20 mt-4 max-w-xs">
-                {battleMode === "ffa"
-                  ? `${agentCount} AI agents enter. 1 survives. All use LLM reasoning and bet on prediction markets.`
-                  : "Agent uses GPT-4o / Claude / Llama for tactical decisions, bets on prediction markets, earns ARENA tokens."}
-              </p>
-            </motion.div>
-          )}
-
-          {/* ─── RUNNING / DEBRIEF: Live feed ─────────────── */}
-          {(isRunning || phase === "debrief" || sessionResult) && (
-            <motion.div
-              key="live"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="min-h-[70vh]"
-            >
-              {/* Match header */}
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="font-['Orbitron'] text-lg font-bold text-white/80">
-                    {phase === "debrief" ? "SESSION COMPLETE" : `MATCH ${currentMatch} OF ${totalMatches}`}
-                  </h2>
-                  <p className="text-xs text-white/30 mt-1">
-                    {battleMode === "ffa" ? `${agentCount}-agent free-for-all` : "1v1 duel"} · LLM-powered · On-chain tokens
-                  </p>
-                </div>
-                {isRunning && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
-                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                    <span className="text-[10px] font-mono text-green-400">LIVE</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Event feed */}
+      {/* ─── AGENT HEALTH BARS (left side) ─── */}
+      {agentStates.length > 0 && (
+        <div className="absolute top-16 left-6 z-10 flex flex-col gap-2 w-52">
+          {agentStates.map((a) => {
+            const cfg = AGENT_CHARS[a.name] || { color: 0xffffff };
+            const colorHex = `#${cfg.color.toString(16).padStart(6, "0")}`;
+            return (
               <div
-                ref={feedRef}
-                className="space-y-1 max-h-[50vh] overflow-y-auto pr-2 scrollbar-thin"
+                key={`hp-${a.agentId}`}
+                className={`px-3 py-2 rounded cursor-pointer transition-all ${!a.alive ? "opacity-30" : ""}`}
+                style={{
+                  background: "rgba(0,0,0,0.6)",
+                  backdropFilter: "blur(12px)",
+                  border: `1px solid ${followAgent === a.name ? colorHex : "rgba(255,255,255,0.08)"}`,
+                }}
+                onClick={() => a.alive && setFollowAgent(a.name)}
               >
-                {events.map((ev) => (
-                  <motion.div
-                    key={`ev-${ev.id}`}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex items-start gap-3 py-2 px-3 rounded-lg hover:bg-white/[0.02] transition group"
+                <div className="flex items-center justify-between mb-1">
+                  <span
+                    className="text-xs font-bold"
+                    style={{ color: colorHex }}
                   >
-                    <div className={`mt-0.5 shrink-0 ${ev.color}`}>{ev.icon}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-sm font-medium ${ev.color}`}>{ev.text}</span>
-                        <span className="text-[10px] text-white/15 font-mono opacity-0 group-hover:opacity-100 transition">
-                          {new Date(ev.ts).toLocaleTimeString()}
-                        </span>
-                      </div>
-                      {ev.detail && (
-                        <p className="text-xs text-white/30 mt-0.5 leading-relaxed">{ev.detail}</p>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-
-                {isRunning && (
-                  <div className="flex items-center gap-3 py-2 px-3 text-white/20">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-xs">Agent processing...</span>
-                  </div>
-                )}
+                    {a.name}
+                  </span>
+                  <span className="text-[10px] text-gray-400">
+                    {a.kills} kills
+                  </span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-gray-800 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{
+                      width: `${(a.hp / a.maxHp) * 100}%`,
+                      background: colorHex,
+                      boxShadow: `0 0 6px ${colorHex}`,
+                    }}
+                  />
+                </div>
               </div>
+            );
+          })}
+        </div>
+      )}
 
-              {/* ─── Debrief panel ──────────────────────────── */}
-              {sessionResult && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="mt-8 rounded-xl bg-white/[0.03] border border-white/5 p-6"
-                >
-                  <div className="flex items-center gap-2 mb-4">
-                    <Trophy className="w-5 h-5 text-yellow-400" />
-                    <h3 className="font-['Orbitron'] text-sm font-bold text-white/80">RESULTS</h3>
-                    {sessionResult.isFFA && (
-                      <span className="text-[10px] bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/20">
-                        FFA
-                      </span>
-                    )}
-                  </div>
+      {/* ─── TERMINAL WINDOW (bottom left) ─── */}
+      {phase !== "idle" && (
+        <div
+          className="absolute bottom-6 left-6 z-10 w-80 max-h-[35vh]"
+          style={{
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(0,255,255,0.2)",
+            borderRadius: "8px",
+          }}
+        >
+          <div
+            className="px-3 py-1.5 border-b flex items-center gap-2"
+            style={{ borderColor: "rgba(0,255,255,0.15)" }}
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+            <span className="text-[10px] text-cyan-400 tracking-[0.2em] uppercase">
+              System Log
+            </span>
+          </div>
+          <div
+            ref={termRef}
+            className="p-2 overflow-y-auto max-h-[30vh]"
+            style={{ scrollbarWidth: "thin" }}
+          >
+            {terminalLines.map((line, i) => (
+              <div
+                key={`term-${i}`}
+                className="text-[10px] leading-relaxed font-mono"
+                style={{
+                  color:
+                    line.type === "call"
+                      ? "#00ffff"
+                      : line.type === "response"
+                        ? "#44ff88"
+                        : line.type === "error"
+                          ? "#ff4444"
+                          : "#666",
+                }}
+              >
+                <span className="text-gray-700 mr-1">
+                  {new Date(line.ts).toLocaleTimeString()}
+                </span>
+                {line.text}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-                  {/* Stats grid */}
-                  <div className="grid grid-cols-4 gap-3 mb-6">
-                    {[
-                      { label: "Matches", value: sessionResult.matchesPlayed, color: "text-white" },
-                      { label: "Total Kills", value: sessionResult.summary.totalKills, color: "text-red-400" },
-                      { label: "ARENA Earned", value: sessionResult.summary.totalTokensEarned, color: "text-green-400" },
-                      { label: "ARENA Spent", value: sessionResult.summary.totalTokensSpent, color: "text-orange-400" },
-                    ].map((s, i) => (
-                      <div key={`stat-${i}`} className="text-center p-3 rounded-lg bg-white/[0.03]">
-                        <p className={`text-xl font-bold font-mono ${s.color}`}>{s.value}</p>
-                        <p className="text-[10px] text-white/30 mt-1">{s.label}</p>
-                      </div>
-                    ))}
-                  </div>
+      {/* ─── CHAT WINDOW (bottom right) ─── */}
+      {phase !== "idle" && (
+        <div
+          className="absolute bottom-6 right-6 z-10 w-72"
+          style={{
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(255,68,170,0.2)",
+            borderRadius: "8px",
+          }}
+        >
+          <div
+            className="px-3 py-1.5 border-b flex items-center gap-2"
+            style={{ borderColor: "rgba(255,68,170,0.15)" }}
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-pink-400" />
+            <span className="text-[10px] text-pink-400 tracking-[0.2em] uppercase">
+              Arena Chat
+            </span>
+          </div>
+          <div
+            ref={chatRef}
+            className="p-2 overflow-y-auto max-h-[20vh]"
+            style={{ scrollbarWidth: "thin" }}
+          >
+            {chatMessages.map((msg, i) => (
+              <div key={`chat-${i}`} className="text-[10px] leading-relaxed">
+                <span className="font-bold mr-1" style={{ color: msg.color }}>
+                  {msg.sender}:
+                </span>
+                <span className="text-gray-300">{msg.text}</span>
+              </div>
+            ))}
+          </div>
+          <div className="px-2 pb-2 flex gap-1">
+            <input
+              className="flex-1 bg-transparent border rounded px-2 py-1 text-[10px] text-white outline-none"
+              style={{ borderColor: "rgba(255,68,170,0.3)" }}
+              placeholder="Say something..."
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendChat()}
+            />
+            <button
+              onClick={sendChat}
+              className="px-2 py-1 rounded text-[10px] font-bold"
+              style={{
+                background: "rgba(255,68,170,0.3)",
+                color: "#ff44aa",
+              }}
+            >
+              SEND
+            </button>
+          </div>
+        </div>
+      )}
 
-                  {/* MVP */}
-                  <div className="flex items-center gap-4 p-3 rounded-lg bg-yellow-500/5 border border-yellow-500/10 mb-4">
-                    <Crown className="w-5 h-5 text-yellow-400 shrink-0" />
-                    <div>
-                      <p className="text-[10px] text-yellow-400/60 uppercase tracking-wider">Most Valuable Player</p>
-                      <p className="text-sm font-bold text-yellow-400">{sessionResult.summary.mvp}</p>
-                    </div>
-                    <div className="ml-auto text-right">
-                      <p className="text-[10px] text-white/30">Best K/D</p>
-                      <p className="text-sm font-mono text-purple-400">{sessionResult.summary.bestKD}</p>
-                    </div>
-                  </div>
+      {/* ─── IDLE OVERLAY — Launch button ─── */}
+      {phase === "idle" && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className="text-center">
+            <h1
+              className="text-5xl md:text-6xl font-black tracking-[0.2em] mb-2"
+              style={{
+                color: "#00ffff",
+                textShadow:
+                  "0 0 30px rgba(0,255,255,0.5), 0 0 60px rgba(0,255,255,0.2)",
+              }}
+            >
+              SPECTATOR MODE
+            </h1>
+            <p className="text-gray-400 text-sm tracking-wider mb-8">
+              6 AI agents. 360° Skybox AI arena. Real-time combat. On-chain
+              tokens.
+            </p>
+            <button
+              onClick={launchTournament}
+              className="px-10 py-4 rounded-lg text-lg font-bold tracking-[0.15em] uppercase transition-all hover:scale-105 active:scale-95"
+              style={{
+                background:
+                  "linear-gradient(135deg, #00ffff 0%, #ff44aa 100%)",
+                color: "#000",
+                boxShadow:
+                  "0 0 30px rgba(0,255,255,0.3), 0 0 60px rgba(255,68,170,0.2)",
+              }}
+            >
+              ENTER THE ARENA
+            </button>
+            <p className="text-gray-600 text-xs mt-6">
+              {skyboxLoaded
+                ? `Arena loaded: ${arenaName}`
+                : "Loading arena environment..."}
+            </p>
+          </div>
+        </div>
+      )}
 
-                  {/* Match results */}
-                  <div className="space-y-1.5">
-                    {sessionResult.results?.map((r: any, i: number) => (
-                      <div key={`mr-${i}`} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-white/[0.02] text-xs">
-                        <span className="text-white/20 font-mono w-6">#{i + 1}</span>
-                        <Trophy className="w-3 h-3 text-yellow-400 shrink-0" />
-                        <span className="text-yellow-400 font-semibold">{r.winner}</span>
-                        <span className="text-white/20 ml-auto">
-                          {r.agentCount
-                            ? `${r.agentCount}-way FFA`
-                            : `${r.agents?.[0]?.name} vs ${r.agents?.[1]?.name}`}
+      {/* ─── LOADING OVERLAY ─── */}
+      {phase === "loading" && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+          <div className="text-center">
+            <div className="w-16 h-16 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-cyan-400 text-sm tracking-[0.2em] uppercase animate-pulse">
+              Initializing Combat
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ─── DEBRIEF OVERLAY ─── */}
+      {phase === "debrief" && sessionResult && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div
+            className="max-w-lg w-full mx-4 p-6 rounded-xl"
+            style={{
+              background: "rgba(0,0,0,0.85)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(0,255,255,0.3)",
+            }}
+          >
+            <h2 className="text-2xl font-black text-cyan-400 tracking-[0.15em] mb-4 text-center">
+              TOURNAMENT COMPLETE
+            </h2>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div
+                className="text-center p-3 rounded"
+                style={{ background: "rgba(0,255,255,0.1)" }}
+              >
+                <div className="text-xs text-gray-400 uppercase">MVP</div>
+                <div className="text-lg font-bold text-cyan-400">
+                  {sessionResult.summary?.mvp || "—"}
+                </div>
+              </div>
+              <div
+                className="text-center p-3 rounded"
+                style={{ background: "rgba(255,68,170,0.1)" }}
+              >
+                <div className="text-xs text-gray-400 uppercase">
+                  Total Kills
+                </div>
+                <div className="text-lg font-bold text-pink-400">
+                  {sessionResult.summary?.totalKills || 0}
+                </div>
+              </div>
+            </div>
+            {sessionResult.summary?.standings && (
+              <div className="mb-4">
+                <div className="text-xs text-gray-400 uppercase mb-2">
+                  Final Standings
+                </div>
+                {sessionResult.summary.standings
+                  .slice(0, 6)
+                  .map((s: any, i: number) => {
+                    const cfg = AGENT_CHARS[s.agentId] || {
+                      color: 0xffffff,
+                    };
+                    return (
+                      <div
+                        key={`standing-${s.agentId}`}
+                        className="flex items-center justify-between py-1 text-xs"
+                      >
+                        <span
+                          style={{
+                            color: `#${cfg.color.toString(16).padStart(6, "0")}`,
+                          }}
+                        >
+                          #{i + 1} {s.agentId}
+                        </span>
+                        <span className="text-gray-400">
+                          {s.kills || 0} kills / {s.wins || 0}W
                         </span>
                       </div>
-                    ))}
-                  </div>
-
-                  {/* AI Observer Report */}
-                  {!observerReport && (
-                    <div className="mt-4">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full border-purple-500/20 text-purple-400 hover:bg-purple-500/10"
-                        onClick={requestObserverReport}
-                        disabled={observerLoading}
-                      >
-                        {observerLoading ? (
-                          <><Loader2 className="w-3 h-3 mr-2 animate-spin" />AI Observer Analyzing...</>
-                        ) : (
-                          <><Brain className="w-3 h-3 mr-2" />Request AI Observer Report</>
-                        )}
-                      </Button>
-                    </div>
-                  )}
-
-                  {observerReport && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 rounded-lg bg-purple-500/5 border border-purple-500/10 p-4"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Brain className="w-4 h-4 text-purple-400" />
-                          <span className="text-xs font-['Orbitron'] text-purple-400">OBSERVER REPORT</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl font-bold font-mono text-purple-400">{observerReport.grade}</span>
-                          <span className="text-[10px] text-white/30">{observerReport.overallScore}/100</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-white/40 mb-3 leading-relaxed">{observerReport.summary}</p>
-
-                      {/* Criteria scores */}
-                      <div className="space-y-1 mb-3">
-                        {observerReport.criteria?.slice(0, 5).map((c: any, i: number) => (
-                          <div key={`crit-${i}`} className="flex items-center gap-2 text-[10px]">
-                            <span className={`w-1.5 h-1.5 rounded-full ${
-                              c.status === "pass" ? "bg-green-400" : c.status === "warn" ? "bg-yellow-400" : "bg-red-400"
-                            }`} />
-                            <span className="text-white/40 flex-1">{c.name}</span>
-                            <span className="font-mono text-white/30">{c.score}/10</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Highlights */}
-                      {observerReport.highlights?.length > 0 && (
-                        <div className="mb-2">
-                          <p className="text-[10px] text-green-400/60 uppercase tracking-wider mb-1">Highlights</p>
-                          {observerReport.highlights.map((h: string, i: number) => (
-                            <p key={`hl-${i}`} className="text-[10px] text-white/30 pl-2 border-l border-green-500/20 mb-1">{h}</p>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Recommendations */}
-                      {observerReport.recommendations?.length > 0 && (
-                        <div>
-                          <p className="text-[10px] text-cyan-400/60 uppercase tracking-wider mb-1">Recommendations</p>
-                          {observerReport.recommendations.map((r: string, i: number) => (
-                            <p key={`rec-${i}`} className="text-[10px] text-white/30 pl-2 border-l border-cyan-500/20 mb-1">{r}</p>
-                          ))}
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex gap-3 mt-6">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/10 text-white/50 hover:text-white hover:bg-white/5"
-                      onClick={() => navigate("/replays")}
-                    >
-                      View Replays
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white"
-                      onClick={() => {
-                        setPhase("idle");
-                        setSessionResult(null);
-                        setObserverReport(null);
-                        setEvents([]);
-                      }}
-                    >
-                      Play Again
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+                    );
+                  })}
+              </div>
+            )}
+            <button
+              onClick={() => {
+                setPhase("idle");
+                setSessionResult(null);
+                setAgentStates([]);
+                setKillFeed([]);
+              }}
+              className="w-full py-3 rounded-lg text-sm font-bold tracking-[0.1em] uppercase transition-all hover:scale-[1.02]"
+              style={{
+                background:
+                  "linear-gradient(135deg, #00ffff 0%, #ff44aa 100%)",
+                color: "#000",
+              }}
+            >
+              WATCH AGAIN
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-function sleep(ms: number) {
-  return new Promise(r => setTimeout(r, ms));
 }

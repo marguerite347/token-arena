@@ -39,7 +39,7 @@ async function startServer() {
   app.get("/api/skybox-proxy", async (req, res) => {
     try {
       const url = req.query.url as string;
-      if (!url || !url.includes("blockadelabs.com")) {
+      if (!url || !(url.includes("blockadelabs.com") || url.includes("manuscdn.com"))) {
         return res.status(400).send("Invalid URL");
       }
       const response = await fetch(url);

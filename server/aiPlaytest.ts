@@ -795,6 +795,8 @@ export async function runPlaytestSession(
 export interface FFAMatchResult {
   matchId: number | null;
   arena: string;
+  arenaStyleId: number;
+  arenaPrompt: string;
   duration: number;
   replayId?: string;
   agentCount: number;
@@ -960,6 +962,8 @@ export async function runFFAMatch(
   return {
     matchId,
     arena: arena.name,
+    arenaStyleId: arena.styleId,
+    arenaPrompt: arena.prompt,
     duration: maxTicks,
     replayId,
     agentCount: agents.length,
