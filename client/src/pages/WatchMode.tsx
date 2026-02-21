@@ -1151,9 +1151,11 @@ export default function WatchMode() {
       }
 
       // Bob agent meshes
-      if (agentMeshesRef.current) {
-        agentMeshesRef.current.forEach((mesh) => {
-          if (mesh) mesh.position.y = Math.sin(elapsed * 2 + mesh.position.x) * 0.05;
+      if (agentMeshesRef.current && agentMeshesRef.current.size > 0) {
+        Array.from(agentMeshesRef.current.values()).forEach((mesh) => {
+          if (mesh && mesh.position) {
+            mesh.position.y = Math.sin(elapsed * 2 + mesh.position.x) * 0.05;
+          }
         });
       }
 

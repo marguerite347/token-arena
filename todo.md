@@ -1260,3 +1260,25 @@
 - [ ] Test match replay playback accuracy
 - [ ] Test leaderboard data accuracy
 - [ ] Save checkpoint
+
+
+## CURRENT SESSION — Debugging Initialization Hang
+
+### Critical Issue
+- Match initialization hangs at "INITIALIZING" phase, does not progress to combat
+- Error: Cannot read properties of undefined (reading 'x')
+- Root cause: agentMeshesRef Map iteration or mesh.position initialization
+
+### Debugging Attempts
+- [x] Added null checks for mesh and mesh.position
+- [x] Changed to Array.from(agentMeshesRef.current.values()) for proper Map iteration
+- [x] Consulted Claude via OpenRouter for debugging suggestions
+- [ ] Browser cache persists despite HMR updates - may need manual cache clear
+
+### Next Steps for Future Debug Sessions
+1. Add console.log in animation loop to verify agentMeshesRef.current.size > 0
+2. Log each mesh object to confirm it has position property initialized
+3. Check createAgentMesh() function to ensure position is initialized
+4. Consider wrapping animation loop in try-catch with detailed logging
+5. May need to simplify initialization or add delay before animation starts
+6. Verify mesh creation in startMatch() initializes all properties correctly
