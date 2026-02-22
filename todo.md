@@ -1445,3 +1445,13 @@
 - [x] Fix 5: All setIsRunning(false) calls also reset isRunningRef.current
 - [x] tsc --noEmit passes with 0 errors
 - [x] Push to GitHub (71406ef)
+
+## README Accuracy Pass + Repo Public
+
+- [ ] Audit full README against actual codebase
+- [ ] Remove 0g Labs section entirely
+- [ ] Move Memory NFTs, auctions, memory absorption, decentralized narrative to Future Scope
+- [ ] Verify Polymarket integration — keep or move to Future Scope
+- [ ] Rewrite README with only accurate claims
+- [ ] Make GitHub repo public (required for Uniswap bounty)
+- [ ] Push to GitHub

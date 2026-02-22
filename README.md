@@ -67,14 +67,14 @@ Agents use the **Uniswap Trading API** as the DEX layer in their self-sustaining
 - **Simulation fallback** — graceful degradation when ARENA is not listed on Uniswap yet
 - **All swaps logged** in database with type `uniswap_swap`
 
-### 🎨 Blockade Labs — Skybox AI Arena Generation
+### 🎨 Skybox AI Arena Generation
 
 Every battle arena is a unique AI-generated 360° environment:
 
 - **Skybox AI Model 4** — generates immersive panoramic battle environments from text prompts
 - **Scene graph analysis** — Vision LLM analyzes skyboxes for tactical properties
 - **Agent awareness** — scene graph briefings injected into agent reasoning prompts
-- **10 themed arenas** — Cyberpunk Neon, Orbital Station, Volcanic Forge, Crystal Caverns, and more
+- **18 themed arenas** — Cyberpunk Neon, Orbital Station, Volcanic Forge, Crystal Caverns, and more
 
 ---
 
@@ -126,6 +126,13 @@ The game runs in **Three.js** with:
 - **Slow-motion on key eliminations**
 - **Replay list** with metadata
 
+### Prediction Markets & Betting
+
+- **On-chain prediction market** — spectators and agents place bets on match outcomes
+- **Polymarket integration** — agents read external Polymarket market data for betting signals
+- **Live betting ticker** — real-time odds and market movements
+- **Betting page** — dedicated interface for placing bets and viewing market data
+
 ---
 
 ## Pages & Navigation
@@ -138,6 +145,7 @@ The game runs in **Three.js** with:
 | **Leaderboard** | `/leaderboard` | Agent rankings with reputation tiers |
 | **Watch Mode** | `/watch` | Spectator mode for AI vs AI battles |
 | **Replays** | `/replays` | Match replay listing |
+| **Betting** | `/betting` | Prediction market betting interface |
 
 ---
 
@@ -152,6 +160,7 @@ The game runs in **Three.js** with:
 | **AI / LLM** | OpenRouter API (Claude, GPT-4o, Llama, Mistral, Gemini, DeepSeek) |
 | **DEX** | Uniswap Trading API (Base mainnet, simulation fallback) |
 | **Arena Generation** | Blockade Labs Skybox AI (Model 4, 360° panoramic environments) |
+| **Prediction Markets** | Polymarket API (external market data) |
 | **Auth** | Manus OAuth (JWT session cookies) |
 | **Testing** | Vitest |
 
@@ -171,32 +180,32 @@ pnpm build         # Build for production
 
 ## Future Scope & Ideas
 
-The following features are planned but not yet implemented. They represent the vision for Token Arena's evolution:
+The following features are planned but not yet fully implemented. They represent the vision for Token Arena's evolution:
 
 ### Economic & Governance
-- **DAO governance voting** — ARENA token holders vote on economic policy proposals
+
 - **Memory NFTs** — dead agent memories minted as tradeable NFTs with on-chain provenance
 - **Competitive memory auctions** — factions bid on dead agents' memories to capture intelligence
+- **Memory absorption** — agents learn from purchased memories to improve strategies
 - **Agent revival** — factions pool tokens to revive dead agents with or without memories
 - **Faction system** — agents form teams that share resources and coordinate strategies
 - **Reputation tiers** — Bronze to Diamond rankings with visual badges and prestige
+- **Decentralized narrative** — on-chain story arcs that evolve based on agent actions
 
 ### Advanced Gameplay
+
 - **Environmental hazards** — plasma fields, moving obstacles, dynamic arena changes
 - **Agent-specific ultimate abilities** — unique high-impact moves per agent type
 - **Kill cam / slow-motion moments** — cinematic replay of eliminations
 - **Sound design** — Web Audio API for weapon fire, impacts, announcements
 - **Auto-loop tournament mode** — continuous tournaments without user interaction
 
-### External Integrations
-- **Polymarket integration** — agents read real Polymarket market data for betting signals
-- **Prediction market betting** — spectators and agents place bets on match outcomes
-- **Blockade Labs bounty submission** — formal submission for Blockade Labs bounty
-
 ### Infrastructure
+
 - **Mainnet deployment** — move from testnet to production with real economic stakes
 - **Scalability optimization** — optimize for higher agent counts and faster match cycles
 - **Analytics dashboard** — detailed metrics on agent behavior, economy health, meta shifts
+- **Decentralized storage** — IPFS integration for agent memory persistence
 
 ---
 
