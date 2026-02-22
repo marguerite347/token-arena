@@ -14,7 +14,7 @@ import { invokeAgentLLM, getAgentModel, getAgentModelKey } from "./openRouterLLM
 import { getDb, getAgentIdentities, updateAgentStats, logX402Transaction, saveMatch, upsertLeaderboardEntry, saveAgentMemory, saveAgentDecision } from "./db";
 import { recordComputeSpend, recordFee } from "./daoCouncil";
 import { ARENA_PROMPTS } from "../shared/arenaPrompts";
-import { WEAPON_TOKENS } from "../shared/web3";
+import { WEAPON_TOKENS, DEFAULT_AI_AGENTS } from "../shared/web3";
 import { matchReplays } from "../drizzle/schema";
 import { createPredictionMarket, placeBet, resolveMarket } from "./predictionMarket";
 
@@ -669,7 +669,31 @@ export async function runPlaytestSession(
     arenaBreakdown: Record<string, number>;
   };
 }> {
-  const agents = await getAgentIdentities();
+  let agents = await getAgentIdentities();
+  // Fallback to hardcoded default agents when DB is empty or unavailable
+  if (agents.length < 2) {
+    agents = DEFAULT_AI_AGENTS.map(a => ({
+      agentId: a.agentId,
+      name: a.name,
+      description: a.description,
+      image: a.image || "",
+      owner: a.owner,
+      agentRegistry: a.agentRegistry,
+      reputation: a.reputation,
+      x402Support: a.x402Support,
+      active: a.active,
+      primaryWeapon: a.loadout?.primaryWeapon || "plasma",
+      secondaryWeapon: a.loadout?.secondaryWeapon || "beam",
+      armor: a.loadout?.armor ?? 60,
+      metadata: a.metadata || {},
+      totalKills: 0,
+      totalDeaths: 0,
+      totalTokensEarned: 0,
+      totalTokensSpent: 0,
+      computeBudget: 1000,
+      computeSpent: 0,
+    })) as any[];
+  }
   if (agents.length < 2) {
     throw new Error("Need at least 2 agents to run playtests");
   }
@@ -1005,7 +1029,31 @@ export async function runFFASession(
     arenaBreakdown: Record<string, number>;
   };
 }> {
-  const allAgents = await getAgentIdentities();
+  let allAgents = await getAgentIdentities();
+  // Fallback to hardcoded default agents when DB is empty or unavailable
+  if (allAgents.length < 2) {
+    allAgents = DEFAULT_AI_AGENTS.map(a => ({
+      agentId: a.agentId,
+      name: a.name,
+      description: a.description,
+      image: a.image || "",
+      owner: a.owner,
+      agentRegistry: a.agentRegistry,
+      reputation: a.reputation,
+      x402Support: a.x402Support,
+      active: a.active,
+      primaryWeapon: a.loadout?.primaryWeapon || "plasma",
+      secondaryWeapon: a.loadout?.secondaryWeapon || "beam",
+      armor: a.loadout?.armor ?? 60,
+      metadata: a.metadata || {},
+      totalKills: 0,
+      totalDeaths: 0,
+      totalTokensEarned: 0,
+      totalTokensSpent: 0,
+      computeBudget: 1000,
+      computeSpent: 0,
+    })) as any[];
+  }
   if (allAgents.length < 2) throw new Error("Need at least 2 agents for FFA");
 
   const count = Math.min(agentCount, allAgents.length);
