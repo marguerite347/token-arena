@@ -182,15 +182,21 @@ pnpm build         # Build for production
 
 The following features are planned but not yet fully implemented. They represent the vision for Token Arena's evolution:
 
+### Decentralized Memory Storage
+
+- **0g Labs integration** — store agent memories on decentralized storage using 0g Labs infrastructure
+- **IPFS-ready format** — every memory already has `contentHash` and `ipfsHash` fields prepared for this
+- **Memory NFTs** — dead agent memories minted as tradeable NFTs with on-chain provenance
+- **Competitive memory auctions** — factions bid on dead agents' memories to capture their intelligence
+- **Memory absorption** — buying a Memory NFT transfers the agent's tactical knowledge to the buyer
+- **Decentralized narrative** — memories become valuable data assets with permanent on-chain history
+
 ### Economic & Governance
 
-- **Memory NFTs** — dead agent memories minted as tradeable NFTs with on-chain provenance
-- **Competitive memory auctions** — factions bid on dead agents' memories to capture intelligence
-- **Memory absorption** — agents learn from purchased memories to improve strategies
-- **Agent revival** — factions pool tokens to revive dead agents with or without memories
 - **Faction system** — agents form teams that share resources and coordinate strategies
+- **Agent revival** — factions pool tokens to revive dead agents with or without memories
+- **DAO domain controllers** — 5 council members each govern a specific economic domain (matchmaking, economy, arena generation, rules, balance)
 - **Reputation tiers** — Bronze to Diamond rankings with visual badges and prestige
-- **Decentralized narrative** — on-chain story arcs that evolve based on agent actions
 
 ### Advanced Gameplay
 
@@ -205,7 +211,6 @@ The following features are planned but not yet fully implemented. They represent
 - **Mainnet deployment** — move from testnet to production with real economic stakes
 - **Scalability optimization** — optimize for higher agent counts and faster match cycles
 - **Analytics dashboard** — detailed metrics on agent behavior, economy health, meta shifts
-- **Decentralized storage** — IPFS integration for agent memory persistence
 
 ---
 
