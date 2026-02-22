@@ -1,8 +1,13 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import * as THREE from "three";
 import { useGame, type Agent, type Projectile, WEAPONS, type WeaponType } from "@/contexts/GameContext";
 import { updateAgentAI, notifyAgentDamaged, resetAgentStates } from "@/lib/aiCombat";
 import { getActiveRecorder } from "@/lib/replayEngine";
+import { ParticleSystem } from "@/lib/particleSystem";
+import { createPostProcessing, triggerGlitch, resizePostProcessing, type PostProcessingPipeline } from "@/lib/postProcessing";
+import { createArenaVisuals, updateArenaVisuals, triggerArenaPulse, flashCombatLights, disposeArenaVisuals, type ArenaElements } from "@/lib/arenaVisuals";
+import { createHolographicMaterial, updateHolographicMaterial } from "@/lib/holographicMaterial";
+import { SpectatorCamera } from "@/lib/spectatorCamera";
 
 interface GameEngineOptions {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -39,6 +44,17 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
   const spectatorAngle = useRef(0);
   const initDone = useRef(false);
 
+  // ─── NEW: Enhanced visual system refs ─────────────────────────────────────
+  const particleSystemRef = useRef<ParticleSystem | null>(null);
+  const postProcessingRef = useRef<PostProcessingPipeline | null>(null);
+  const arenaVisualsRef = useRef<ArenaElements | null>(null);
+  const spectatorCamRef = useRef<SpectatorCamera | null>(null);
+  const holoMaterialsRef = useRef<THREE.ShaderMaterial[]>([]);
+  const totalTimeRef = useRef(0);
+  const ambientParticleTimer = useRef(0);
+  const prevAgentPositions = useRef<Map<string, { x: number; z: number }>>(new Map());
+  const prevAgentAlive = useRef<Map<string, boolean>>(new Map());
+
   // ─── Scene init ───────────────────────────────────────────────────────────
   const initScene = useCallback(() => {
     if (!canvasRef.current || initDone.current) return;
@@ -46,65 +62,39 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a0a1a);
-    scene.fog = new THREE.FogExp2(0x0a0a1a, 0.015);
+    scene.fog = new THREE.FogExp2(0x0a0a1a, 0.012);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 1.6, 0);
     cameraRef.current = camera;
 
-    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
     rendererRef.current = renderer;
 
-    // Lights
+    // Ambient light
     scene.add(new THREE.AmbientLight(0x1a1a3a, 0.6));
-    const c1 = new THREE.PointLight(0x00f0ff, 2, 40);
-    c1.position.set(8, 6, 8);
-    scene.add(c1);
-    const c2 = new THREE.PointLight(0xff00aa, 2, 40);
-    c2.position.set(-8, 6, -8);
-    scene.add(c2);
-    const c3 = new THREE.PointLight(0x39ff14, 1.5, 25);
-    c3.position.set(0, 4, 0);
-    scene.add(c3);
 
-    // Ground grid
-    const grid = new THREE.GridHelper(40, 40, 0x00f0ff, 0x1a1a3a);
-    (grid.material as THREE.Material).opacity = 0.3;
-    (grid.material as THREE.Material).transparent = true;
-    scene.add(grid);
+    // ─── NEW: Enhanced arena visuals (replaces old grid/ring/pillars) ────
+    const arena = createArenaVisuals(scene);
+    arenaVisualsRef.current = arena;
 
-    // Arena ring
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(19.5, 20, 64),
-      new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.2 })
-    );
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.y = 0.01;
-    scene.add(ring);
+    // ─── NEW: Particle system ───────────────────────────────────────────
+    const particles = new ParticleSystem(scene, 3000);
+    particleSystemRef.current = particles;
 
-    // Arena pillars for visual reference
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
-      const px = Math.cos(angle) * 18;
-      const pz = Math.sin(angle) * 18;
-      const pillar = new THREE.Mesh(
-        new THREE.BoxGeometry(0.3, 4, 0.3),
-        new THREE.MeshPhongMaterial({
-          color: 0x00f0ff,
-          emissive: 0x00f0ff,
-          emissiveIntensity: 0.3,
-          transparent: true,
-          opacity: 0.6,
-        })
-      );
-      pillar.position.set(px, 2, pz);
-      scene.add(pillar);
-    }
+    // ─── NEW: Post-processing pipeline ──────────────────────────────────
+    const pp = createPostProcessing(renderer, scene, camera);
+    postProcessingRef.current = pp;
+
+    // ─── NEW: Spectator camera ──────────────────────────────────────────
+    const specCam = new SpectatorCamera(camera);
+    spectatorCamRef.current = specCam;
+
   }, [canvasRef]);
 
   // ─── Skybox loader ────────────────────────────────────────────────────────
@@ -127,7 +117,7 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
     });
   }, []);
 
-  // ─── Agent mesh factory ───────────────────────────────────────────────────
+  // ─── Agent mesh factory (enhanced with holographic elements) ──────────────
   const makeAgent = useCallback((a: Agent): THREE.Group => {
     const g = new THREE.Group();
     const c = new THREE.Color(a.color);
@@ -148,10 +138,19 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
     head.position.y = 1.6;
     g.add(head);
 
-    // Visor
+    // Visor — now holographic
+    const visorMat = createHolographicMaterial({
+      color: "#00f0ff",
+      scanlineSize: 15,
+      brightness: 2.0,
+      fresnelAmount: 0.3,
+      opacity: 0.9,
+      signalSpeed: 1.5,
+    });
+    holoMaterialsRef.current.push(visorMat);
     const visor = new THREE.Mesh(
       new THREE.BoxGeometry(0.35, 0.12, 0.05),
-      new THREE.MeshBasicMaterial({ color: 0x00f0ff })
+      visorMat
     );
     visor.position.set(0, 1.65, 0.23);
     g.add(visor);
@@ -164,10 +163,18 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
     gun.position.set(0.4, 1.0, 0.3);
     g.add(gun);
 
-    // Health bar bg
+    // Health bar bg — holographic
+    const hbBgMat = createHolographicMaterial({
+      color: "#1a1a2e",
+      scanlineSize: 20,
+      brightness: 0.5,
+      opacity: 0.6,
+      enableAdditive: false,
+    });
+    holoMaterialsRef.current.push(hbBgMat);
     const hbBg = new THREE.Mesh(
       new THREE.PlaneGeometry(0.8, 0.08),
-      new THREE.MeshBasicMaterial({ color: 0x1a1a1a, transparent: true, opacity: 0.8 })
+      hbBgMat
     );
     hbBg.position.y = 2.1;
     hbBg.name = "hb-bg";
@@ -183,16 +190,24 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
     hb.name = "hb";
     g.add(hb);
 
-    // Name label (using a small plane with color)
+    // Name label — holographic
+    const nameTagMat = createHolographicMaterial({
+      color: "#" + c.getHexString(),
+      scanlineSize: 10,
+      brightness: 1.0,
+      fresnelAmount: 0.2,
+      opacity: 0.7,
+    });
+    holoMaterialsRef.current.push(nameTagMat);
     const nameTag = new THREE.Mesh(
       new THREE.PlaneGeometry(0.6, 0.15),
-      new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.6 })
+      nameTagMat
     );
     nameTag.position.y = 2.3;
     nameTag.name = "nametag";
     g.add(nameTag);
 
-    // Glow
+    // Glow light
     const glow = new THREE.PointLight(c, 0.5, 5);
     glow.position.y = 1;
     g.add(glow);
@@ -202,7 +217,7 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
     return g;
   }, []);
 
-  // ─── Projectile mesh factory ──────────────────────────────────────────────
+  // ─── Projectile mesh factory (enhanced with emissive glow) ────────────────
   const makeProj = useCallback((p: Projectile): THREE.Mesh => {
     const c = new THREE.Color(p.color);
     let geo: THREE.BufferGeometry;
@@ -214,7 +229,14 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
       case "beam": geo = new THREE.CylinderGeometry(0.02, 0.02, 0.4, 4); break;
       default: geo = new THREE.SphereGeometry(0.08, 8, 8);
     }
-    return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.9 }));
+    // Enhanced: use emissive material for bloom pickup
+    return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+      color: c,
+      emissive: c,
+      emissiveIntensity: 2.0,
+      transparent: true,
+      opacity: 0.9,
+    }));
   }, []);
 
   // ─── Main game loop ───────────────────────────────────────────────────────
@@ -232,6 +254,7 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
 
     const dt = Math.min((time - lastTime.current) / 1000, 0.05);
     lastTime.current = time;
+    totalTimeRef.current += dt;
 
     // ─── COMBAT LOGIC ─────────────────────────────────────────────────
     if (s.phase === "combat" && !s.isPaused) {
@@ -305,20 +328,29 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
 
       // Spectator camera (AI vs AI or dead player)
       if (s.mode === "aivai" || (s.mode === "pvai" && !s.player.isAlive)) {
-        spectatorAngle.current += dt * 0.3;
-        const alive = s.agents.filter((a) => a.isAlive);
-        let cx = 0, cz = 0;
-        if (alive.length > 0) {
-          cx = alive.reduce((sum, a) => sum + a.x, 0) / alive.length;
-          cz = alive.reduce((sum, a) => sum + a.z, 0) / alive.length;
+        // ─── NEW: Use enhanced spectator camera ─────────────────────
+        if (spectatorCamRef.current) {
+          const agentTargets = s.agents.filter(a => a.isAlive).map(a => ({
+            x: a.x, y: a.y, z: a.z, id: a.id, name: a.name,
+          }));
+          spectatorCamRef.current.update(dt, agentTargets, keys.current);
+        } else {
+          // Fallback to old orbit
+          spectatorAngle.current += dt * 0.3;
+          const alive = s.agents.filter((a) => a.isAlive);
+          let cx = 0, cz = 0;
+          if (alive.length > 0) {
+            cx = alive.reduce((sum, a) => sum + a.x, 0) / alive.length;
+            cz = alive.reduce((sum, a) => sum + a.z, 0) / alive.length;
+          }
+          const radius = 12;
+          camera.position.set(
+            cx + Math.cos(spectatorAngle.current) * radius,
+            8,
+            cz + Math.sin(spectatorAngle.current) * radius
+          );
+          camera.lookAt(cx, 1, cz);
         }
-        const radius = 12;
-        camera.position.set(
-          cx + Math.cos(spectatorAngle.current) * radius,
-          8,
-          cz + Math.sin(spectatorAngle.current) * radius
-        );
-        camera.lookAt(cx, 1, cz);
       }
 
       // ─── SMART AI COMBAT ──────────────────────────────────────────────
@@ -422,19 +454,46 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
             const hp = Math.max(0, agent.health - dmg);
             d({ type: "UPDATE_AGENT", id: agent.id, updates: { health: hp } });
             notifyAgentDamaged(agent.id, p.ownerId);
-            if (p.ownerId !== s.player.id) {
-              // Agent-to-agent: tokens go to the target
-            } else {
-              // Player hit agent — no token earn for player (they spent to fire)
+
+            // ─── NEW: Hit spark particles ───────────────────────────
+            if (particleSystemRef.current) {
+              particleSystemRef.current.emitHitSparks(
+                new THREE.Vector3(nx, ny, nz),
+                p.color
+              );
             }
+            // ─── NEW: Arena pulse on hit ────────────────────────────
+            if (arenaVisualsRef.current) {
+              triggerArenaPulse(arenaVisualsRef.current, new THREE.Vector3(nx, 0, nz), totalTimeRef.current);
+            }
+
             if (hp <= 0) {
               d({ type: "AGENT_KILLED", killerId: p.ownerId, victimId: agent.id });
               const killerName = p.ownerId === s.player.id ? "PLAYER" : s.agents.find((a) => a.id === p.ownerId)?.name || "?";
               d({ type: "ADD_LOG", log: { id: `k-${now}-${Math.random()}`, timestamp: now, message: `${killerName} eliminated ${agent.name}`, type: "kill" } });
-              // Record kill in replay
               const replayRec = getActiveRecorder();
               if (replayRec) replayRec.recordKill(p.ownerId, killerName, agent.id, agent.name, s.matchTime);
               if (p.ownerId === s.player.id) d({ type: "EARN_TOKENS", amount: 25 });
+
+              // ─── NEW: Death explosion particles ───────────────────
+              if (particleSystemRef.current) {
+                particleSystemRef.current.emitDeathExplosion(
+                  new THREE.Vector3(agent.x, 1.2, agent.z),
+                  agent.color
+                );
+              }
+              // ─── NEW: Flash combat lights on kill ─────────────────
+              if (arenaVisualsRef.current) {
+                flashCombatLights(arenaVisualsRef.current, new THREE.Color(agent.color).getHex(), 5);
+              }
+              // ─── NEW: Glitch effect on kill ───────────────────────
+              if (postProcessingRef.current) {
+                triggerGlitch(postProcessingRef.current, 300);
+              }
+              // ─── NEW: Notify spectator camera ─────────────────────
+              if (spectatorCamRef.current) {
+                spectatorCamRef.current.notifyKill(p.ownerId);
+              }
             }
             break;
           }
@@ -449,13 +508,35 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
             const hp = Math.max(0, s.player.health - dmg);
             d({ type: "UPDATE_PLAYER", updates: { health: hp } });
             d({ type: "EARN_TOKENS", amount: p.tokenValue });
+
+            // ─── NEW: Hit particles + glitch on player damage ───────
+            if (particleSystemRef.current) {
+              particleSystemRef.current.emitHitSparks(
+                new THREE.Vector3(nx, ny, nz),
+                p.color
+              );
+            }
+            if (postProcessingRef.current) {
+              triggerGlitch(postProcessingRef.current, 150);
+            }
+
             if (hp <= 0) {
               d({ type: "AGENT_KILLED", killerId: p.ownerId, victimId: s.player.id });
               const pKillerName = s.agents.find((a) => a.id === p.ownerId)?.name || "?";
               d({ type: "ADD_LOG", log: { id: `d-${now}`, timestamp: now, message: `PLAYER eliminated by ${pKillerName}`, type: "kill" } });
-              // Record kill in replay
               const replayRec2 = getActiveRecorder();
               if (replayRec2) replayRec2.recordKill(p.ownerId, pKillerName, s.player.id, "PLAYER", s.matchTime);
+
+              // ─── NEW: Player death explosion ──────────────────────
+              if (particleSystemRef.current) {
+                particleSystemRef.current.emitDeathExplosion(
+                  new THREE.Vector3(s.player.x, 1.2, s.player.z),
+                  "#00f0ff"
+                );
+              }
+              if (postProcessingRef.current) {
+                triggerGlitch(postProcessingRef.current, 500);
+              }
             }
           }
         }
@@ -466,7 +547,6 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
       d({ type: "UPDATE_PROJECTILES", projectiles: updatedProjs });
 
       // ─── BANKRUPTCY CHECK ─────────────────────────────────────────────
-      // Agents whose token balance hits zero mid-match go bankrupt and die
       for (const agent of s.agents) {
         if (!agent.isAlive) continue;
         if (agent.tokens <= 0 && !agent.isBankrupt) {
@@ -480,21 +560,26 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
               type: "system",
             },
           });
-          // Record in replay
           const replayRecB = getActiveRecorder();
           if (replayRecB) replayRecB.recordKill("ECONOMY", "BANKRUPTCY", agent.id, agent.name, s.matchTime);
+
+          // ─── NEW: Bankruptcy explosion (red) ──────────────────────
+          if (particleSystemRef.current) {
+            particleSystemRef.current.emitDeathExplosion(
+              new THREE.Vector3(agent.x, 1.2, agent.z),
+              0xff3333
+            );
+          }
         }
       }
 
       // ─── MEMORY MAINTENANCE COST (every 10 seconds of match time) ─────
-      // Agents pay compute tokens to maintain their memory each cycle
-      const memoryCycleInterval = 10; // seconds
+      const memoryCycleInterval = 10;
       const prevCycle = Math.floor((s.matchTime - dt) / memoryCycleInterval);
       const currCycle = Math.floor(s.matchTime / memoryCycleInterval);
       if (currCycle > prevCycle) {
         for (const agent of s.agents) {
           if (!agent.isAlive || agent.memorySize <= 0) continue;
-          // Cost = 1 token per 100KB of memory per cycle
           const maintenanceCost = Math.max(1, Math.ceil(agent.memorySize / 100));
           if (agent.computeTokens >= maintenanceCost) {
             d({ type: "COMPUTE_SPEND", agentId: agent.id, amount: maintenanceCost, reason: "memory_maintenance" });
@@ -551,7 +636,7 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
       }
     }
 
-    // Sync projectile meshes
+    // Sync projectile meshes + emit trails
     const activeIds = new Set(s.projectiles.map((p) => p.id));
     projMeshes.current.forEach((pv, id) => {
       if (!activeIds.has(id)) { scene.remove(pv.mesh); if (pv.trail) scene.remove(pv.trail); projMeshes.current.delete(id); }
@@ -565,10 +650,36 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
         projMeshes.current.set(p.id, pv);
       }
       pv.mesh.position.set(p.x, p.y, p.z);
-      // Rotate projectile for visual effect
       pv.mesh.rotation.x += dt * 5;
       pv.mesh.rotation.z += dt * 3;
+
+      // ─── NEW: Emit projectile trail particles ─────────────────────
+      if (particleSystemRef.current) {
+        particleSystemRef.current.emitTrail(
+          new THREE.Vector3(p.x, p.y, p.z),
+          p.color,
+          p.type
+        );
+      }
     }
+
+    // ─── NEW: Ambient particles ─────────────────────────────────────────
+    if (particleSystemRef.current) {
+      ambientParticleTimer.current += dt;
+      if (ambientParticleTimer.current > 0.15) {
+        ambientParticleTimer.current = 0;
+        particleSystemRef.current.emitAmbient(18);
+      }
+      particleSystemRef.current.update(dt);
+    }
+
+    // ─── NEW: Update arena visuals ──────────────────────────────────────
+    if (arenaVisualsRef.current) {
+      updateArenaVisuals(arenaVisualsRef.current, dt, totalTimeRef.current);
+    }
+
+    // ─── NEW: Update holographic materials ──────────────────────────────
+    holoMaterialsRef.current.forEach(mat => updateHolographicMaterial(mat, dt));
 
     // Record replay frame
     if (s.phase === "combat") {
@@ -578,7 +689,13 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
       }
     }
 
-    renderer.render(scene, camera);
+    // ─── NEW: Render via post-processing composer instead of raw renderer
+    if (postProcessingRef.current) {
+      postProcessingRef.current.composer.render(dt);
+    } else {
+      renderer.render(scene, camera);
+    }
+
     animFrame.current = requestAnimationFrame(gameLoop);
   }, [makeAgent, makeProj]);
 
@@ -597,6 +714,20 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
         const wType = weaponKeys[e.key];
         const owned = wType === "plasma" || s.inventory.some((i) => i.weapon?.type === wType);
         if (owned) dispatchRef.current({ type: "EQUIP_WEAPON", weapon: WEAPONS[wType] });
+      }
+      // ─── NEW: Spectator camera controls ───────────────────────────
+      if (e.key === "Tab" && spectatorCamRef.current) {
+        e.preventDefault();
+        const s = stateRef.current;
+        const alive = s.agents.filter(a => a.isAlive);
+        spectatorCamRef.current.cycleTarget(alive.map(a => ({ x: a.x, y: a.y, z: a.z, id: a.id, name: a.name })));
+      }
+      if (e.key === "c" && spectatorCamRef.current) {
+        const modes: Array<"orbit" | "follow" | "cinematic"> = ["orbit", "follow", "cinematic"];
+        const current = spectatorCamRef.current.getMode();
+        const idx = modes.indexOf(current as any);
+        const next = modes[(idx + 1) % modes.length];
+        spectatorCamRef.current.setMode(next);
       }
     };
     const onKeyUp = (e: KeyboardEvent) => keys.current.delete(e.key.toLowerCase());
@@ -619,6 +750,10 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
         cameraRef.current.aspect = window.innerWidth / window.innerHeight;
         cameraRef.current.updateProjectionMatrix();
         rendererRef.current.setSize(window.innerWidth, window.innerHeight);
+        // ─── NEW: Resize post-processing ────────────────────────────
+        if (postProcessingRef.current) {
+          resizePostProcessing(postProcessingRef.current, window.innerWidth, window.innerHeight);
+        }
       }
     };
 
@@ -683,6 +818,16 @@ export function useGameEngine({ canvasRef }: GameEngineOptions) {
           else (skyMat as THREE.Material).dispose();
         }
       }
+      // ─── NEW: Dispose enhanced visuals ────────────────────────────
+      if (particleSystemRef.current && sceneRef.current) {
+        particleSystemRef.current.dispose(sceneRef.current);
+      }
+      if (arenaVisualsRef.current && sceneRef.current) {
+        disposeArenaVisuals(arenaVisualsRef.current, sceneRef.current);
+      }
+      holoMaterialsRef.current.forEach(mat => mat.dispose());
+      holoMaterialsRef.current = [];
+
       rendererRef.current?.dispose();
       initDone.current = false;
     };
